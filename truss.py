@@ -121,7 +121,6 @@ class Truss(object):
             self.force = [0.0]
             self.fos = array([0.0])
             self.mass = 0.0
-            self._build_init_script()
                 
     def truss_eval(self):
         self.mass_eval()
@@ -141,9 +140,7 @@ class Truss(object):
     
     def fos_eval(self):
         support = array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
-        self._single_fos_eval(support)
-                
-    def _single_fos_eval(self, support):
+
         D = {"Re":  support}
         for _ in range(self.n-5):
             D["Re"] = column_stack([D["Re"], [0,0,1]])
@@ -190,14 +187,6 @@ class Truss(object):
         for i in range(self.m):
             if isinf(self.fos[i]):
                 self.fos[i] = pow(10,10)
-
-    def all_members(self, inc_dec):
-        self.sizes += inc_dec
-        for i in range(self.m):
-            if self.sizes[i] > 9:
-                self.sizes[i] = 9
-            if self.sizes[i] < 0:
-                self.sizes[i] = 0
                 
     def single_member(self, j, inc_dec):
         self.sizes[j] += inc_dec
@@ -207,11 +196,6 @@ class Truss(object):
             self.sizes[j] = 0.0
     
     def add_joint(self, xy):
-        b = [max(c) + 0.001*min(c) for c in self.con.T]
-        if len(b) > 0:
-            ratio = float(len(b))/float(len(unique(b)))   
-            if ratio > 1.0:
-                print("Add Joint:"+str(ratio))
         self.n += 1
 
         temp = zeros([self.n, self.n])
@@ -220,23 +204,12 @@ class Truss(object):
                 temp[i, j] = self.con_mat[i, j]
                 
         self.con_mat = temp
-        # self.con_mat.resize(self.n, self.n)
         self.coord = vstack([self.coord.T, xy]).T
         
     def move_joint(self, j, dxy):
-        b = [max(c) + 0.001*min(c) for c in self.con.T]
-        if len(b) > 0:
-            ratio = float(len(b))/float(len(unique(b)))  
-            if ratio > 1.0:
-                print("Move Joint:"+str(ratio))
         self.coord[:, j] += dxy
         
     def delete_joint(self, j):
-        b = [max(c) + 0.001*min(c) for c in self.con.T]
-        if len(b) > 0:
-            ratio = float(len(b))/float(len(unique(b)))   
-            if ratio > 1.0:
-                print("Del Joint:"+str(ratio))
         # Remove from coordinate list
         self.coord = delete(self.coord, j, 1)
 
@@ -261,11 +234,6 @@ class Truss(object):
         self.n -=1
 
     def add_member(self, a, b):
-        d = [max(c) + 0.001*min(c) for c in self.con.T]
-        if len(d) > 0:
-            ratio = float(len(d))/float(len(unique(d)))   
-            if ratio > 1.0:
-                print("Add Member:"+str(ratio))
         self.con = vstack([self.con.T, array([a, b])]).T
         self.con_mat[a, b] = 1.0
         self.con_mat[b, a] = 1.0
@@ -273,23 +241,11 @@ class Truss(object):
         self.m += 1
         
     def delete_member(self, j):
-        b = [max(c) + 0.001*min(c) for c in self.con.T]
-        if len(b) > 0:
-            ratio = float(len(b))/float(len(unique(b)))   
-            if ratio > 1.0:
-                print("Del Member:"+str(ratio))
         self.con_mat[self.con[1, j], self.con[0, j]] = 0.0
         self.con_mat[self.con[0, j], self.con[1, j]] = 0.0
         self.con = delete(self.con, j, 1)        
         self.sizes = delete(self.sizes, j)
         self.m -= 1
-        
-    def reset(self):
-        for i in range(self.m):
-            self.delete_member(0)
-        for i in range(5, self.n):
-            self.delete_joint(5)
-        self.mass = 0.0
     
     def _draw_random_joint(self):
         mind = []
@@ -348,26 +304,7 @@ class Truss(object):
         R = sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
 
         return F, U, R
-    
-    def _build_init_script(self):
-        # Make joint script
-        self.script = []
-        for i in range(5, self.n):
-            self.script.append("self.add_joint("+repr(self.coord[:,i])+")")
-            
-        # Make member script
-        for i in range(self.m):
-            self.script.append("self.add_member("+str(self.con[0,i])+", "+str(self.con[1, i])+")")
-        
-        self.reset()
-    
-    def run_script(self):
-        eval(self.script[0])
 
-        if self.m > 0:
-            self.truss_eval()
-        self.script.pop(0)
-    
     def __sub__(self, other):
 
         nA = self.n
