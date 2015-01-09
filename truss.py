@@ -1,13 +1,9 @@
-
-# coding: utf-8
-
-## It's all about trusses!
-
-# In[30]:
-
-from numpy import pi, array, size, zeros, outer, ones, concatenate, where,     multiply, sum, column_stack, vstack, hstack, append, abs, mean, std,     loadtxt, diag, delete, inf, dot, atleast_2d, log, sqrt, isnan, isinf, unique
+from numpy import pi, array, size, zeros, outer, ones, concatenate, where,     \
+    multiply, sum, column_stack, vstack, hstack, append, abs, mean, std,     \
+    loadtxt, diag, delete, inf, dot, atleast_2d, log, sqrt, isnan, isinf, \
+    unique,
 from numpy.linalg import norm, solve, cond, det
-from numpy.random import multivariate_normal
+from numpy.random import uniform
 
 from math import atan2
 
@@ -16,14 +12,6 @@ from copy import copy
 
 from matplotlib import delaunay
 from matplotlib.pyplot import plot, axis, arrow, title, annotate, gca
-
-from IPython.core.pylabtools import figsize
-figsize(8,8)
-
-
-### <div id="constants"></div>1. Section Properties and Constants
-
-# In[31]:
 
 # Yield strength of steel
 Fy = 344*pow(10, 6)
@@ -35,12 +23,12 @@ E = 210*pow(10, 9)
 OUTER_DIAM = [(x+1.0)/100 for x in range(10)]
 
 # Thickness of the wall sections of optional sizes, in meters
-THICK =  [d/15 for d in OUTER_DIAM];
+THICK = [d/15 for d in OUTER_DIAM]
 
 # Cross sectional area in m^2
 AREA_SEC = [pi*pow(d/2, 2) - pi*pow(d/2-d/15, 2) for d in OUTER_DIAM]
 
-# Moment of intertia, in m^4
+# Moment of inertia, in m^4
 I_SEC = [pi*(pow(d, 4) - pow((d - 2*d/15), 4))/64 for d in OUTER_DIAM]
 
 # Weight per length, kg/ft
@@ -54,10 +42,6 @@ FOS_MIN = FOS_TARGETS[0]
 MASS_TARGETS = [175.0, 350.0, 225.0]
 MASS_TARGET = MASS_TARGETS[0]
 
-# Get node locations
-nodelocs = loadtxt('nodes.dat', delimiter=',')
-NODEMEAN = append(mean(nodelocs, axis=0), array(0.0))
-NODEDEV = append(std(nodelocs, axis=0), array(0.0))
 
 # Constants to use for truss initialization
 INITDIST = 2.0
@@ -69,11 +53,7 @@ DISTREPS = 10
 SCRAMREPS = 40
 
 
-# In[32]:
-
 class Truss(object):
-    
-    PROBLEM = 0
     
     def __init__(self, n=None):
         if n is not None:        
@@ -81,7 +61,11 @@ class Truss(object):
             self.n = n
 
             # Create first set of coordinates
-            self.coord = array([[-5, 0, 0], [-2, 0, 0], [1, 0, 0], [3, 0, 0], [5, 0, 0]])
+            self.coord = array([[-5, 0, 0],
+                                [-2, 0, 0],
+                                [ 1, 0, 0],
+                                [ 3, 0, 0],
+                                [ 5, 0, 0]])
 
             # Draw randomly for joint locations
             for i in range(self.n-5):
@@ -161,37 +145,11 @@ class Truss(object):
             self.mass += L[i]*WEIGHT[int(self.sizes[i])]
     
     def fos_eval(self):
-        if self.PROBLEM == 0:
-            support = array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
-            self._single_fos_eval(support)
-            
-        elif self.PROBLEM == 1:
-            print("eval problem 2")
-            fos_saver = []
-            
-            self._single_fos_eval(array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T)
-            fos_saver.append(self.fos)
-            
-            self._single_fos_eval(array([[0, 0, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T)
-            fos_saver.append(self.fos)
-            
-            self._single_fos_eval(array([[1, 1, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [1, 1, 1]]).T)
-            fos_saver.append(self.fos)
-            
-            self._single_fos_eval(array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [0, 0, 1]]).T)
-            fos_saver.append(self.fos)
-            
-            fos_saver = array(fos_saver)
-            for i in range(self.m):
-                self.fos[i] = min(fos_saver[:, i])
-
+        support = array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
+        self._single_fos_eval(support)
                 
     def _single_fos_eval(self, support):
-        D = {}
-
-        # Add the "Re"
-#         D["Re"] = array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
-        D["Re"] = support
+        D = {"Re":  support}
         for _ in range(self.n-5):
             D["Re"] = column_stack([D["Re"], [0,0,1]])
 
@@ -351,7 +309,7 @@ class Truss(object):
         mind = []
         xysave = []
         for i in range(INITREPS):
-            xy = multivariate_normal(NODEMEAN, diag(NODEDEV))
+            xy = uniform([-6.0, -6.0], [6.0, 6.0], 2)
             d = []
             for joint in self.coord:
                 d.append(norm(joint - xy))
@@ -414,7 +372,6 @@ class Truss(object):
         # Make member script
         for i in range(self.m):
             self.script.append("self.add_member("+str(self.con[0,i])+", "+str(self.con[1, i])+")")
-#             self.script.append("self.add_member("+str(self.con[0,i])+", "+str(self.con[1, i])+"); self.truss_eval()")
         
         self.reset()
     
@@ -532,8 +489,6 @@ class Truss(object):
         return newtruss
 
 
-# In[1]:
-
 def plot_truss(truss, LABELS=True):
     Hm = []
     # Plot every member
@@ -585,6 +540,3 @@ def plot_truss(truss, LABELS=True):
     gca().set_ylim([-6, 6])
     
     return Hm, Hj, Hl, Hs
-
-
-# In[ ]:
