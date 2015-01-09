@@ -35,13 +35,10 @@ I_SEC = [pi*(pow(d, 4) - pow((d - 2*d/15), 4))/64 for d in OUTER_DIAM]
 WEIGHT = [a*7870 for a in AREA_SEC]
 
 # Minimum required factor of safety
-FOS_TARGETS = [1.25, 1.00, 1.25]
-FOS_MIN = FOS_TARGETS[0]
+FOS_MIN = 1.25
 
 # Mass target
-MASS_TARGETS = [175.0, 350.0, 225.0]
-MASS_TARGET = MASS_TARGETS[0]
-
+MASS_TARGET = 175
 
 # Constants to use for truss initialization
 INITDIST = 2.0
@@ -129,8 +126,6 @@ class Truss(object):
     def truss_eval(self):
         self.mass_eval()
         self.fos_eval()
-        self.quality_eval()                
-
                 
     def mass_eval(self): 
         """This function calculates the mass of the truss"""
@@ -195,14 +190,6 @@ class Truss(object):
         for i in range(self.m):
             if isinf(self.fos[i]):
                 self.fos[i] = pow(10,10)
-    
-    def quality_eval(self):
-        if size(self.fos) == 0:
-            self.fos = [0.0]
-        if min(self.fos) < pow(10, -6):
-            self.quality = self.mass  + pow(100*max([0, FOS_MIN - min(self.fos)]), 2)
-        else:
-            self.quality = self.mass  + pow(100*log(min(self.fos)), 2)
 
     def all_members(self, inc_dec):
         self.sizes += inc_dec
@@ -302,7 +289,6 @@ class Truss(object):
             self.delete_member(0)
         for i in range(5, self.n):
             self.delete_joint(5)
-        self.quality = pow(10, 10)
         self.mass = 0.0
     
     def _draw_random_joint(self):
@@ -396,9 +382,19 @@ class Truss(object):
 
         # Resize if necessary
         if len(A) > len(B):
-            B.resize(len(A), len(A))
+            dim = len(A)
+            temp = zeros([dim, dim])
+            for i in range(len(B)):
+                for j in range(len(B)):
+                    temp[i, j] = B[i, j]
+            B = temp
         elif len(B) > len(A):
-            A.resize(len(B), len(B))
+            dim = len(B)
+            temp = zeros([dim, dim])
+            for i in range(len(A)):
+                for j in range(len(A)):
+                    temp[i, j] = B[i, j]
+            A = temp
         L = len(A)
         best_dist = stat_dist(A, B)
 
@@ -432,63 +428,32 @@ class Truss(object):
                 A[[a, b], :] = A[[b, a], :]
 
         return best_dist/2 + abs(nA - nB)
-    
-        
-    def __div__(self, other):
-        A = self.con_mat.copy() 
-        B = other.con_mat.copy()
 
-        CA = self.__CovarianceRepresentation(A, 5)
-        CB = self.__CovarianceRepresentation(B, 5)
-        CC = (CA + CB)/2.0
 
-        return 0.5*log(det(CC)/sqrt(det(CA)*det(CB)))
-            
-        
-    def __CovarianceRepresentation(self, A, k):
-        n = size(A, axis=0)
-        x = ones(n)
-        Msave = []
-
-        for i in range(k):
-            Ax = dot(A, x)
-            x = n * Ax / norm(Ax, ord=1)
-            Msave.append(x)
-
-        Msave = array(Msave)
-        CA = zeros([k, k])
-        mu = ones(k)
-        for i in range(n):
-            Msave_mu = atleast_2d(Msave[:, i] - mu)
-            CA += Msave_mu * Msave_mu.T
-
-        return CA
-    
-    
     def copy(self):
         """This function allows the truss to be safely copied"""
         
         # Make a blank truss
-        newtruss = Truss()
-        newtruss.script = []
+        new_truss = Truss()
+        new_truss.script = []
         
         # Copy the truss construction info
-        newtruss.m = copy(self.m)
-        newtruss.n = copy(self.n)
-        newtruss.con = copy(self.con)
-        newtruss.coord = copy(self.coord)
-        newtruss.sizes = copy(self.sizes)
-        newtruss.con_mat = copy(self.con_mat)
+        new_truss.m = copy(self.m)
+        new_truss.n = copy(self.n)
+        new_truss.con = copy(self.con)
+        new_truss.coord = copy(self.coord)
+        new_truss.sizes = copy(self.sizes)
+        new_truss.con_mat = copy(self.con_mat)
         
         # Copy the truss performance info
-        newtruss.fos = copy(self.fos)
-        newtruss.force = copy(self.force)
-        newtruss.mass = copy(self.mass)
-        newtruss.quality = copy(self.quality)
+        new_truss.fos = copy(self.fos)
+        new_truss.force = copy(self.force)
+        new_truss.mass = copy(self.mass)
         
-        return newtruss
+        return new_truss
 
 
+# This function plots the truss, labeling with FOS
 def plot_truss(truss, LABELS=True):
     Hm = []
     # Plot every member
