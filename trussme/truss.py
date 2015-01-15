@@ -1,4 +1,5 @@
 import numpy
+import numpy.delaunay
 import math
 import copy
 import matplotlib
