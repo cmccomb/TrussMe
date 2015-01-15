@@ -4,7 +4,7 @@ import unittest
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
-        self.T = Truss(12)
+        self.T = truss.Truss(12)
 
     def testTrussInit(self):
         self.assertEqual(self.T.n, 12)
