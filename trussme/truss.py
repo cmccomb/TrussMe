@@ -241,7 +241,7 @@ class Truss(object):
         mind = []
         xysave = []
         for i in range(INITREPS):
-            xy = numpy.random.uniform([-6.0, -6.0], [6.0, 6.0], 2)
+            xy = numpy.random.uniform([-6.0, -6.0, 0.0], [6.0, 6.0, 0.0], 3)
             d = []
             for joint in self.coord:
                 d.append(numpy.linalg.norm(joint - xy))
