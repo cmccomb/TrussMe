@@ -16,7 +16,7 @@ OUTER_DIAM = [(x+1.0)/100 for x in range(10)]
 THICK = [d/15 for d in OUTER_DIAM]
 
 # Cross sectional area in m^2
-AREA_SEC = [numpy.pi*pow(d/2, 2) - pi*pow(d/2-d/15, 2) for d in OUTER_DIAM]
+AREA_SEC = [numpy.pi*pow(d/2, 2) - numpy.pi*pow(d/2-d/15, 2) for d in OUTER_DIAM]
 
 # Moment of inertia, in m^4
 I_SEC = [numpy.pi*(pow(d, 4) - pow((d - 2*d/15), 4))/64 for d in OUTER_DIAM]
