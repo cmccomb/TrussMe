@@ -1,5 +1,2 @@
 numpy
-math
-random
-copy
 matplotlib
