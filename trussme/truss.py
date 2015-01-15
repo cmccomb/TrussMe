@@ -7,9 +7,7 @@ from numpy.random import uniform, choice
 
 import math
 import copy
-
-from matplotlib import delaunay
-from matplotlib.pyplot import plot, axis, arrow, title, annotate, gca
+import matplotlib
 
 # Yield strength of steel
 Fy = 344*pow(10, 6)
