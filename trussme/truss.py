@@ -1,8 +1,8 @@
 import numpy
-import numpy.delaunay
 import math
 import copy
 import matplotlib
+import matplotlib.delaunay
 
 # Yield strength of steel
 Fy = 344*pow(10, 6)
