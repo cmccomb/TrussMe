@@ -1,4 +1,4 @@
-import truss
+import trussme import truss
 import unittest
 
 class TestSequenceFunctions(unittest.TestCase):
