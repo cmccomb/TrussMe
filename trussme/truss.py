@@ -1,10 +1,4 @@
-from numpy import pi, array, size, zeros, outer, ones, concatenate, where, \
-    multiply, sum, column_stack, vstack, hstack, append, abs, mean, std, \
-    loadtxt, diag, delete, inf, dot, atleast_2d, log, sqrt, isnan, isinf, \
-    unique
-from numpy.linalg import norm, solve, cond, det
-from numpy.random import uniform, choice
-
+import numpy
 import math
 import copy
 import matplotlib
@@ -22,10 +16,10 @@ OUTER_DIAM = [(x+1.0)/100 for x in range(10)]
 THICK = [d/15 for d in OUTER_DIAM]
 
 # Cross sectional area in m^2
-AREA_SEC = [pi*pow(d/2, 2) - pi*pow(d/2-d/15, 2) for d in OUTER_DIAM]
+AREA_SEC = [numpy.pi*pow(d/2, 2) - pi*pow(d/2-d/15, 2) for d in OUTER_DIAM]
 
 # Moment of inertia, in m^4
-I_SEC = [pi*(pow(d, 4) - pow((d - 2*d/15), 4))/64 for d in OUTER_DIAM]
+I_SEC = [numpy.pi*(pow(d, 4) - pow((d - 2*d/15), 4))/64 for d in OUTER_DIAM]
 
 # Weight per length, kg/ft
 WEIGHT = [a*7870 for a in AREA_SEC]
@@ -54,7 +48,7 @@ class Truss(object):
             self.n = n
 
             # Create first set of coordinates
-            self.coord = array([[-5, 0, 0],
+            self.coord = numpy.array([[-5, 0, 0],
                                 [-2, 0, 0],
                                 [ 1, 0, 0],
                                 [ 3, 0, 0],
@@ -64,7 +58,7 @@ class Truss(object):
             for i in range(self.n-5):
                 # Draw random location from distribution
                 xy = self._draw_random_joint()
-                self.coord = vstack([self.coord, xy])
+                self.coord = numpy.vstack([self.coord, xy])
             self.coord = self.coord.T
 
             # Delaunay triangulation to get connections
@@ -73,7 +67,7 @@ class Truss(object):
 
             # Check for near-redundant connections (angle)
             for j in range(self.n):
-                row, col = where(self.con == j)
+                row, col = numpy.where(self.con == j)
                 theta = []
                 length = []
 
@@ -87,35 +81,35 @@ class Truss(object):
 
                     dx, dy, dz = self.coord[:, other_end] - self.coord[:, j]
                     theta.append(math.atan2(dy, dx))
-                    length.append(norm([dx, dy]))
+                    length.append(numpy.linalg.norm([dx, dy]))
                 removal_list = []
 
                 # Check to see if any are close to one another
                 for i in range(len(theta)):
                     for k in range(i, len(theta)):
-                        if abs(theta[i] - theta[k]) < THETATOL:
+                        if numpy.abs(theta[i] - theta[k]) < THETATOL:
                             if length[i] > length[k]:
                                 removal_list.append(i)
 
                 # Perform removal
                 if removal_list is not []:
-                    self.con = delete(self.con, [col[x] for x in removal_list], axis=1)
+                    self.con = numpy.delete(self.con, [col[x] for x in removal_list], axis=1)
 
             # Store final number of members
             self.m = len(self.con.T)
 
             # Initialize truss sizes
-            self.sizes = ones(len(self.con.T))*4
+            self.sizes = numpy.ones(len(self.con.T))*4
 
             # Establish the connectivity matrix
-            self.con_mat = zeros([self.m, self.m])
+            self.con_mat = numpy.zeros([self.m, self.m])
             for member in self.con.T:
                 self.con_mat[member[0], member[1]] = 1.0
                 self.con_mat[member[1], member[0]] = 1.0
 
             # Evaluate the truss
             self.force = [0.0]
-            self.fos = array([0.0])
+            self.fos = numpy.array([0.0])
             self.mass = 0.0
                 
     def truss_eval(self):
@@ -125,9 +119,9 @@ class Truss(object):
     def mass_eval(self): 
         """This function calculates the mass of the truss"""
         # Calculate lengths
-        L = zeros(self.m)
+        L = numpy.zeros(self.m)
         for i in range(self.m):
-            L[i] = norm(self.coord[:, self.con[0, i]] - self.coord[:, self.con[1, i]])
+            L[i] = numpy.linalg.norm(self.coord[:, self.con[0, i]] - self.coord[:, self.con[1, i]])
 
         # Calculate total mass
         self.mass = 0
@@ -135,14 +129,14 @@ class Truss(object):
             self.mass += L[i]*WEIGHT[int(self.sizes[i])]
     
     def fos_eval(self):
-        support = array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
+        support = numpy.array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
 
         D = {"Re":  support}
         for _ in range(self.n-5):
-            D["Re"] = column_stack([D["Re"], [0,0,1]])
+            D["Re"] = numpy.column_stack([D["Re"], [0,0,1]])
 
         # Add the appropriate loads
-        D["Load"] = zeros([3, self.n])
+        D["Load"] = numpy.zeros([3, self.n])
         D["Load"][1, 1] = -200000.0
         D["Load"][1, 3] = -200000.0
 
@@ -152,36 +146,36 @@ class Truss(object):
             D["A"].append(AREA_SEC[int(member_size)])
         D["Coord"] = self.coord
         D["Con"] = self.con
-        D["E"] = E*ones(self.m)
+        D["E"] = E*numpy.ones(self.m)
 
         # Do force analysis
         try:
             self.force, U, R = self._force_eval(D)
         except:
-            self.force = ones(self.m)*pow(10, 16)
+            self.force = numpy.ones(self.m)*pow(10, 16)
             
         # Calculate lengths
-        L = zeros(self.m)
+        L = numpy.zeros(self.m)
         for i in range(self.m):
-            L[i] = norm(D["Coord"][:, D["Con"][0, i]] - D["Coord"][:, D["Con"][1, i]])
+            L[i] = numpy.linalg.norm(D["Coord"][:, D["Con"][0, i]] - D["Coord"][:, D["Con"][1, i]])
 
         # Calculate FOS's
-        self.fos = zeros(self.m)
+        self.fos = numpy.zeros(self.m)
         for i in range(len(self.force)):
             self.fos[i] = D["A"][i]*Fy/self.force[i]
             if self.fos[i] < 0:
-                self.fos[i] = min(pi*pi*E*I_SEC[int(self.sizes[i] - 1)]/(L[i]*L[i])/-self.force[i], -self.fos[i])
+                self.fos[i] = min(numpy.pi*numpy.pi*E*I_SEC[int(self.sizes[i] - 1)]/(L[i]*L[i])/-self.force[i], -self.fos[i])
     
         # Make sure loads and supports are connected
         for i in range(5):
-            if size(where(self.con == i)) == 0:
-                self.fos = zeros(self.m)
+            if numpy.size(numpy.where(self.con == i)) == 0:
+                self.fos = numpy.zeros(self.m)
         
-        if isnan(sum(self.fos)):
-            self.fos = zeros(self.m)
+        if numpy.isnan(numpy.sum(self.fos)):
+            self.fos = numpy.zeros(self.m)
         
         for i in range(self.m):
-            if isinf(self.fos[i]):
+            if numpy.isinf(self.fos[i]):
                 self.fos[i] = pow(10,10)
                 
     def single_member(self, j, inc_dec):
@@ -194,29 +188,29 @@ class Truss(object):
     def add_joint(self, xy):
         self.n += 1
 
-        temp = zeros([self.n, self.n])
+        temp = numpy.zeros([self.n, self.n])
         for i in range(self.n-1):
             for j in range(self.n-1):
                 temp[i, j] = self.con_mat[i, j]
                 
         self.con_mat = temp
-        self.coord = vstack([self.coord.T, xy]).T
+        self.coord = numpy.vstack([self.coord.T, xy]).T
         
     def move_joint(self, j, dxy):
         self.coord[:, j] += dxy
         
     def delete_joint(self, j):
         # Remove from coordinate list
-        self.coord = delete(self.coord, j, 1)
+        self.coord = numpy.delete(self.coord, j, 1)
 
         # Remove row and column from conn_mat
-        self.con_mat = delete(self.con_mat, j, 0)
-        self.con_mat = delete(self.con_mat, j, 1)
+        self.con_mat = numpy.delete(self.con_mat, j, 0)
+        self.con_mat = numpy.delete(self.con_mat, j, 1)
 
         # Remove connected members
-        _, col = where(self.con == j)
-        self.con = delete(self.con, col, 1)
-        self.sizes = delete(self.sizes, col)
+        _, col = numpy.where(self.con == j)
+        self.con = numpy.delete(self.con, col, 1)
+        self.sizes = numpy.delete(self.sizes, col)
         self.m -= len(col)
 
         # Decrement connections appropriately
@@ -230,74 +224,74 @@ class Truss(object):
         self.n -=1
 
     def add_member(self, a, b):
-        self.con = vstack([self.con.T, array([a, b])]).T
+        self.con = numpy.vstack([self.con.T, numpy.array([a, b])]).T
         self.con_mat[a, b] = 1.0
         self.con_mat[b, a] = 1.0
-        self.sizes = hstack([self.sizes, array(4.0)])
+        self.sizes = numpy.hstack([self.sizes, numpy.array(4.0)])
         self.m += 1
         
     def delete_member(self, j):
         self.con_mat[self.con[1, j], self.con[0, j]] = 0.0
         self.con_mat[self.con[0, j], self.con[1, j]] = 0.0
-        self.con = delete(self.con, j, 1)        
-        self.sizes = delete(self.sizes, j)
+        self.con = numpy.delete(self.con, j, 1)        
+        self.sizes = numpy.delete(self.sizes, j)
         self.m -= 1
     
     def _draw_random_joint(self):
         mind = []
         xysave = []
         for i in range(INITREPS):
-            xy = uniform([-6.0, -6.0], [6.0, 6.0], 2)
+            xy = numpy.random.uniform([-6.0, -6.0], [6.0, 6.0], 2)
             d = []
             for joint in self.coord:
-                d.append(norm(joint - xy))
+                d.append(numpy.linalg.norm(joint - xy))
             dmin1 = min(d)
             d.remove(dmin1)
             dmin2 = min(d)
-            mind.append(abs(dmin1 - INITDIST) + abs(dmin2 - INITDIST))
+            mind.append(numpy.abs(dmin1 - INITDIST) + numpy.abs(dmin2 - INITDIST))
             xysave.append(xy)
-        idx = array(mind).argmin()
+        idx = numpy.array(mind).argmin()
         return xysave[idx]
     
     def _force_eval(self, D):
-        Tj = zeros([3, size(D["Con"], axis=1)])
-        w = array([size(D["Re"], axis=0), size(D["Re"], axis=1)])
-        SS = zeros([3*w[1], 3*w[1]])
+        Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])
+        w = numpy.array([numpy.size(D["Re"], axis=0), numpy.size(D["Re"], axis=1)])
+        SS = numpy.zeros([3*w[1], 3*w[1]])
         U = 1.0 - D["Re"]
 
         # This identifies joints that are unsupported, and can therefore be loaded
-        ff = where(U.T.flat == 1)[0]
+        ff = numpy.where(U.T.flat == 1)[0]
 
         # Step through the each member in the truss, and build the global stiffness matrix
-        for i in range(size(D["Con"], axis=1)):
+        for i in range(numpy.size(D["Con"], axis=1)):
             H = D["Con"][:, i]
             C = D["Coord"][:, H[1]] - D["Coord"][:, H[0]]
-            Le = norm(C)
+            Le = numpy.linalg.norm(C)
             T = C/Le
-            s = outer(T, T)
+            s = numpy.outer(T, T)
             G = D["E"][i]*D["A"][i]/Le
-            ss = G*concatenate((concatenate((s, -s), axis=1), concatenate((-s, s), axis=1)), axis=0)
+            ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
             Tj[:, i] = G*T
             e = range((3*H[0]), (3*H[0] + 3)) + range((3*H[1]), (3*H[1] + 3))
             for ii in range(6):
                 for j in range(6):
                     SS[e[ii], e[j]] += ss[ii, j]
 
-        SSff = zeros([len(ff), len(ff)])
+        SSff = numpy.zeros([len(ff), len(ff)])
         for i in range(len(ff)):
             for j in range(len(ff)):
                 SSff[i,j] = SS[ff[i], ff[j]]
 
         Loadff = D["Load"].T.flat[ff]
-        Uff = solve(SSff, Loadff)
+        Uff = numpy.linalg.solve(SSff, Loadff)
 
-        ff = where(U.T==1)
+        ff = numpy.where(U.T==1)
         for i in range(len(ff[0])):
             U[ff[1][i], ff[0][i]] = Uff[i]
-        F = sum(multiply(Tj, U[:, D["Con"][1,:]] - U[:, D["Con"][0,:]]), axis=0)
-        if cond(SSff) > pow(10,10):
+        F = numpy.sum(numpy.multiply(Tj, U[:, D["Con"][1,:]] - U[:, D["Con"][0,:]]), axis=0)
+        if numpy.linalg.cond(SSff) > pow(10,10):
             F *= pow(10, 10)
-        R = sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
+        R = numpy.sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
 
         return F, U, R
 
@@ -307,7 +301,7 @@ class Truss(object):
         nB = other.n
 
         # Define a function to calculate static distance
-        stat_dist = lambda x, y: sum(abs(x - y))
+        stat_dist = lambda x, y: numpy.sum(numpy.abs(x - y))
 
         # Get the connectivity matrices specifically
         A = self.con_mat.copy() 
@@ -316,14 +310,14 @@ class Truss(object):
         # Resize if necessary
         if len(A) > len(B):
             dim = len(A)
-            temp = zeros([dim, dim])
+            temp = numpy.zeros([dim, dim])
             for i in range(len(B)):
                 for j in range(len(B)):
                     temp[i, j] = B[i, j]
             B = temp
         elif len(B) > len(A):
             dim = len(B)
-            temp = zeros([dim, dim])
+            temp = numpy.zeros([dim, dim])
             for i in range(len(A)):
                 for j in range(len(A)):
                     temp[i, j] = B[i, j]
@@ -353,14 +347,14 @@ class Truss(object):
 
             # Scramble and re-start
             for i in range(SCRAMREPS):
-                a = choice(range(5, L))
-                b = choice(range(5, L))
+                a = numpy.random.choice(range(5, L))
+                b = numpy.random.choice(range(5, L))
                 # Swap columns
                 A[:, [a, b]] = A[:, [b, a]]
                 # Swap rows
                 A[[a, b], :] = A[[b, a], :]
 
-        return best_dist/2 + abs(nA - nB)
+        return best_dist/2 + numpy.abs(nA - nB)
 
 
     def copy(self):
