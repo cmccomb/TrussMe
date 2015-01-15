@@ -2,4 +2,5 @@
 
 Provides basic construction and analysis capabilities for trusses.
 
-Based on function by [Hossein Rahami](http://www.mathworks.com/matlabcentral/fileexchange/authors/27559).
+### Acknowledgements
+Force calculations based on MATLAB function by [Hossein Rahami](http://www.mathworks.com/matlabcentral/fileexchange/authors/27559).
