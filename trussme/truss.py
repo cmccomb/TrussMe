@@ -1,7 +1,7 @@
 from numpy import pi, array, size, zeros, outer, ones, concatenate, where,     \
     multiply, sum, column_stack, vstack, hstack, append, abs, mean, std,     \
     loadtxt, diag, delete, inf, dot, atleast_2d, log, sqrt, isnan, isinf, \
-    unique,
+    unique
 from numpy.linalg import norm, solve, cond, det
 from numpy.random import uniform
 
