@@ -1,14 +1,12 @@
-from numpy import pi, array, size, zeros, outer, ones, concatenate, where,     \
-    multiply, sum, column_stack, vstack, hstack, append, abs, mean, std,     \
+from numpy import pi, array, size, zeros, outer, ones, concatenate, where, \
+    multiply, sum, column_stack, vstack, hstack, append, abs, mean, std, \
     loadtxt, diag, delete, inf, dot, atleast_2d, log, sqrt, isnan, isinf, \
     unique
 from numpy.linalg import norm, solve, cond, det
-from numpy.random import uniform
+from numpy.random import uniform, choice
 
-from math import atan2
-
-from random import choice
-from copy import copy
+import math
+import copy
 
 from matplotlib import delaunay
 from matplotlib.pyplot import plot, axis, arrow, title, annotate, gca
@@ -90,7 +88,7 @@ class Truss(object):
                         other_end = other_end[0]
 
                     dx, dy, dz = self.coord[:, other_end] - self.coord[:, j]
-                    theta.append(atan2(dy, dx))
+                    theta.append(math.atan2(dy, dx))
                     length.append(norm([dx, dy]))
                 removal_list = []
 
@@ -375,17 +373,17 @@ class Truss(object):
         new_truss.script = []
         
         # Copy the truss construction info
-        new_truss.m = copy(self.m)
-        new_truss.n = copy(self.n)
-        new_truss.con = copy(self.con)
-        new_truss.coord = copy(self.coord)
-        new_truss.sizes = copy(self.sizes)
-        new_truss.con_mat = copy(self.con_mat)
+        new_truss.m = copy.copy(self.m)
+        new_truss.n = copy.copy(self.n)
+        new_truss.con = copy.copy(self.con)
+        new_truss.coord = copy.copy(self.coord)
+        new_truss.sizes = copy.copy(self.sizes)
+        new_truss.con_mat = copy.copy(self.con_mat)
         
         # Copy the truss performance info
-        new_truss.fos = copy(self.fos)
-        new_truss.force = copy(self.force)
-        new_truss.mass = copy(self.mass)
+        new_truss.fos = copy.copy(self.fos)
+        new_truss.force = copy.copy(self.force)
+        new_truss.mass = copy.copy(self.mass)
         
         return new_truss
 
