@@ -4,10 +4,10 @@ import unittest
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
-        self.n = 1
+        self.T = Truss(12)
 
-    def testTheThing(self):
-        self.assertEqual(self.n, 1)
+    def testTrussInit(self):
+        self.assertEqual(self.T.n, 12)
 
 if __name__ == "__main__":
     unittest.main()
