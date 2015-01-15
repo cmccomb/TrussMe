@@ -70,7 +70,7 @@ class Truss(object):
             self.coord = self.coord.T
 
             # Delaunay triangulation to get connections
-            cens, edg, tri, neig = delaunay.delaunay(self.coord[0, :], self.coord[1, :])
+            cens, edg, tri, neig = matplotlib.delaunay.delaunay(self.coord[0, :], self.coord[1, :])
             self.con = edg.T
 
             # Check for near-redundant connections (angle)
@@ -390,7 +390,6 @@ class Truss(object):
 
 # This function plots the truss, labeling with FOS
 def plot_truss(truss, LABELS=True):
-    Hm = []
     # Plot every member
     for i in range(truss.m):
         p1 = truss.coord[:, truss.con[0, i]]
@@ -409,34 +408,29 @@ def plot_truss(truss, LABELS=True):
         else:
             trstr = ">10.0"
         if LABELS:
-            annotate(trstr, [xyz[0], xyz[1]], bbox=dict(boxstyle="round", fc="w")) 
-        Hm.append(plot([p1[0], p2[0]], [p1[1], p2[1]], color, linewidth=truss.sizes[i]+1, linestyle = lst));
-        axis('equal')
+            matplotlib.pyplot.annotate(trstr, [xyz[0], xyz[1]], bbox=dict(boxstyle="round", fc="w")) 
+        matplotlib.pyplot.plot([p1[0], p2[0]], [p1[1], p2[1]], color, linewidth=truss.sizes[i]+1, linestyle = lst);
+        matplotlib.pyplot.axis('equal')
         
     # Plot supports
-    Hs = []
-    Hs.append(plot(truss.coord[0, 0], truss.coord[1, 0], 'ks', ms=15));
-    Hs.append(plot(truss.coord[0, 2], truss.coord[1, 2], 'ko', ms=15));
-    Hs.append(plot(truss.coord[0, 4], truss.coord[1, 4], 'ks', ms=15));
+    matplotlib.pyplot.plot(truss.coord[0, 0], truss.coord[1, 0], 'ks', ms=15);
+    matplotlib.pyplot.plot(truss.coord[0, 2], truss.coord[1, 2], 'ko', ms=15);
+    matplotlib.pyplot.plot(truss.coord[0, 4], truss.coord[1, 4], 'ks', ms=15);
     
     # Plot loads
-    Hl = []
-    Hl.append(plot(truss.coord[0, 1], truss.coord[1, 1], 'ko', ms=10));
-    Hl.append(arrow(truss.coord[0, 1], truss.coord[1, 1] + 2.0, 0.0, -1.5, 
-                    fc="m", ec="m", head_width=0.3, head_length=0.6, width=0.1, zorder=3))
-    Hl.append(plot(truss.coord[0, 3], truss.coord[1, 3], 'ko', ms=10));
-    Hl.append(arrow(truss.coord[0, 3], truss.coord[1, 3] + 2.0, 0.0, -1.5, 
-                    fc="m", ec="m", head_width=0.3, head_length=0.6, width=0.1, zorder=3))
+    matplotlib.pyplot.plot(truss.coord[0, 1], truss.coord[1, 1], 'ko', ms=10);
+    matplotlib.pyplot.arrow(truss.coord[0, 1], truss.coord[1, 1] + 2.0, 0.0, -1.5, 
+                    fc="m", ec="m", head_width=0.3, head_length=0.6, width=0.1, zorder=3);
+    matplotlib.pyplot.plot(truss.coord[0, 3], truss.coord[1, 3], 'ko', ms=10);
+    matplotlib.pyplot.arrow(truss.coord[0, 3], truss.coord[1, 3] + 2.0, 0.0, -1.5, 
+                    fc="m", ec="m", head_width=0.3, head_length=0.6, width=0.1, zorder=3);
         
     # Plot every joint
-    Hj = []
     for i in range(truss.n-5):
-        Hj.append(plot(truss.coord[0, i + 5], truss.coord[1, i + 5], 'ko', ms=10));
+        matplotlib.pyplot.plot(truss.coord[0, i + 5], truss.coord[1, i + 5], 'ko', ms=10);
     
     # Make the title
-    title("FOS = "+"{0:.4f}".format(min(truss.fos))+", Mass = "+"{0:.2f}".format(truss.mass)+"kg")
+    matplotlib.pyplot.title("FOS = "+"{0:.4f}".format(min(truss.fos))+", Mass = "+"{0:.2f}".format(truss.mass)+"kg")
     
-    gca().set_xlim([-6, 6])
-    gca().set_ylim([-6, 6])
-    
-    return Hm, Hj, Hl, Hs
+    matplotlib.pyplot.gca().set_xlim([-6, 6])
+    matplotlib.pyplotgca().set_ylim([-6, 6])
