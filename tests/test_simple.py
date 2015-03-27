@@ -1,18 +1,25 @@
+import numpy
 from trussme import truss
-from trussme import member
 import unittest
 
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
-        self.T = truss.Truss(12)
+        self.T = truss.Truss()
 
-    def testTrussInit(self):
-        self.assertEqual(self.T.n, 12)
+    def test_joints(self):
+        self.T.add_support(numpy.array([0.0, 0.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([1.0, 1.0, 0.0]), d=2)
+        self.T.add_support(numpy.array([2.0, 0.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([1.0, 0.0, 0.0]), d=2)
 
-    def testMemberError(self):
-        m = member.Member()
-        m.set_shape("bar")
+        self.T.add_member(0, 1)
+        self.T.add_member(1, 2)
+        self.T.add_member(2, 3)
+        self.T.add_member(3, 0)
+        self.T.add_member(1, 3)
+
+        self.assertEqual(self.T.m, 5)
 
 if __name__ == "__main__":
     unittest.main()

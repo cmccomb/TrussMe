@@ -12,7 +12,7 @@ class Member(object):
     materials = {"A36":  [7800, 200*pow(10, 9), 250*pow(10, 6)],
                  "A992": [7850, 200*pow(10, 9), 345*pow(10, 6)]}
 
-    def __init__(self, idx=-1, default=True):
+    def __init__(self, joint1, joint2, idx=-1):
         # Save id number
         self.idx = idx
 
@@ -34,11 +34,23 @@ class Member(object):
         self.I = 0.0   # Moment of inertia
         self.LW = 0.0  # Linear weight
 
-        # Set default values, and calculate properties
-        if default:
-            self.set_shape("pipe", update_props=False)
-            self.set_material("A36", update_props=False)
-            self.set_parameters(t=0.01, r=0.1, update_props=True)
+        # Variables to store information about truss state
+        self.force = 0
+        self.fos_yield = 0
+        self.fos_buckling = 0
+        self.mass = 0
+
+        # Variable to store location in truss
+        self.joints = []
+        self.length = 0
+        self.end_a = []
+        self.end_b = []
+
+        # Calculate properties
+        self.set_shape("pipe", update_props=False)
+        self.set_material("A36", update_props=False)
+        self.set_parameters(t=0.01, r=0.1, update_props=True)
+        self.update_geometry(joint1, joint2)
 
     def set_shape(self, new_shape, update_props=True):
         # Read and save hte shape name
@@ -142,6 +154,12 @@ class Member(object):
 
     def calc_lw(self):
         self.LW = self.A * self.rho
+
+    def update_geometry(self, joint1, joint2):
+        self.end_a = joint1.coordinates
+        self.end_b = joint2.coordinates
+        self.length = numpy.linalg.norm(self.end_a - self.end_b)
+        self.mass = self.length*self.LW
 
     def shape_name_is_ok(self, name):
         if name in self.shapes:
