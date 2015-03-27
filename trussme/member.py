@@ -7,8 +7,9 @@ class Member(object):
     shapes = ["pipe", "bar", "square", "box"]
 
     # Material options and characteristics
-    #            name    rho   E               Fy
-    materials = {"A36": [7870, 200*pow(10, 9), 250*pow(10, 6)]}
+    #            name     rho   E               Fy
+    materials = {"A36":  [7800, 200*pow(10, 9), 250*pow(10, 6)],
+                 "A992": [7850, 200*pow(10, 9), 345*pow(10, 6)]}
 
     def __init__(self, default=True):
         # Shape independent variables
