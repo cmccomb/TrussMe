@@ -2,6 +2,7 @@ import numpy
 import math
 import copy
 import matplotlib
+import matplotlib.pyplot
 import matplotlib.delaunay
 
 # Yield strength of steel
@@ -426,4 +427,4 @@ def plot_truss(truss, LABELS=True):
     matplotlib.pyplot.title("FOS = "+"{0:.4f}".format(min(truss.fos))+", Mass = "+"{0:.2f}".format(truss.mass)+"kg")
     
     matplotlib.pyplot.gca().set_xlim([-6, 6])
-    matplotlib.pyplotgca().set_ylim([-6, 6])
+    matplotlib.pyplot.gca().set_ylim([-6, 6])

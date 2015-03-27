@@ -12,7 +12,10 @@ class Member(object):
     materials = {"A36":  [7800, 200*pow(10, 9), 250*pow(10, 6)],
                  "A992": [7850, 200*pow(10, 9), 345*pow(10, 6)]}
 
-    def __init__(self, default=True):
+    def __init__(self, idx=-1, default=True):
+        # Save id number
+        self.idx = idx
+
         # Shape independent variables
         self.shape = ''
         self.t = 0.0  # thickness
@@ -42,7 +45,7 @@ class Member(object):
         if self.shape_name_is_ok(new_shape):
             self.shape = new_shape
         else:
-            raise ValueError(new_shape+' is not an defined shape. Try ' +
+            raise ValueError(new_shape+' is not a defined shape. Try ' +
                              ', '.join(self.shapes[0:-1]) + ', or ' +
                              self.shapes[-1] + '.')
 
@@ -54,7 +57,7 @@ class Member(object):
         if self.material_name_is_ok(new_material):
             self.material = new_material
         else:
-            raise ValueError(new_material+' is not an defined shape. Try ' +
+            raise ValueError(new_material+' is not a defined shape. Try ' +
                              ', '.join(self.materials.keys()[0:-1]) + ', or ' +
                              self.materials.keys()[-1] + '.')
 
