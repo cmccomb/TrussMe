@@ -1,6 +1,7 @@
 import numpy
 import warnings
 
+
 class Member(object):
 
     # Shape types
@@ -13,6 +14,7 @@ class Member(object):
 
     def __init__(self, default=True):
         # Shape independent variables
+        self.shape = ''
         self.t = 0.0  # thickness
         self.w = 0.0  # outer width
         self.h = 0.0  # outer height
@@ -47,7 +49,6 @@ class Member(object):
         # If required, update properties
         if update_props:
             self.calc_properties()
-
 
     def set_material(self, new_material, update_props=True):
         if self.material_name_is_ok(new_material):
@@ -107,11 +108,37 @@ class Member(object):
 
     def calc_properties(self):
         # Calculate moment of inertia
-        self.I = 0.0
+        self.calc_moi()
 
         # Calculate the cross-sectional area
+        self.calc_area()
 
-        # Calculate the
+        # Calculate the linear mass
+        self.calc_lw()
+
+    def calc_moi(self):
+        if self.shape == "pipe":
+            self.I = (numpy.pi/4.)*(self.r**4 - (self.r - 2*self.t)**4)
+        elif self.shape == "bar":
+            self.I = (numpy.pi/4.)*self.r**4
+        elif self.shape == "box":
+            self.I = (1./12.)*self.w*self.h**3
+        elif self.shape == "square":
+            self.I = (1./12.)*(self.w*self.h**3)\
+                - (1./12.)*(self.w - 2*self.t)*(self.h - 2*self.t)**3
+
+    def calc_area(self):
+        if self.shape == "pipe":
+            self.A = numpy.pi*(self.r**2 - (self.r-self.t)**2)
+        elif self.shape == "bar":
+            self.A = numpy.pi*self.r**2
+        elif self.shape == "box":
+            self.A = self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
+        elif self.shape == "square":
+            self.A = self.w * self.h
+
+    def calc_lw(self):
+        self.LW = self.A * self.rho
 
     def shape_name_is_ok(self, name):
         if name in self.shapes:
