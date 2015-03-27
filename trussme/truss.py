@@ -1,6 +1,6 @@
 import numpy
-import joint
-import member
+from trussme import joint
+from trussme import member
 
 class Truss(object):
 

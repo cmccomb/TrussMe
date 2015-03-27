@@ -12,7 +12,7 @@ class Member(object):
     materials = {"A36":  [7800, 200*pow(10, 9), 250*pow(10, 6)],
                  "A992": [7850, 200*pow(10, 9), 345*pow(10, 6)]}
 
-    def __init__(self, joint1, joint2, idx=-1):
+    def __init__(self, joint_a, joint_b, idx=-1):
         # Save id number
         self.idx = idx
 
@@ -41,7 +41,7 @@ class Member(object):
         self.mass = 0
 
         # Variable to store location in truss
-        self.joints = []
+        self.joints = [joint_a, joint_b]
         self.length = 0
         self.end_a = []
         self.end_b = []
@@ -50,7 +50,6 @@ class Member(object):
         self.set_shape("pipe", update_props=False)
         self.set_material("A36", update_props=False)
         self.set_parameters(t=0.01, r=0.1, update_props=True)
-        self.update_geometry(joint1, joint2)
 
     def set_shape(self, new_shape, update_props=True):
         # Read and save hte shape name
@@ -131,6 +130,9 @@ class Member(object):
         # Calculate the linear mass
         self.calc_lw()
 
+        # Update length, etc.
+        self.calc_geometry()
+
     def calc_moi(self):
         if self.shape == "pipe":
             self.I = (numpy.pi/4.)*(self.r**4 - (self.r - 2*self.t)**4)
@@ -155,11 +157,15 @@ class Member(object):
     def calc_lw(self):
         self.LW = self.A * self.rho
 
-    def update_geometry(self, joint1, joint2):
-        self.end_a = joint1.coordinates
-        self.end_b = joint2.coordinates
+    def calc_geometry(self):
+        self.end_a = self.joints[0].coordinates
+        self.end_b = self.joints[1].coordinates
         self.length = numpy.linalg.norm(self.end_a - self.end_b)
         self.mass = self.length*self.LW
+
+    def update_joints(self, joint_a, joint_b):
+        self.joints = [joint_a, joint_b]
+        self.calc_geometry()
 
     def shape_name_is_ok(self, name):
         if name in self.shapes:
