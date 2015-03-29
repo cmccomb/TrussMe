@@ -50,6 +50,9 @@ class Truss(object):
 
         self.m += 1
 
+    def move_joint(self, j, coordinates):
+        self.joints[j].coordinates = coordinates
+
     def calc_mass(self):
         self.mass = 0
         for m in members:
