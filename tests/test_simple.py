@@ -22,7 +22,7 @@ class TestSequenceFunctions(unittest.TestCase):
         for m in self.T.members:
             print(m.idx)
             
-        self.T.move_joint(2, array([5.0, 5.0, 5.0]))
+        self.T.move_joint(2, numpy.array([5.0, 5.0, 5.0]))
         print(self.T.joints[2].coordinates)
         print(self.T.members[1].joints[0].coordinates)
         print(self.T.members[1].joints[1].coordinates)
