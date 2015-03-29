@@ -30,7 +30,7 @@ class Truss(object):
 
     def add_support(self, coordinates, d=3):
         # Make the joint
-        self.joints.append(joint.Joint(coordinates, self.n))
+        self.joints.append(joint.Joint(coordinates))
         self.joints[self.n].pinned(d=d)
         self.n += 1
 
