@@ -45,8 +45,8 @@ class Truss(object):
         self.members.append(member.Member(self.joints[j1], self.joints[j2]))
 
         # Update joints
-        joint1.members.append(self.members[-1])
-        joint2.members.append(self.members[-1])
+        self.joints[j1].members.append(self.members[-1])
+        self.joints[j2].members.append(self.members[-1])
 
         self.m += 1
 
