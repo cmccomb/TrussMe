@@ -3,6 +3,9 @@ import warnings
 
 
 class Member(object):
+    
+    # Save the number of members
+    number_of_members = 0
 
     # Shape types
     shapes = ["pipe", "bar", "square", "box"]
@@ -12,9 +15,10 @@ class Member(object):
     materials = {"A36":  [7800, 200*pow(10, 9), 250*pow(10, 6)],
                  "A992": [7850, 200*pow(10, 9), 345*pow(10, 6)]}
 
-    def __init__(self, joint_a, joint_b, idx=-1):
+    def __init__(self, joint_a, joint_b):
         # Save id number
-        self.idx = idx
+        self.idx = number_of_members
+        number_of_members += 1
 
         # Shape independent variables
         self.shape = ''
