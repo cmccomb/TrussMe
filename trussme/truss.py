@@ -20,6 +20,13 @@ class Truss(object):
         self.fos_yielding = 0
         self.fos_buckling = 0
         self.fos_total = 0
+        
+    def make_random_truss(self, xlim=[-10, 10], ylim=[-10, 10]):
+        # Draw joints
+        # Determine which joints should be supportrs
+        # Add members
+        # Evaluate
+        asdf = 1
 
     def add_support(self, coordinates, d=3):
         # Make the joint
