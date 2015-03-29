@@ -9,7 +9,7 @@ class Joint(object):
     def __init__(self, coordinates):
         # Save the joint id
         self.idx = self.number_of_joints
-        self.number_of_joints += 1
+        Joint.number_of_joints += 1
 
         # Coordinates of the joint
         self.coordinates = coordinates
