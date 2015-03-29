@@ -36,21 +36,17 @@ class Truss(object):
 
     def add_joint(self, coordinates, d=3):
         # Make the joint
-        self.joints.append(joint.Joint(coordinates, self.n))
+        self.joints.append(joint.Joint(coordinates))
         self.joints[self.n].free(d=d)
         self.n += 1
 
     def add_member(self, j1, j2):
-        # Find the joints we're dealing with
-        joint1 = self.joints[j1]
-        joint2 = self.joints[j2]
-
         # Make a member
-        self.members.append(member.Member(joint1, joint2, self.m))
+        self.members.append(member.Member(self.joints[j1], self.joints[j2]))
 
         # Update joints
-        self.joints[j1].members.append(self.m)
-        self.joints[j2].members.append(self.m)
+        joint1.members.append(self.members[-1])
+        joint2.members.append(self.members[-1])
 
         self.m += 1
 
