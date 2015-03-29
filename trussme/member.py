@@ -17,7 +17,7 @@ class Member(object):
 
     def __init__(self, joint_a, joint_b):
         # Save id number
-        self.idx = number_of_members
+        self.idx = self.number_of_members
         self.number_of_members += 1
 
         # Shape independent variables
