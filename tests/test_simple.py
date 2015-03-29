@@ -18,6 +18,9 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(2, 3)
         self.T.add_member(3, 0)
         self.T.add_member(1, 3)
+        
+        for m in self.T.members:
+            print(m.idx)
 
         self.assertEqual(self.T.m, 5)
 
