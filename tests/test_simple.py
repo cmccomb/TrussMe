@@ -1,5 +1,6 @@
 import numpy
 from trussme import truss
+from trussme import old_truss
 import unittest
 
 
@@ -7,6 +8,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
         self.T = truss.Truss()
+        self.Tr = old_truss.Truss(6)
 
     def test_joints(self):
         self.T.add_support(numpy.array([-5.0, 0.0, 0.0]), d=2)
@@ -26,6 +28,9 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(2, 5)
         self.T.add_member(3, 5)
         self.T.add_member(4, 5)
+        
+        self.T.fos_eval()
+        self.T2.truss_eval()
 
         # self.T.print_report()
 
