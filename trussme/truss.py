@@ -87,6 +87,10 @@ class Truss(object):
         D["Coord"] = numpy.array(D["Coord"]).T
         D["Con"] = numpy.array(D["Con"]).T
 
+        print(D["Coord"])
+        print(D["Re"])
+        print(D["Con"])
+
         F = self.force_eval(D)
 
     def force_eval(self, D):
