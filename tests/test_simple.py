@@ -2,6 +2,7 @@ import numpy
 from trussme import truss
 import unittest
 
+
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
@@ -18,16 +19,8 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(2, 3)
         self.T.add_member(3, 0)
         self.T.add_member(1, 3)
-        
-        for m in self.T.members:
-            print(m.idx)
-            
-        self.T.move_joint(2, numpy.array([5.0, 5.0, 5.0]))
-        print(self.T.joints[2].coordinates)
-        print(self.T.members[1].joints[0].coordinates)
-        print(self.T.members[1].joints[1].coordinates)
-        print(self.T.members[2].joints[0].coordinates)
-        print(self.T.members[2].joints[1].coordinates)
+
+        self.T.calc_fos()
 
         self.T.print_report()
 

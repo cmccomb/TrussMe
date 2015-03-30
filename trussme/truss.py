@@ -76,6 +76,8 @@ class Truss(object):
             D["E"].append(m.E)
             D["A"].append(m.A)
 
+        # PUll out
+
     def force_eval(self, D):
         Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])
         w = numpy.array([numpy.size(D["Re"], axis=0), numpy.size(D["Re"], axis=1)])
@@ -199,3 +201,18 @@ class Truss(object):
                                         "Elastic Modulus (GPa)",
                                         "Yield Strength (Pa)"])
               .to_string(justify="left"))
+
+        print("\n")
+        print("(2) STRESS ANALYSIS INFORMATION")
+        print("===============================")
+        print("\nlorem ipsum")
+
+        print("\n")
+        print("(3) DEFLECTION ANALYSIS INFORMATION")
+        print("===============================")
+        print("\nlorem ipsum")
+
+        print("\n")
+        print("(4) RECOMMENDATIONS")
+        print("===============================")
+        print("\nlorem ipsum")
