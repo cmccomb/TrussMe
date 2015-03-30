@@ -29,7 +29,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(3, 5)
         self.T.add_member(4, 5)
         
-        self.T.fos_eval()
+        self.T.calc_fos()
         self.T2.truss_eval()
 
         # self.T.print_report()
