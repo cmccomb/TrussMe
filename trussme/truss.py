@@ -66,17 +66,28 @@ class Truss(object):
 
         # Pull supports and add to D
         D["Re"] = []
+        D["Coord"] = []
         for j in self.joints:
             D["Re"].append(j.translation)
+            D["Coord"].append(j.coordinates)
 
         # Pull out E and A
         D["E"] = []
         D["A"] = []
+        D["Con"] = []
         for m in self.members:
             D["E"].append(m.E)
             D["A"].append(m.A)
+            D["Con"].append([j.idx for j in m.joints])
 
-        # PUll out
+        # Make everything an array
+        D["A"] = numpy.array(D["A"])
+        D["E"] = numpy.array(D["E"])
+        D["Re"] = numpy.array(D["Re"])
+        D["Coord"] = numpy.array(D["Coord"]).T
+        D["Con"] = numpy.array(D["Con"]).T
+
+        F = self.force_eval(D)
 
     def force_eval(self, D):
         Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])

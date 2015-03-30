@@ -20,7 +20,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(3, 0)
         self.T.add_member(1, 3)
 
-        self.T.calc_fos()
+        # self.T.calc_fos()
 
         self.T.print_report()
 
