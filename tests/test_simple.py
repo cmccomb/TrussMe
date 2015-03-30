@@ -29,5 +29,7 @@ class TestSequenceFunctions(unittest.TestCase):
         print(self.T.members[2].joints[0].coordinates)
         print(self.T.members[2].joints[1].coordinates)
 
+        self.T.print_report()
+
 if __name__ == "__main__":
     unittest.main()

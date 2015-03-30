@@ -1,6 +1,9 @@
 import numpy
+import pandas
 from trussme import joint
 from trussme import member
+import time
+import os
 
 class Truss(object):
 
@@ -115,3 +118,84 @@ class Truss(object):
 
         return F, U, R
 
+    def print_report(self):
+        print(time.strftime('%X %x %Z'))
+        print(os.getcwd())
+
+        # Print Section header
+        print("\n")
+        print("(1) INSTANTIATION INFORMATION")
+        print("=============================")
+
+        # Print joint information
+        print("\n--- JOINTS ---")
+        data = []
+        rows = []
+        for j in self.joints:
+            temp = []
+            rows.append(j.idx)
+            temp.append(str(j.coordinates[0]))
+            temp.append(str(j.coordinates[1]))
+            temp.append(str(j.coordinates[2]))
+            temp.append(str(j.translation[0][0]))
+            temp.append(str(j.translation[1][0]))
+            temp.append(str(j.translation[2][0]))
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               index=rows,
+                               columns=["X",
+                                        "Y",
+                                        "Z",
+                                        "X-Trans",
+                                        "Y-Trans",
+                                        "Z-Trans"])
+              .to_string(justify="left"))
+
+        # Print member information
+        print("\n--- MEMBERS ---")
+        data = []
+        rows = []
+        for m in self.members:
+            temp = []
+            rows.append(str(m.idx))
+            temp.append(str(m.joints[0].idx))
+            temp.append(str(m.joints[1].idx))
+            temp.append(m.material)
+            temp.append(m.shape)
+            temp.append(m.h)
+            temp.append(m.w)
+            temp.append(m.r)
+            temp.append(m.t)
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               index=rows,
+                               columns=["Joint A",
+                                        "Joint B",
+                                        "Material",
+                                        "Shape",
+                                        "Height (m)",
+                                        "Width (m)",
+                                        "Radius (m)",
+                                        "Thickness (m)"])
+              .to_string(justify="left"))
+
+        # Print material list
+        unique_materials = numpy.unique([m.material for m in self.members])
+        print("\n--- MATERIALS ---")
+        data = []
+        for mat in unique_materials:
+            temp = []
+            temp.append(mat)
+            temp.append(str(member.Member.materials[mat][0]))
+            temp.append(str(member.Member.materials[mat][1]/pow(10, 9)))
+            temp.append(str(member.Member.materials[mat][2]/pow(10, 6)))
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               columns=["Material",
+                                        "Density (kg/m3)",
+                                        "Elastic Modulus (GPa)",
+                                        "Yield Strength (Pa)"])
+              .to_string(justify="left"))

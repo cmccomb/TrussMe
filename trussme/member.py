@@ -64,6 +64,19 @@ class Member(object):
                              ', '.join(self.shapes[0:-1]) + ', or ' +
                              self.shapes[-1] + '.')
 
+        if self.shape is "pipe":
+            self.w = "N/A"
+            self.h = "N/A"
+        elif self.shape is "bar":
+            self.w = "N/A"
+            self.h = "N/A"
+            self.r = "N/A"
+        elif self.shape is "square":
+            self.r = "N/A"
+            self.t = "N/A"
+        elif self.shape is "box":
+            self.r = "N/A"
+
         # If required, update properties
         if update_props:
             self.calc_properties()
