@@ -55,6 +55,63 @@ class Truss(object):
 
     def calc_mass(self):
         self.mass = 0
-        for m in members:
+        for m in self.members:
             self.mass += m.mass
+
+    def calc_fos(self):
+        D = {}
+
+        # Pull supports and add to D
+        D["Re"] = []
+        for j in self.joints:
+            D["Re"].append(j.translation)
+
+        # Pull out E and A
+        D["E"] = []
+        D["A"] = []
+        for m in self.members:
+            D["E"].append(m.E)
+            D["A"].append(m.A)
+
+    def force_eval(self, D):
+        Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])
+        w = numpy.array([numpy.size(D["Re"], axis=0), numpy.size(D["Re"], axis=1)])
+        SS = numpy.zeros([3*w[1], 3*w[1]])
+        U = 1.0 - D["Re"]
+
+        # This identifies joints that are unsupported, and can therefore be loaded
+        ff = numpy.where(U.T.flat == 1)[0]
+
+        # Step through the each member in the truss, and build the global stiffness matrix
+        for i in range(numpy.size(D["Con"], axis=1)):
+            H = D["Con"][:, i]
+            C = D["Coord"][:, H[1]] - D["Coord"][:, H[0]]
+            Le = numpy.linalg.norm(C)
+            T = C/Le
+            s = numpy.outer(T, T)
+            G = D["E"][i]*D["A"][i]/Le
+            ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
+            Tj[:, i] = G*T
+            e = range((3*H[0]), (3*H[0] + 3)) + range((3*H[1]), (3*H[1] + 3))
+            for ii in range(6):
+                for j in range(6):
+                    SS[e[ii], e[j]] += ss[ii, j]
+
+        SSff = numpy.zeros([len(ff), len(ff)])
+        for i in range(len(ff)):
+            for j in range(len(ff)):
+                SSff[i,j] = SS[ff[i], ff[j]]
+
+        Loadff = D["Load"].T.flat[ff]
+        Uff = numpy.linalg.solve(SSff, Loadff)
+
+        ff = numpy.where(U.T==1)
+        for i in range(len(ff[0])):
+            U[ff[1][i], ff[0][i]] = Uff[i]
+        F = numpy.sum(numpy.multiply(Tj, U[:, D["Con"][1,:]] - U[:, D["Con"][0,:]]), axis=0)
+        if numpy.linalg.cond(SSff) > pow(10,10):
+            F *= pow(10, 10)
+        R = numpy.sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
+
+        return F, U, R
 
