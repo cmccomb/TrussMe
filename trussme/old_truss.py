@@ -150,6 +150,10 @@ class Truss(object):
         D["Con"] = self.con
         D["E"] = E*numpy.ones(self.m)
 
+        print(D["Coord"])
+        print(D["Re"])
+        print(D["Con"])
+    
         # Do force analysis
         try:
             self.force, U, R = self._force_eval(D)
