@@ -73,9 +73,9 @@ class Truss(object):
         # Build Re
         D["Re"] = numpy.zeros([3, self.n])
         for i in range(len(self.joints)):
-            D["Re][0,i] = self.joints[i].translation[0]
-            D["Re][1,i] = self.joints[i].translation[1]
-            D["Re][2,i] = self.joints[i].translation[2]
+            D["Re"][0,i] = self.joints[i].translation[0]
+            D["Re"][1,i] = self.joints[i].translation[1]
+            D["Re"][2,i] = self.joints[i].translation[2]
 
         # Pull out E and A
         D["E"] = []
@@ -89,7 +89,6 @@ class Truss(object):
         # Make everything an array
         D["A"] = numpy.array(D["A"])
         D["E"] = numpy.array(D["E"])
-        D["Re"] = numpy.array(D["Re"])
         D["Coord"] = numpy.array(D["Coord"]).T
         D["Con"] = numpy.array(D["Con"]).T
 
