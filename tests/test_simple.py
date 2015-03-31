@@ -8,7 +8,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
         self.T = truss.Truss()
-        self.Tr = old_truss.Truss(6)
+        self.T2 = old_truss.Truss(6)
 
     def test_joints(self):
         self.T.add_support(numpy.array([-5.0, 0.0, 0.0]), d=2)
