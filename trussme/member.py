@@ -160,10 +160,17 @@ class Member(object):
         elif self.shape == "bar":
             self.I = (numpy.pi/4.)*self.r**4
         elif self.shape == "box":
-            self.I = (1./12.)*self.w*self.h**3
+            if self.h > self.w:
+                self.I = (1./12.)*self.w*self.h**3
+            else:
+                self.I = (1./12.)*self.h*self.w**3
         elif self.shape == "square":
-            self.I = (1./12.)*(self.w*self.h**3)\
-                - (1./12.)*(self.w - 2*self.t)*(self.h - 2*self.t)**3
+            if self.h > self.w:
+                self.I = (1./12.)*(self.w*self.h**3)\
+                    - (1./12.)*(self.w - 2*self.t)*(self.h - 2*self.t)**3
+            else:
+                self.I = (1./12.)*(self.h*self.w**3)\
+                    - (1./12.)*(self.h - 2*self.t)*(self.w - 2*self.t)**3
 
     def calc_area(self):
         if self.shape == "pipe":
