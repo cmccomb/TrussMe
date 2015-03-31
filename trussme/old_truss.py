@@ -153,6 +153,7 @@ class Truss(object):
         print(D["Coord"])
         print(D["Re"])
         print(D["Con"])
+        print(D["Load"])
     
         # Do force analysis
         try:
@@ -278,7 +279,7 @@ class Truss(object):
             G = D["E"][i]*D["A"][i]/Le
             ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
             Tj[:, i] = G*T
-            e = range((3*H[0]), (3*H[0] + 3)) + range((3*H[1]), (3*H[1] + 3))
+            e = list(range((3*H[0]), (3*H[0] + 3))) + list(range((3*H[1]), (3*H[1] + 3)))
             for ii in range(6):
                 for j in range(6):
                     SS[e[ii], e[j]] += ss[ii, j]
