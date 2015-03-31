@@ -24,20 +24,20 @@ class Joint(object):
         self.members = []
 
     def free(self, d=3):
-        self.translation = numpy.ones([3, 1])
+        self.translation = numpy.zeros([3, 1])
         # If 2d, add out of plane support
         if d is 2:
-            self.translation[2] = 0
+            self.translation[2] = 1
 
     def pinned(self, d=3):
         # Restrict all translation
-        self.translation = numpy.zeros([3, 1])
+        self.translation = numpy.ones([3, 1])
 
     def roller(self, axis='y', d=3):
         # Only support reaction along denotated axis
-        self.translation = numpy.ones([3, 1])
-        self.translation[ord(axis)-120] = 0
+        self.translation = numpy.zeros([3, 1])
+        self.translation[ord(axis)-120] = 1
 
         # If 2d, add out of plane support
         if d is 2:
-            self.translation[2] = 0
+            self.translation[2] = 1
