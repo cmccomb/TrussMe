@@ -5,7 +5,10 @@ from trussme import member
 import time
 import os
 
+
 class Truss(object):
+
+    g = 9.81
 
     def __init__(self):
         # Make a list to store members in
@@ -53,17 +56,19 @@ class Truss(object):
 
         self.m += 1
 
-    def move_joint(self, j, coordinates):
-        self.joints[j].coordinates = coordinates
+    def move_joint(self, jidx, coordinates):
+        self.joints[jidx].coordinates = coordinates
 
     def calc_mass(self):
         self.mass = 0
         for m in self.members:
             self.mass += m.mass
 
+    def set_load(self, jidx, load):
+        self.joints[jidx].load = load
+
     def calc_fos(self):
         D = {}
-
         # Pull supports and add to D
         D["Re"] = []
         D["Coord"] = []
@@ -72,10 +77,15 @@ class Truss(object):
 
         # Build Re
         D["Re"] = numpy.zeros([3, self.n])
+        D["Load"] = numpy.zeros([3, self.n])
         for i in range(len(self.joints)):
-            D["Re"][0,i] = self.joints[i].translation[0]
-            D["Re"][1,i] = self.joints[i].translation[1]
-            D["Re"][2,i] = self.joints[i].translation[2]
+            D["Re"][0, i] = self.joints[i].translation[0]
+            D["Re"][1, i] = self.joints[i].translation[1]
+            D["Re"][2, i] = self.joints[i].translation[2]
+            D["Load"][0, i] = self.joints[i].loads[0]
+            D["Load"][1, i] = self.joints[i].loads[1] \
+                              - sum([m.mass/2.0*self.g for m in self.joints[i].members])
+            D["Load"][2, i] = self.joints[i].loads[2]
 
         # Pull out E and A
         D["E"] = []
@@ -92,11 +102,19 @@ class Truss(object):
         D["Coord"] = numpy.array(D["Coord"]).T
         D["Con"] = numpy.array(D["Con"]).T
 
-        print(D["Coord"])
-        print(D["Re"])
-        print(D["Con"])
+        F, U, R = self.force_eval(D)
 
-        F = self.force_eval(D)
+        for i in range(len(F)):
+            self.members[i].set_force(F[i])
+
+        for i in range(len(F)):
+            for j in range(3):
+                if self.joints[i].translation[j]:
+                    self.joints[i].reactions[j] = R[j, i]
+                    self.joints[i].deflections[j] = 0.0
+                else:
+                    self.joints[i].reactions[j] = 0.0
+                    self.joints[i].deflections[j] = U[j, i]
 
     def force_eval(self, D):
         Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])
@@ -138,6 +156,8 @@ class Truss(object):
             F *= pow(10, 10)
         R = numpy.sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
 
+        print(U)
+
         return F, U, R
 
     def print_report(self):
@@ -159,9 +179,9 @@ class Truss(object):
             temp.append(str(j.coordinates[0]))
             temp.append(str(j.coordinates[1]))
             temp.append(str(j.coordinates[2]))
-            temp.append(str(j.translation[0][0]))
-            temp.append(str(j.translation[1][0]))
-            temp.append(str(j.translation[2][0]))
+            temp.append(str(bool(j.translation[0][0])))
+            temp.append(str(bool(j.translation[1][0])))
+            temp.append(str(bool(j.translation[2][0])))
             data.append(temp)
 
         print(pandas.DataFrame(data,
@@ -169,9 +189,9 @@ class Truss(object):
                                columns=["X",
                                         "Y",
                                         "Z",
-                                        "X-Trans",
-                                        "Y-Trans",
-                                        "Z-Trans"])
+                                        "X-Support",
+                                        "Y-Support",
+                                        "Z-Support"])
               .to_string(justify="left"))
 
         # Print member information
@@ -193,14 +213,14 @@ class Truss(object):
 
         print(pandas.DataFrame(data,
                                index=rows,
-                               columns=["Joint A",
-                                        "Joint B",
+                               columns=["Joint-A",
+                                        "Joint-B",
                                         "Material",
                                         "Shape",
-                                        "Height (m)",
-                                        "Width (m)",
-                                        "Radius (m)",
-                                        "Thickness (m)"])
+                                        "Height(m)",
+                                        "Width(m)",
+                                        "Radius(m)",
+                                        "Thickness(m)"])
               .to_string(justify="left"))
 
         # Print material list
@@ -217,22 +237,96 @@ class Truss(object):
 
         print(pandas.DataFrame(data,
                                columns=["Material",
-                                        "Density (kg/m3)",
-                                        "Elastic Modulus (GPa)",
-                                        "Yield Strength (Pa)"])
+                                        "Density(kg/m3)",
+                                        "Elastic Modulus(GPa)",
+                                        "Yield Strength(MPa)"])
               .to_string(justify="left"))
 
         print("\n")
         print("(2) STRESS ANALYSIS INFORMATION")
         print("===============================")
-        print("\nlorem ipsum")
+
+        # Print information about loads
+        print("\n--- LOADING ---")
+        data = []
+        rows = []
+        for j in self.joints:
+            temp = []
+            rows.append(j.idx)
+            temp.append(str(j.loads[0][0]/pow(10, 3)))
+            temp.append(format((j.loads[1][0] - sum([m.mass/2.0*self.g for m in j.members]))/pow(10, 3), '.2f'))
+            temp.append(str(j.loads[2][0]/pow(10, 3)))
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               index=rows,
+                               columns=["X-Load",
+                                        "Y-Load",
+                                        "Z-Load"])
+              .to_string(justify="left"))
+
+        # Print information about reactions
+        print("\n--- REACTIONS ---")
+        data = []
+        rows = []
+        for j in self.joints:
+            temp = []
+            rows.append(j.idx)
+            temp.append(format(j.reactions[0][0]/pow(10, 3), '.2f') if j.translation[0][0] != 0.0 else "N/A")
+            temp.append(format(j.reactions[1][0]/pow(10, 3), '.2f') if j.translation[1][0] != 0.0 else "N/A")
+            temp.append(format(j.reactions[2][0]/pow(10, 3), '.2f') if j.translation[2][0] != 0.0 else "N/A")
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               index=rows,
+                               columns=["X-Reaction(kN)",
+                                        "Y-Reaction(kN)",
+                                        "Z-Reaction(kN)"])
+              .to_string(justify="left"))
+
+        # Print information about members
+        print("\n--- FORCES AND STRESSES ---")
+        data = []
+        rows = []
+        for m in self.members:
+            temp = []
+            rows.append(m.idx)
+            temp.append(m.A)
+            temp.append(format(m.I, '.2e'))
+            temp.append(format(m.force/pow(10, 3), '.2f'))
+            temp.append(m.fos_yield)
+            temp.append(m.fos_buckling)
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               index=rows,
+                               columns=["Area(m2)",
+                                        "Moment-of-Inertia(m4)",
+                                        "Axial-force(kN)",
+                                        "FOS-yielding",
+                                        "FOS-buckling"])
+              .to_string(justify="left"))
+
+        # Print information about members
+        print("\n--- DEFLECTIONS ---")
+        data = []
+        rows = []
+        for j in self.joints:
+            temp = []
+            rows.append(j.idx)
+            temp.append(format(j.deflections[0][0]*pow(10, 3), '.5f') if j.translation[0][0] == 0.0 else "N/A")
+            temp.append(format(j.deflections[1][0]*pow(10, 3), '.5f') if j.translation[1][0] == 0.0 else "N/A")
+            temp.append(format(j.deflections[2][0]*pow(10, 3), '.5f') if j.translation[2][0] == 0.0 else "N/A")
+            data.append(temp)
+
+        print(pandas.DataFrame(data,
+                               index=rows,
+                               columns=["X-Defl.(mm)",
+                                        "Y-Defl.(mm)",
+                                        "Z-Defl.(mm)"])
+              .to_string(justify="left"))
 
         print("\n")
-        print("(3) DEFLECTION ANALYSIS INFORMATION")
-        print("===============================")
-        print("\nlorem ipsum")
-
-        print("\n")
-        print("(4) RECOMMENDATIONS")
+        print("(3) RECOMMENDATIONS")
         print("===============================")
         print("\nlorem ipsum")

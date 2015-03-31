@@ -99,6 +99,7 @@ class Member(object):
             self.calc_properties()
 
     def set_parameters(self, **kwargs):
+        prop_update = False
         # Save the values
         for key in kwargs.keys():
             if key is "radius":
@@ -118,7 +119,7 @@ class Member(object):
             elif key is "h":
                 self.h = kwargs["h"]
             elif kwargs["update_props"]:
-                self.calc_properties()
+                prop_update = True
             else:
                 raise ValueError(key+' is not an defined shape. '
                                      'Try thickness (t), width (w), '
@@ -136,6 +137,9 @@ class Member(object):
             elif 2*self.t > self.h:
                 warnings.warn("Thickness is greater than half of height."
                               "Changing shape to square.")
+
+        if prop_update:
+            self.calc_properties()
 
     def calc_properties(self):
         # Calculate moment of inertia
@@ -179,6 +183,15 @@ class Member(object):
         self.end_b = self.joints[1].coordinates
         self.length = numpy.linalg.norm(self.end_a - self.end_b)
         self.mass = self.length*self.LW
+
+    def set_force(self, F):
+        self.force = F
+        self.fos_yield = abs(self.force/self.A)/self.Fy
+        if self.force < 0:
+            self.fos_buckling = -((numpy.pi**2)*self.E*self.I
+                                 /(self.length**2))/self.force
+        else:
+            self.fos_buckling = "N/A"
 
     def update_joints(self, joint_a, joint_b):
         self.joints = [joint_a, joint_b]
