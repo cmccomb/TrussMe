@@ -186,7 +186,7 @@ class Member(object):
 
     def set_force(self, F):
         self.force = F
-        self.fos_yield = abs(self.force/self.A)/self.Fy
+        self.fos_yield = self.Fy/abs(self.force/self.A)
         if self.force < 0:
             self.fos_buckling = -((numpy.pi**2)*self.E*self.I
                                  /(self.length**2))/self.force
