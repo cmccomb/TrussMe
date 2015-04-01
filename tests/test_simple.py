@@ -24,7 +24,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(1, 2)
         self.T.add_member(2, 0)
 
-        self.T.set_goal(min_fos_total=1.0)
+        self.T.set_goal(min_fos_total=1.0, min_fos_buckling=1.0, max_mass=5.0)
 
         self.T.print_report()
 

@@ -219,43 +219,13 @@ class Truss(object):
         print("\n")
         print("(0) SUMMARY OF ANALYSIS")
         print("=============================")
-        print("The truss has a mass of " + format(self.mass, '.2f') + " kg, "
+        print("\t- The truss has a mass of " + format(self.mass, '.2f') + " kg, "
               "and a total factor of safety of " + format(self.fos_total, '.2f')
-              + ". The limit state is " + self.limit_state + "."),
+              + ". ")
+        print("\t- The limit state is " + self.limit_state + ".")
 
         if self.THERE_ARE_GOALS:
-            success_string = []
-            failure_string = []
-            for key in self.goals.keys():
-                if key is "min_fos_total" and self.goals[key] is not -1:
-                    if self.goals[key] < self.fos_total:
-                        success_string.append("total FOS")
-                    else:
-                        failure_string.append("total FOS")
-                elif key is "min_fos_buckling" and self.goals[key] is not -1:
-                    if self.goals[key] < self.fos_total:
-                        success_string.append("buckling FOS")
-                    else:
-                        failure_string.append("buckling FOS")
-                elif key is "min_fos_yielding" and self.goals[key] is not -1:
-                    if self.goals[key] < self.fos_total:
-                        success_string.append("yielding FOS")
-                    else:
-                        failure_string.append("yielding FOS")
-                elif key is "max_mass" and self.goals[key] is not -1:
-                    if self.goals[key] < self.fos_total:
-                        success_string.append("mass")
-                    else:
-                        failure_string.append("mass")
-                elif key is "max_deflection" and self.goals[key] is not -1:
-                    if self.goals[key] < self.fos_total:
-                        success_string.append("deflection")
-                    else:
-                        failure_string.append("deflection")
-
-            if len(success_string) is not 0:
-                if len(success_string) is 1:
-                    print("The design goal for " + str(success_string[0]) + " was satisfied.")
+            self.print_goals()
 
         # Print Section header
         print("\n")
@@ -421,3 +391,59 @@ class Truss(object):
         print("(3) RECOMMENDATIONS")
         print("===============================")
         print("\nlorem ipsum")
+
+    def print_goals(self):
+        success_string = []
+        failure_string = []
+        for key in self.goals.keys():
+            if key is "min_fos_total" and self.goals[key] is not -1:
+                if self.goals[key] < self.fos_total:
+                    success_string.append("total FOS")
+                else:
+                    failure_string.append("total FOS")
+            elif key is "min_fos_buckling" and self.goals[key] is not -1:
+                if self.goals[key] < self.fos_buckling:
+                    success_string.append("buckling FOS")
+                else:
+                    failure_string.append("buckling FOS")
+            elif key is "min_fos_yielding" and self.goals[key] is not -1:
+                if self.goals[key] < self.fos_yielding:
+                    success_string.append("yielding FOS")
+                else:
+                    failure_string.append("yielding FOS")
+            elif key is "max_mass" and self.goals[key] is not -1:
+                if self.goals[key] > self.mass:
+                    success_string.append("mass")
+                else:
+                    failure_string.append("mass")
+            elif key is "max_deflection" and self.goals[key] is not -1:
+                if self.goals[key] > self.fos_total:
+                    success_string.append("deflection")
+                else:
+                    failure_string.append("deflection")
+
+        if len(success_string) is not 0:
+            if len(success_string) is 1:
+                print("\t- The design goal for " + str(success_string[0])
+                      + " was satisfied.")
+            elif len(success_string) is 2:
+                print("\t- The design goals for " + str(success_string[0])
+                      + " and " + str(success_string[1]) + " were satisfied.")
+            else:
+                print("\t- The design goals for"),
+                for st in success_string[0:-1]:
+                    print(st+","),
+                print("and "+str(success_string[-1])+" were satisfied.")
+
+        if len(failure_string) is not 0:
+            if len(failure_string) is 1:
+                print("\t- The design goal for " + str(failure_string[0])
+                      + " was not satisfied.")
+            elif len(failure_string) is 2:
+                print("- The design goals for " + str(failure_string[0])
+                      + " and " + str(failure_string[1]) + " were not satisfied.")
+            else:
+                print("The design goals for"),
+                for st in failure_string[0:-1]:
+                    print(st+","),
+                print("and "+str(failure_string[-1])+" were not satisfied.")
