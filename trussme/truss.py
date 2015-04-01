@@ -89,7 +89,8 @@ class Truss(object):
             reactions[2, i] = self.joints[i].translation[2]
             loads[0, i] = self.joints[i].loads[0]
             loads[1, i] = self.joints[i].loads[1]\
-                          - sum([m.mass/2.0*self.g for m in self.joints[i].members])
+                          - sum([m.mass/2.0*self.g
+                                 for m in self.joints[i].members])
             loads[2, i] = self.joints[i].loads[2]
 
         # Pull out E and A
@@ -133,22 +134,26 @@ class Truss(object):
 
     def evaluate_forces(self, truss_info):
         Tj = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
-        w = numpy.array([numpy.size(truss_info["reactions"], axis=0), numpy.size(truss_info["reactions"], axis=1)])
+        w = numpy.array([numpy.size(truss_info["reactions"], axis=0),
+                         numpy.size(truss_info["reactions"], axis=1)])
         SS = numpy.zeros([3*w[1], 3*w[1]])
         deflections = 1.0 - truss_info["reactions"]
 
-        # This identifies joints that are unsupported, and can therefore be loaded
+        # This identifies joints that can be loaded
         ff = numpy.where(deflections.T.flat == 1)[0]
 
-        # Step through the each member in the truss, and build the global stiffness matrix
+        # Build the global stiffness matrix
         for i in range(numpy.size(truss_info["connections"], axis=1)):
             H = truss_info["connections"][:, i]
-            C = truss_info["coordinates"][:, H[1]] - truss_info["coordinates"][:, H[0]]
+            C = truss_info["coordinates"][:, H[1]] \
+                - truss_info["coordinates"][:, H[0]]
             Le = numpy.linalg.norm(C)
             T = C/Le
             s = numpy.outer(T, T)
             G = truss_info["elastic_modulus"][i]*truss_info["area"][i]/Le
-            ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
+            ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1),
+                                      numpy.concatenate((-s, s), axis=1)),
+                                     axis=0)
             Tj[:, i] = G*T
             e = list(range((3*H[0]), (3*H[0] + 3))) \
                 + list(range((3*H[1]), (3*H[1] + 3)))
@@ -167,10 +172,13 @@ class Truss(object):
         ff = numpy.where(deflections.T == 1)
         for i in range(len(ff[0])):
             deflections[ff[1][i], ff[0][i]] = Uff[i]
-        forces = numpy.sum(numpy.multiply(Tj, deflections[:, truss_info["connections"][1, :]] - deflections[:, truss_info["connections"][0, :]]), axis=0)
+        forces = numpy.sum(numpy.multiply(
+            Tj, deflections[:, truss_info["connections"][1, :]]
+                - deflections[:, truss_info["connections"][0, :]]), axis=0)
         if numpy.linalg.cond(SSff) > pow(10, 10):
             forces *= pow(10, 10)
-        reactions = numpy.sum(SS*deflections.T.flat[:], axis=1).reshape([w[1], w[0]]).T
+        reactions = numpy.sum(SS*deflections.T.flat[:], axis=1)\
+            .reshape([w[1], w[0]]).T
 
         return forces, deflections, reactions
 
@@ -242,12 +250,11 @@ class Truss(object):
         print("\n--- MATERIALS ---")
         data = []
         for mat in unique_materials:
-            temp = []
-            temp.append(mat)
-            temp.append(str(member.Member.materials[mat][0]))
-            temp.append(str(member.Member.materials[mat][1]/pow(10, 9)))
-            temp.append(str(member.Member.materials[mat][2]/pow(10, 6)))
-            data.append(temp)
+            data.append([
+                mat,
+                str(member.Member.materials[mat][0]),
+                str(member.Member.materials[mat][1]/pow(10, 9)),
+                str(member.Member.materials[mat][2]/pow(10, 6))])
 
         print(pandas.DataFrame(data,
                                columns=["Material",
@@ -268,7 +275,9 @@ class Truss(object):
             temp = []
             rows.append(j.idx)
             temp.append(str(j.loads[0][0]/pow(10, 3)))
-            temp.append(format((j.loads[1][0] - sum([m.mass/2.0*self.g for m in j.members]))/pow(10, 3), '.2f'))
+            temp.append(format((j.loads[1][0]
+                                - sum([m.mass/2.0*self.g
+                                       for m in j.members]))/pow(10, 3), '.2f'))
             temp.append(str(j.loads[2][0]/pow(10, 3)))
             data.append(temp)
 
@@ -286,9 +295,12 @@ class Truss(object):
         for j in self.joints:
             temp = []
             rows.append(j.idx)
-            temp.append(format(j.reactions[0][0]/pow(10, 3), '.2f') if j.translation[0][0] != 0.0 else "N/A")
-            temp.append(format(j.reactions[1][0]/pow(10, 3), '.2f') if j.translation[1][0] != 0.0 else "N/A")
-            temp.append(format(j.reactions[2][0]/pow(10, 3), '.2f') if j.translation[2][0] != 0.0 else "N/A")
+            temp.append(format(j.reactions[0][0]/pow(10, 3), '.2f')
+                        if j.translation[0][0] != 0.0 else "N/A")
+            temp.append(format(j.reactions[1][0]/pow(10, 3), '.2f')
+                        if j.translation[1][0] != 0.0 else "N/A")
+            temp.append(format(j.reactions[2][0]/pow(10, 3), '.2f')
+                        if j.translation[2][0] != 0.0 else "N/A")
             data.append(temp)
 
         print(pandas.DataFrame(data,
@@ -328,9 +340,12 @@ class Truss(object):
         for j in self.joints:
             temp = []
             rows.append(j.idx)
-            temp.append(format(j.deflections[0][0]*pow(10, 3), '.5f') if j.translation[0][0] == 0.0 else "N/A")
-            temp.append(format(j.deflections[1][0]*pow(10, 3), '.5f') if j.translation[1][0] == 0.0 else "N/A")
-            temp.append(format(j.deflections[2][0]*pow(10, 3), '.5f') if j.translation[2][0] == 0.0 else "N/A")
+            temp.append(format(j.deflections[0][0]*pow(10, 3), '.5f')
+                        if j.translation[0][0] == 0.0 else "N/A")
+            temp.append(format(j.deflections[1][0]*pow(10, 3), '.5f')
+                        if j.translation[1][0] == 0.0 else "N/A")
+            temp.append(format(j.deflections[2][0]*pow(10, 3), '.5f')
+                        if j.translation[2][0] == 0.0 else "N/A")
             data.append(temp)
 
         print(pandas.DataFrame(data,

@@ -29,7 +29,6 @@ class Joint(object):
         # Loads
         self.deflections = numpy.zeros([3, 1])
 
-
     def free(self, d=3):
         self.translation = numpy.zeros([3, 1])
         # If 2d, add out of plane support
