@@ -146,9 +146,12 @@ class Truss(object):
                 else:
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = deflections[j, i]
+
         # Pull out the member factors of safety
-        self.fos_buckling = min([m.fos_buckling for m in self.members])
-        self.fos_yielding = min([m.fos_yielding for m in self.members])
+        self.fos_buckling = min([self.members[i].fos_buckling
+                                 for i in range(self.number_of_members)])
+        self.fos_yielding = min([self.members[i].fos_yielding
+                                 for i in range(self.number_of_members)])
 
         # Get total FOS and limit state
         self.fos_total = min(self.fos_buckling, self.fos_yielding)
@@ -215,7 +218,15 @@ class Truss(object):
         print(time.strftime('%X %x %Z'))
         print(os.getcwd())
 
-        # Print Section header
+        self._print_summary()
+
+        self._print_instantiation_information()
+
+        self._print_stress_analysis()
+
+        self._print_recommendations()
+
+    def _print_summary(self):
         print("\n")
         print("(0) SUMMARY OF ANALYSIS")
         print("=============================")
@@ -225,9 +236,63 @@ class Truss(object):
         print("\t- The limit state is " + self.limit_state + ".")
 
         if self.THERE_ARE_GOALS:
-            self.print_goals()
+            success_string = []
+            failure_string = []
+            for key in self.goals.keys():
+                if key is "min_fos_total" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_total:
+                        success_string.append("total FOS")
+                    else:
+                        failure_string.append("total FOS")
+                elif key is "min_fos_buckling" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_buckling:
+                        success_string.append("buckling FOS")
+                    else:
+                        failure_string.append("buckling FOS")
+                elif key is "min_fos_yielding" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_yielding:
+                        success_string.append("yielding FOS")
+                    else:
+                        failure_string.append("yielding FOS")
+                elif key is "max_mass" and self.goals[key] is not -1:
+                    if self.goals[key] > self.mass:
+                        success_string.append("mass")
+                    else:
+                        failure_string.append("mass")
+                elif key is "max_deflection" and self.goals[key] is not -1:
+                    if self.goals[key] > self.fos_total:
+                        success_string.append("deflection")
+                    else:
+                        failure_string.append("deflection")
 
-        # Print Section header
+            if len(success_string) is not 0:
+                if len(success_string) is 1:
+                    print("\t- The design goal for " + str(success_string[0])
+                          + " was satisfied.")
+                elif len(success_string) is 2:
+                    print("\t- The design goals for " + str(success_string[0])
+                          + " and " + str(success_string[1]) + " were satisfied.")
+                else:
+                    print("\t- The design goals for"),
+                    for st in success_string[0:-1]:
+                        print(st+","),
+                    print("and "+str(success_string[-1])+" were satisfied.")
+
+            if len(failure_string) is not 0:
+                if len(failure_string) is 1:
+                    print("\t- The design goal for " + str(failure_string[0])
+                          + " was not satisfied.")
+                elif len(failure_string) is 2:
+                    print("- The design goals for " + str(failure_string[0])
+                          + " and " + str(failure_string[1]) + " were not satisfied.")
+                else:
+                    print("The design goals for"),
+                    for st in failure_string[0:-1]:
+                        print(st+","),
+                    print("and "+str(failure_string[-1])+" were not satisfied.")
+
+
+    def _print_instantiation_information(self):
         print("\n")
         print("(1) INSTANTIATION INFORMATION")
         print("=============================")
@@ -303,6 +368,7 @@ class Truss(object):
                                         "Yield Strength(MPa)"])
               .to_string(justify="left"))
 
+    def _print_stress_analysis(self):
         print("\n")
         print("(2) STRESS ANALYSIS INFORMATION")
         print("===============================")
@@ -387,63 +453,8 @@ class Truss(object):
                                         "Z-Defl.(mm)"])
               .to_string(justify="left"))
 
+    def _print_recommendations(self):
         print("\n")
         print("(3) RECOMMENDATIONS")
         print("===============================")
         print("\nlorem ipsum")
-
-    def print_goals(self):
-        success_string = []
-        failure_string = []
-        for key in self.goals.keys():
-            if key is "min_fos_total" and self.goals[key] is not -1:
-                if self.goals[key] < self.fos_total:
-                    success_string.append("total FOS")
-                else:
-                    failure_string.append("total FOS")
-            elif key is "min_fos_buckling" and self.goals[key] is not -1:
-                if self.goals[key] < self.fos_buckling:
-                    success_string.append("buckling FOS")
-                else:
-                    failure_string.append("buckling FOS")
-            elif key is "min_fos_yielding" and self.goals[key] is not -1:
-                if self.goals[key] < self.fos_yielding:
-                    success_string.append("yielding FOS")
-                else:
-                    failure_string.append("yielding FOS")
-            elif key is "max_mass" and self.goals[key] is not -1:
-                if self.goals[key] > self.mass:
-                    success_string.append("mass")
-                else:
-                    failure_string.append("mass")
-            elif key is "max_deflection" and self.goals[key] is not -1:
-                if self.goals[key] > self.fos_total:
-                    success_string.append("deflection")
-                else:
-                    failure_string.append("deflection")
-
-        if len(success_string) is not 0:
-            if len(success_string) is 1:
-                print("\t- The design goal for " + str(success_string[0])
-                      + " was satisfied.")
-            elif len(success_string) is 2:
-                print("\t- The design goals for " + str(success_string[0])
-                      + " and " + str(success_string[1]) + " were satisfied.")
-            else:
-                print("\t- The design goals for"),
-                for st in success_string[0:-1]:
-                    print(st+","),
-                print("and "+str(success_string[-1])+" were satisfied.")
-
-        if len(failure_string) is not 0:
-            if len(failure_string) is 1:
-                print("\t- The design goal for " + str(failure_string[0])
-                      + " was not satisfied.")
-            elif len(failure_string) is 2:
-                print("- The design goals for " + str(failure_string[0])
-                      + " and " + str(failure_string[1]) + " were not satisfied.")
-            else:
-                print("The design goals for"),
-                for st in failure_string[0:-1]:
-                    print(st+","),
-                print("and "+str(failure_string[-1])+" were not satisfied.")
