@@ -148,7 +148,7 @@ class Truss(object):
                     self.joints[i].deflections[j] = deflections[j, i]
 
         # Pull out the member factors of safety
-        self.fos_buckling = min([m.fos_buckling for m in self.members])
+        self.fos_buckling = min([m.fos_buckling if m.fos_buckling > 0 else 10000 for m in self.members])
         self.fos_yielding = min([m.fos_yielding for m in self.members])
 
         # Get total FOS and limit state
@@ -300,15 +300,13 @@ class Truss(object):
         data = []
         rows = []
         for j in self.joints:
-            temp = []
             rows.append("Joint_"+str(j.idx))
-            temp.append(str(j.coordinates[0]))
-            temp.append(str(j.coordinates[1]))
-            temp.append(str(j.coordinates[2]))
-            temp.append(str(bool(j.translation[0][0])))
-            temp.append(str(bool(j.translation[1][0])))
-            temp.append(str(bool(j.translation[2][0])))
-            data.append(temp)
+            data.append([str(j.coordinates[0]),
+                         str(j.coordinates[1]),
+                         str(j.coordinates[2]),
+                         str(bool(j.translation[0][0])),
+                         str(bool(j.translation[1][0])),
+                         str(bool(j.translation[2][0]))])
 
         print(pandas.DataFrame(data,
                                index=rows,
@@ -420,7 +418,7 @@ class Truss(object):
                          format(m.I, '.2e'),
                          format(m.force/pow(10, 3), '.2f'),
                          m.fos_yielding,
-                         m.fos_buckling])
+                         m.fos_buckling if m.fos_buckling > 0 else "N/A"])
 
         print(pandas.DataFrame(data,
                                index=rows,

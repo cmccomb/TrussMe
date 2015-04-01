@@ -194,11 +194,8 @@ class Member(object):
     def set_force(self, the_force):
         self.force = the_force
         self.fos_yielding = self.Fy/abs(self.force/self.area)
-        if self.force < 0:
-            self.fos_buckling = -((numpy.pi**2)*self.elastic_modulus*self.I
-                                 /(self.length**2))/self.force
-        else:
-            self.fos_buckling = "N/A"
+        self.fos_buckling = -((numpy.pi**2)*self.elastic_modulus*self.I
+                             /(self.length**2))/self.force
 
     def update_joints(self, joint_a, joint_b):
         self.joints = [joint_a, joint_b]
