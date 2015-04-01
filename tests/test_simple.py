@@ -12,17 +12,21 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_support(
             numpy.array([-2.0, 0.0, 0.0]), d=2)
         self.T.add_joint(
-            numpy.array([0.0, 2.0, 0.0]), d=2)
+            numpy.array([0.0, 1.0, 0.0]), d=2)
         self.T.add_support(
             numpy.array([2.0, 0.0, 0.0]), d=2)
 
         self.T.joints[2].roller(d=2)
 
-        self.T.joints[1].loads[1][0] = -40000.0
+        self.T.joints[1].loads[1][0] = -500000.0
 
         self.T.add_member(0, 1)
         self.T.add_member(1, 2)
         self.T.add_member(2, 0)
+
+        for m in self.T.members:
+            m.r /= 3.0
+            m.t /= 3.0
 
         self.T.calc_fos()
 

@@ -18,18 +18,24 @@ class Truss(object):
         self.joints = []
 
         # Variables to store number of joints and members
-        self.n = 0
-        self.m = 0
+        self.number_of_joints = 0
+        self.number_of_members = 0
 
         # Variables to store truss characteristics
         self.mass = 0
         self.fos_yielding = 0
         self.fos_buckling = 0
         self.fos_total = 0
+
+        # Design goals
+        self.fos_total = -1
+        self.fos_buckling = -1
+        self.fos_total = -1
+        self.fos_total = -1
         
     def make_random_truss(self, xlim=[-10, 10], ylim=[-10, 10]):
         # Draw joints
-        # Determine which joints should be supportrs
+        # Determine which joints should be supports
         # Add members
         # Evaluate
         asdf = 1
@@ -37,105 +43,115 @@ class Truss(object):
     def add_support(self, coordinates, d=3):
         # Make the joint
         self.joints.append(joint.Joint(coordinates))
-        self.joints[self.n].pinned(d=d)
-        self.n += 1
+        self.joints[self.number_of_joints].pinned(d=d)
+        self.number_of_joints += 1
 
     def add_joint(self, coordinates, d=3):
         # Make the joint
         self.joints.append(joint.Joint(coordinates))
-        self.joints[self.n].free(d=d)
-        self.n += 1
+        self.joints[self.number_of_joints].free(d=d)
+        self.number_of_joints += 1
 
-    def add_member(self, j1, j2):
+    def add_member(self, joint_index_a, joint_index_b):
         # Make a member
-        self.members.append(member.Member(self.joints[j1], self.joints[j2]))
+        self.members.append(member.Member(self.joints[joint_index_a],
+                                          self.joints[joint_index_b]))
 
         # Update joints
-        self.joints[j1].members.append(self.members[-1])
-        self.joints[j2].members.append(self.members[-1])
+        self.joints[joint_index_a].members.append(self.members[-1])
+        self.joints[joint_index_b].members.append(self.members[-1])
 
-        self.m += 1
+        self.number_of_members += 1
 
-    def move_joint(self, jidx, coordinates):
-        self.joints[jidx].coordinates = coordinates
+    def move_joint(self, joint_index, coordinates):
+        self.joints[joint_index].coordinates = coordinates
 
     def calc_mass(self):
         self.mass = 0
         for m in self.members:
             self.mass += m.mass
 
-    def set_load(self, jidx, load):
-        self.joints[jidx].load = load
+    def set_load(self, joint_index, load):
+        self.joints[joint_index].load = load
 
     def calc_fos(self):
-        D = {}
         # Pull supports and add to D
-        D["Re"] = []
-        D["Coord"] = []
+        coordinates = []
         for j in self.joints:
-            D["Coord"].append(j.coordinates)
+            coordinates.append(j.coordinates)
 
         # Build Re
-        D["Re"] = numpy.zeros([3, self.n])
-        D["Load"] = numpy.zeros([3, self.n])
+        reactions = numpy.zeros([3, self.number_of_joints])
+        loads = numpy.zeros([3, self.number_of_joints])
         for i in range(len(self.joints)):
-            D["Re"][0, i] = self.joints[i].translation[0]
-            D["Re"][1, i] = self.joints[i].translation[1]
-            D["Re"][2, i] = self.joints[i].translation[2]
-            D["Load"][0, i] = self.joints[i].loads[0]
-            D["Load"][1, i] = self.joints[i].loads[1] \
-                              - sum([m.mass/2.0*self.g for m in self.joints[i].members])
-            D["Load"][2, i] = self.joints[i].loads[2]
+            reactions[0, i] = self.joints[i].translation[0]
+            reactions[1, i] = self.joints[i].translation[1]
+            reactions[2, i] = self.joints[i].translation[2]
+            loads[0, i] = self.joints[i].loads[0]
+            loads[1, i] = self.joints[i].loads[1]\
+                          - sum([m.mass/2.0*self.g for m in self.joints[i].members])
+            loads[2, i] = self.joints[i].loads[2]
 
         # Pull out E and A
-        D["E"] = []
-        D["A"] = []
-        D["Con"] = []
+        elastic_modulus = []
+        area = []
+        connections = []
         for m in self.members:
-            D["E"].append(m.E)
-            D["A"].append(m.A)
-            D["Con"].append([j.idx for j in m.joints])
+            elastic_modulus.append(m.elastic_modulus)
+            area.append(m.area)
+            connections.append([j.idx for j in m.joints])
 
         # Make everything an array
-        D["A"] = numpy.array(D["A"])
-        D["E"] = numpy.array(D["E"])
-        D["Coord"] = numpy.array(D["Coord"]).T
-        D["Con"] = numpy.array(D["Con"]).T
+        area = numpy.array(area)
+        elastic_modulus = numpy.array(elastic_modulus)
+        coordinates = numpy.array(coordinates).T
+        connections = numpy.array(connections).T
 
-        F, U, R = self.force_eval(D)
+        # Pull everything into a dict
+        truss_info = {"elastic_modulus": elastic_modulus,
+                      "coordinates": coordinates,
+                      "connections": connections,
+                      "reactions": reactions,
+                      "loads": loads,
+                      "area": area}
 
-        for i in range(len(F)):
-            self.members[i].set_force(F[i])
+        forces, deflections, reactions = self.evaluate_forces(truss_info)
 
-        for i in range(len(F)):
+        for i in range(self.number_of_members):
+            self.members[i].set_force(forces[i])
+
+        for i in range(self.number_of_joints):
             for j in range(3):
                 if self.joints[i].translation[j]:
-                    self.joints[i].reactions[j] = R[j, i]
+                    self.joints[i].reactions[j] = reactions[j, i]
                     self.joints[i].deflections[j] = 0.0
                 else:
                     self.joints[i].reactions[j] = 0.0
-                    self.joints[i].deflections[j] = U[j, i]
+                    self.joints[i].deflections[j] = deflections[j, i]
+        # Pull out the member factors of safety
+        # self.fos_buckling =
 
-    def force_eval(self, D):
-        Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])
-        w = numpy.array([numpy.size(D["Re"], axis=0), numpy.size(D["Re"], axis=1)])
+    def evaluate_forces(self, truss_info):
+        Tj = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
+        w = numpy.array([numpy.size(truss_info["reactions"], axis=0), numpy.size(truss_info["reactions"], axis=1)])
         SS = numpy.zeros([3*w[1], 3*w[1]])
-        U = 1.0 - D["Re"]
+        deflections = 1.0 - truss_info["reactions"]
 
         # This identifies joints that are unsupported, and can therefore be loaded
-        ff = numpy.where(U.T.flat == 1)[0]
+        ff = numpy.where(deflections.T.flat == 1)[0]
 
         # Step through the each member in the truss, and build the global stiffness matrix
-        for i in range(numpy.size(D["Con"], axis=1)):
-            H = D["Con"][:, i]
-            C = D["Coord"][:, H[1]] - D["Coord"][:, H[0]]
+        for i in range(numpy.size(truss_info["connections"], axis=1)):
+            H = truss_info["connections"][:, i]
+            C = truss_info["coordinates"][:, H[1]] - truss_info["coordinates"][:, H[0]]
             Le = numpy.linalg.norm(C)
             T = C/Le
             s = numpy.outer(T, T)
-            G = D["E"][i]*D["A"][i]/Le
+            G = truss_info["elastic_modulus"][i]*truss_info["area"][i]/Le
             ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
             Tj[:, i] = G*T
-            e = list(range((3*H[0]), (3*H[0] + 3))) + list(range((3*H[1]), (3*H[1] + 3)))
+            e = list(range((3*H[0]), (3*H[0] + 3))) \
+                + list(range((3*H[1]), (3*H[1] + 3)))
             for ii in range(6):
                 for j in range(6):
                     SS[e[ii], e[j]] += ss[ii, j]
@@ -143,22 +159,20 @@ class Truss(object):
         SSff = numpy.zeros([len(ff), len(ff)])
         for i in range(len(ff)):
             for j in range(len(ff)):
-                SSff[i,j] = SS[ff[i], ff[j]]
+                SSff[i, j] = SS[ff[i], ff[j]]
 
-        Loadff = D["Load"].T.flat[ff]
+        Loadff = truss_info["loads"].T.flat[ff]
         Uff = numpy.linalg.solve(SSff, Loadff)
 
-        ff = numpy.where(U.T==1)
+        ff = numpy.where(deflections.T == 1)
         for i in range(len(ff[0])):
-            U[ff[1][i], ff[0][i]] = Uff[i]
-        F = numpy.sum(numpy.multiply(Tj, U[:, D["Con"][1,:]] - U[:, D["Con"][0,:]]), axis=0)
-        if numpy.linalg.cond(SSff) > pow(10,10):
-            F *= pow(10, 10)
-        R = numpy.sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
+            deflections[ff[1][i], ff[0][i]] = Uff[i]
+        forces = numpy.sum(numpy.multiply(Tj, deflections[:, truss_info["connections"][1, :]] - deflections[:, truss_info["connections"][0, :]]), axis=0)
+        if numpy.linalg.cond(SSff) > pow(10, 10):
+            forces *= pow(10, 10)
+        reactions = numpy.sum(SS*deflections.T.flat[:], axis=1).reshape([w[1], w[0]]).T
 
-        print(U)
-
-        return F, U, R
+        return forces, deflections, reactions
 
     def print_report(self):
         print(time.strftime('%X %x %Z'))
@@ -291,7 +305,7 @@ class Truss(object):
         for m in self.members:
             temp = []
             rows.append(m.idx)
-            temp.append(m.A)
+            temp.append(m.area)
             temp.append(format(m.I, '.2e'))
             temp.append(format(m.force/pow(10, 3), '.2f'))
             temp.append(m.fos_yield)

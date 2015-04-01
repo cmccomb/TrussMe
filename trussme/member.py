@@ -29,12 +29,12 @@ class Member(object):
 
         # Material properties
         self.material = ''  # string specifying material
-        self.E = 0.0        # Elastic modulus
+        self.elastic_modulus = 0.0        # Elastic modulus
         self.Fy = 0.0       # yield strength
         self.rho = 0.0      # material density
 
         # Dependent variables
-        self.A = 0.0   # Cross-sectional area
+        self.area = 0.0   # Cross-sectional area
         self.I = 0.0   # Moment of inertia
         self.LW = 0.0  # Linear weight
 
@@ -91,7 +91,7 @@ class Member(object):
 
         # Set material properties
         self.rho = self.materials[new_material][0]
-        self.E = self.materials[new_material][1]
+        self.elastic_modulus = self.materials[new_material][1]
         self.Fy = self.materials[new_material][2]
 
         # If required, update properties
@@ -174,16 +174,16 @@ class Member(object):
 
     def calc_area(self):
         if self.shape == "pipe":
-            self.A = numpy.pi*(self.r**2 - (self.r-self.t)**2)
+            self.area = numpy.pi*(self.r**2 - (self.r-self.t)**2)
         elif self.shape == "bar":
-            self.A = numpy.pi*self.r**2
+            self.area = numpy.pi*self.r**2
         elif self.shape == "box":
-            self.A = self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
+            self.area = self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
         elif self.shape == "square":
-            self.A = self.w * self.h
+            self.area = self.w * self.h
 
     def calc_lw(self):
-        self.LW = self.A * self.rho
+        self.LW = self.area * self.rho
 
     def calc_geometry(self):
         self.end_a = self.joints[0].coordinates
@@ -191,11 +191,11 @@ class Member(object):
         self.length = numpy.linalg.norm(self.end_a - self.end_b)
         self.mass = self.length*self.LW
 
-    def set_force(self, F):
-        self.force = F
-        self.fos_yield = self.Fy/abs(self.force/self.A)
+    def set_force(self, the_force):
+        self.force = the_force
+        self.fos_yield = self.Fy/abs(self.force/self.area)
         if self.force < 0:
-            self.fos_buckling = -((numpy.pi**2)*self.E*self.I
+            self.fos_buckling = -((numpy.pi**2)*self.elastic_modulus*self.I
                                  /(self.length**2))/self.force
         else:
             self.fos_buckling = "N/A"

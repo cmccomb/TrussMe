@@ -133,9 +133,9 @@ class Truss(object):
     def fos_eval(self):
         support = numpy.array([[1, 1, 1], [0, 0, 1], [0, 1, 1], [0, 0, 1], [1, 1, 1]]).T
 
-        D = {"Re":  support}
+        D = {"reactions":  support}
         for _ in range(self.n-5):
-            D["Re"] = numpy.column_stack([D["Re"], [0,0,1]])
+            D["reactions"] = numpy.column_stack([D["reactions"], [0,0,1]])
 
         # Add the appropriate loads
         D["Load"] = numpy.zeros([3, self.n])
@@ -143,16 +143,16 @@ class Truss(object):
         D["Load"][1, 3] = -200000.0
 
         # Add the area information from truss structure
-        D["A"] = []
+        D["area"] = []
         for member_size in self.sizes:
-            D["A"].append(AREA_SEC[int(member_size)])
-        D["Coord"] = self.coord
-        D["Con"] = self.con
-        D["E"] = E*numpy.ones(self.m)
+            D["area"].append(AREA_SEC[int(member_size)])
+        D["coordinates"] = self.coord
+        D["connections"] = self.con
+        D["elastic_modulus"] = E*numpy.ones(self.m)
 
-        print(D["Coord"])
-        print(D["Re"])
-        print(D["Con"])
+        print(D["coordinates"])
+        print(D["reactions"])
+        print(D["connections"])
         print(D["Load"])
     
         # Do force analysis
@@ -164,12 +164,12 @@ class Truss(object):
         # Calculate lengths
         L = numpy.zeros(self.m)
         for i in range(self.m):
-            L[i] = numpy.linalg.norm(D["Coord"][:, D["Con"][0, i]] - D["Coord"][:, D["Con"][1, i]])
+            L[i] = numpy.linalg.norm(D["coordinates"][:, D["connections"][0, i]] - D["coordinates"][:, D["connections"][1, i]])
 
         # Calculate FOS's
         self.fos = numpy.zeros(self.m)
         for i in range(len(self.force)):
-            self.fos[i] = D["A"][i]*Fy/self.force[i]
+            self.fos[i] = D["area"][i]*Fy/self.force[i]
             if self.fos[i] < 0:
                 self.fos[i] = min(numpy.pi*numpy.pi*E*I_SEC[int(self.sizes[i] - 1)]/(L[i]*L[i])/-self.force[i], -self.fos[i])
     
@@ -261,22 +261,22 @@ class Truss(object):
         return xysave[idx]
     
     def _force_eval(self, D):
-        Tj = numpy.zeros([3, numpy.size(D["Con"], axis=1)])
-        w = numpy.array([numpy.size(D["Re"], axis=0), numpy.size(D["Re"], axis=1)])
+        Tj = numpy.zeros([3, numpy.size(D["connections"], axis=1)])
+        w = numpy.array([numpy.size(D["reactions"], axis=0), numpy.size(D["reactions"], axis=1)])
         SS = numpy.zeros([3*w[1], 3*w[1]])
-        U = 1.0 - D["Re"]
+        U = 1.0 - D["reactions"]
 
         # This identifies joints that are unsupported, and can therefore be loaded
         ff = numpy.where(U.T.flat == 1)[0]
 
         # Step through the each member in the truss, and build the global stiffness matrix
-        for i in range(numpy.size(D["Con"], axis=1)):
-            H = D["Con"][:, i]
-            C = D["Coord"][:, H[1]] - D["Coord"][:, H[0]]
+        for i in range(numpy.size(D["connections"], axis=1)):
+            H = D["connections"][:, i]
+            C = D["coordinates"][:, H[1]] - D["coordinates"][:, H[0]]
             Le = numpy.linalg.norm(C)
             T = C/Le
             s = numpy.outer(T, T)
-            G = D["E"][i]*D["A"][i]/Le
+            G = D["elastic_modulus"][i]*D["area"][i]/Le
             ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
             Tj[:, i] = G*T
             e = list(range((3*H[0]), (3*H[0] + 3))) + list(range((3*H[1]), (3*H[1] + 3)))
@@ -295,7 +295,7 @@ class Truss(object):
         ff = numpy.where(U.T==1)
         for i in range(len(ff[0])):
             U[ff[1][i], ff[0][i]] = Uff[i]
-        F = numpy.sum(numpy.multiply(Tj, U[:, D["Con"][1,:]] - U[:, D["Con"][0,:]]), axis=0)
+        F = numpy.sum(numpy.multiply(Tj, U[:, D["connections"][1,:]] - U[:, D["connections"][0,:]]), axis=0)
         if numpy.linalg.cond(SSff) > pow(10,10):
             F *= pow(10, 10)
         R = numpy.sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
