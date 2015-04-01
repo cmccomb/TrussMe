@@ -26,19 +26,36 @@ class Truss(object):
         self.fos_yielding = 0
         self.fos_buckling = 0
         self.fos_total = 0
+        self.limit_state = ''
 
         # Design goals
-        self.fos_total = -1
-        self.fos_buckling = -1
-        self.fos_total = -1
-        self.fos_total = -1
-        
-    def make_random_truss(self, xlim=[-10, 10], ylim=[-10, 10]):
-        # Draw joints
-        # Determine which joints should be supports
-        # Add members
-        # Evaluate
-        asdf = 1
+        self.goals = {"min_fos_total": -1,
+                      "min_fos_buckling": -1,
+                      "min_fos_yielding": -1,
+                      "max_mass": -1,
+                      "max_deflection": -1}
+        self.THERE_ARE_GOALS = False
+
+    def set_goal(self, **kwargs):
+        self.THERE_ARE_GOALS = True
+        for key in kwargs:
+            if key is "min_fos_total":
+                self.goals["min_fos_total"] = kwargs["min_fos_total"]
+            elif key is "min_fos_yielding":
+                self.goals["min_fos_yielding"] = kwargs["min_fos_yielding"]
+            elif key is "min_fos_buckling":
+                self.goals["min_fos_buckling"] = kwargs["min_fos_buckling"]
+            elif key is "max_mass":
+                self.goals["max_mass"] = kwargs["max_mass"]
+            elif key is "max_deflection":
+                self.goals["max_deflection"] = kwargs["max_deflection"]
+            else:
+                self.THERE_ARE_GOALS = False
+                raise ValueError(key+' is not an defined design goal. '
+                                     'Try min_fos_total, '
+                                     'min_fos_yielding, '
+                                     'min_fos_buckling, '
+                                     'max_mass, or max_deflection.')
 
     def add_support(self, coordinates, d=3):
         # Make the joint
@@ -130,7 +147,15 @@ class Truss(object):
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = deflections[j, i]
         # Pull out the member factors of safety
-        # self.fos_buckling =
+        self.fos_buckling = min([m.fos_buckling for m in self.members])
+        self.fos_yielding = min([m.fos_yielding for m in self.members])
+
+        # Get total FOS and limit state
+        self.fos_total = min(self.fos_buckling, self.fos_yielding)
+        if self.fos_buckling < self.fos_yielding:
+            self.limit_state = 'buckling'
+        else:
+            self.limit_state = 'yielding'
 
     def evaluate_forces(self, truss_info):
         Tj = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
@@ -183,8 +208,54 @@ class Truss(object):
         return forces, deflections, reactions
 
     def print_report(self):
+        # DO the calcs
+        self.calc_mass()
+        self.calc_fos()
+
         print(time.strftime('%X %x %Z'))
         print(os.getcwd())
+
+        # Print Section header
+        print("\n")
+        print("(0) SUMMARY OF ANALYSIS")
+        print("=============================")
+        print("The truss has a mass of " + format(self.mass, '.2f') + " kg, "
+              "and a total factor of safety of " + format(self.fos_total, '.2f')
+              + ". The limit state is " + self.limit_state + "."),
+
+        if self.THERE_ARE_GOALS:
+            success_string = []
+            failure_string = []
+            for key in self.goals.keys():
+                if key is "min_fos_total" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_total:
+                        success_string.append("total FOS")
+                    else:
+                        failure_string.append("total FOS")
+                elif key is "min_fos_buckling" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_total:
+                        success_string.append("buckling FOS")
+                    else:
+                        failure_string.append("buckling FOS")
+                elif key is "min_fos_yielding" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_total:
+                        success_string.append("yielding FOS")
+                    else:
+                        failure_string.append("yielding FOS")
+                elif key is "max_mass" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_total:
+                        success_string.append("mass")
+                    else:
+                        failure_string.append("mass")
+                elif key is "max_deflection" and self.goals[key] is not -1:
+                    if self.goals[key] < self.fos_total:
+                        success_string.append("deflection")
+                    else:
+                        failure_string.append("deflection")
+
+            if len(success_string) is not 0:
+                if len(success_string) is 1:
+                    print("The design goal for " + str(success_string[0]) + " was satisfied.")
 
         # Print Section header
         print("\n")
@@ -197,7 +268,7 @@ class Truss(object):
         rows = []
         for j in self.joints:
             temp = []
-            rows.append(j.idx)
+            rows.append("Joint_"+str(j.idx))
             temp.append(str(j.coordinates[0]))
             temp.append(str(j.coordinates[1]))
             temp.append(str(j.coordinates[2]))
@@ -221,17 +292,15 @@ class Truss(object):
         data = []
         rows = []
         for m in self.members:
-            temp = []
-            rows.append(str(m.idx))
-            temp.append(str(m.joints[0].idx))
-            temp.append(str(m.joints[1].idx))
-            temp.append(m.material)
-            temp.append(m.shape)
-            temp.append(m.h)
-            temp.append(m.w)
-            temp.append(m.r)
-            temp.append(m.t)
-            data.append(temp)
+            rows.append("Member_"+str(m.idx))
+            data.append([str(m.joints[0].idx),
+                         str(m.joints[1].idx),
+                         m.material,
+                         m.shape,
+                         m.h,
+                         m.w,
+                         m.r,
+                         m.t])
 
         print(pandas.DataFrame(data,
                                index=rows,
@@ -249,16 +318,17 @@ class Truss(object):
         unique_materials = numpy.unique([m.material for m in self.members])
         print("\n--- MATERIALS ---")
         data = []
+        rows = []
         for mat in unique_materials:
+            rows.append(mat)
             data.append([
-                mat,
                 str(member.Member.materials[mat][0]),
                 str(member.Member.materials[mat][1]/pow(10, 9)),
                 str(member.Member.materials[mat][2]/pow(10, 6))])
 
         print(pandas.DataFrame(data,
-                               columns=["Material",
-                                        "Density(kg/m3)",
+                               index=rows,
+                               columns=["Density(kg/m3)",
                                         "Elastic Modulus(GPa)",
                                         "Yield Strength(MPa)"])
               .to_string(justify="left"))
@@ -272,14 +342,12 @@ class Truss(object):
         data = []
         rows = []
         for j in self.joints:
-            temp = []
-            rows.append(j.idx)
-            temp.append(str(j.loads[0][0]/pow(10, 3)))
-            temp.append(format((j.loads[1][0]
-                                - sum([m.mass/2.0*self.g
-                                       for m in j.members]))/pow(10, 3), '.2f'))
-            temp.append(str(j.loads[2][0]/pow(10, 3)))
-            data.append(temp)
+            rows.append("Joint_"+str(j.idx))
+            data.append([str(j.loads[0][0]/pow(10, 3)),
+                         format((j.loads[1][0]
+                                 - sum([m.mass/2.0*self.g for m
+                                        in j.members]))/pow(10, 3), '.2f'),
+                         str(j.loads[2][0]/pow(10, 3))])
 
         print(pandas.DataFrame(data,
                                index=rows,
@@ -293,15 +361,13 @@ class Truss(object):
         data = []
         rows = []
         for j in self.joints:
-            temp = []
-            rows.append(j.idx)
-            temp.append(format(j.reactions[0][0]/pow(10, 3), '.2f')
-                        if j.translation[0][0] != 0.0 else "N/A")
-            temp.append(format(j.reactions[1][0]/pow(10, 3), '.2f')
-                        if j.translation[1][0] != 0.0 else "N/A")
-            temp.append(format(j.reactions[2][0]/pow(10, 3), '.2f')
-                        if j.translation[2][0] != 0.0 else "N/A")
-            data.append(temp)
+            rows.append("Joint_"+str(j.idx))
+            data.append([format(j.reactions[0][0]/pow(10, 3), '.2f')
+                         if j.translation[0][0] != 0.0 else "N/A",
+                         format(j.reactions[1][0]/pow(10, 3), '.2f')
+                         if j.translation[1][0] != 0.0 else "N/A",
+                         format(j.reactions[2][0]/pow(10, 3), '.2f')
+                         if j.translation[2][0] != 0.0 else "N/A"])
 
         print(pandas.DataFrame(data,
                                index=rows,
@@ -315,14 +381,12 @@ class Truss(object):
         data = []
         rows = []
         for m in self.members:
-            temp = []
-            rows.append(m.idx)
-            temp.append(m.area)
-            temp.append(format(m.I, '.2e'))
-            temp.append(format(m.force/pow(10, 3), '.2f'))
-            temp.append(m.fos_yield)
-            temp.append(m.fos_buckling)
-            data.append(temp)
+            rows.append("Member_"+str(m.idx))
+            data.append([m.area,
+                         format(m.I, '.2e'),
+                         format(m.force/pow(10, 3), '.2f'),
+                         m.fos_yielding,
+                         m.fos_buckling])
 
         print(pandas.DataFrame(data,
                                index=rows,
@@ -338,15 +402,13 @@ class Truss(object):
         data = []
         rows = []
         for j in self.joints:
-            temp = []
-            rows.append(j.idx)
-            temp.append(format(j.deflections[0][0]*pow(10, 3), '.5f')
-                        if j.translation[0][0] == 0.0 else "N/A")
-            temp.append(format(j.deflections[1][0]*pow(10, 3), '.5f')
-                        if j.translation[1][0] == 0.0 else "N/A")
-            temp.append(format(j.deflections[2][0]*pow(10, 3), '.5f')
-                        if j.translation[2][0] == 0.0 else "N/A")
-            data.append(temp)
+            rows.append("Joint_"+str(j.idx))
+            data.append([format(j.deflections[0][0]*pow(10, 3), '.5f')
+                         if j.translation[0][0] == 0.0 else "N/A",
+                         format(j.deflections[1][0]*pow(10, 3), '.5f')
+                         if j.translation[1][0] == 0.0 else "N/A",
+                         format(j.deflections[2][0]*pow(10, 3), '.5f')
+                         if j.translation[2][0] == 0.0 else "N/A"])
 
         print(pandas.DataFrame(data,
                                index=rows,

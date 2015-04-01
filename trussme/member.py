@@ -40,7 +40,7 @@ class Member(object):
 
         # Variables to store information about truss state
         self.force = 0
-        self.fos_yield = 0
+        self.fos_yielding = 0
         self.fos_buckling = 0
         self.mass = 0
 
@@ -53,7 +53,7 @@ class Member(object):
         # Calculate properties
         self.set_shape("pipe", update_props=False)
         self.set_material("A36", update_props=False)
-        self.set_parameters(t=0.01, r=0.1, update_props=True)
+        self.set_parameters(t=0.002, r=0.02, update_props=True)
 
     def set_shape(self, new_shape, update_props=True):
         # Read and save hte shape name
@@ -193,7 +193,7 @@ class Member(object):
 
     def set_force(self, the_force):
         self.force = the_force
-        self.fos_yield = self.Fy/abs(self.force/self.area)
+        self.fos_yielding = self.Fy/abs(self.force/self.area)
         if self.force < 0:
             self.fos_buckling = -((numpy.pi**2)*self.elastic_modulus*self.I
                                  /(self.length**2))/self.force

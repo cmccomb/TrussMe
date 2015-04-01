@@ -18,17 +18,13 @@ class TestSequenceFunctions(unittest.TestCase):
 
         self.T.joints[2].roller(d=2)
 
-        self.T.joints[1].loads[1][0] = -500000.0
+        self.T.joints[1].loads[1][0] = -10000.0
 
         self.T.add_member(0, 1)
         self.T.add_member(1, 2)
         self.T.add_member(2, 0)
 
-        for m in self.T.members:
-            m.r /= 3.0
-            m.t /= 3.0
-
-        self.T.calc_fos()
+        self.T.set_goal(min_fos_total=1.0)
 
         self.T.print_report()
 
