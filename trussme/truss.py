@@ -148,10 +148,8 @@ class Truss(object):
                     self.joints[i].deflections[j] = deflections[j, i]
 
         # Pull out the member factors of safety
-        self.fos_buckling = min([self.members[i].fos_buckling
-                                 for i in range(self.number_of_members)])
-        self.fos_yielding = min([self.members[i].fos_yielding
-                                 for i in range(self.number_of_members)])
+        self.fos_buckling = min([m.fos_buckling for m in self.members])
+        self.fos_yielding = min([m.fos_yielding for m in self.members])
 
         # Get total FOS and limit state
         self.fos_total = min(self.fos_buckling, self.fos_yielding)
@@ -454,7 +452,23 @@ class Truss(object):
               .to_string(justify="left"))
 
     def _print_recommendations(self):
+        MADE_A_RECOMMENDATION = False
         print("\n")
         print("(3) RECOMMENDATIONS")
         print("===============================")
-        print("\nlorem ipsum")
+        for m in self.members:
+            if self.THERE_ARE_GOALS:
+                tyf = self.goals["min_fos_yielding"]
+                tbf = self.goals["min_fos_buckling"]
+            else:
+                tyf = 1.0
+                tbf = 1.0
+            if m.fos_yielding < tyf:
+                print("\t- Member_"+str(m.idx)+": Increase cross-sectional area.")
+                MADE_A_RECOMMENDATION = True
+            if m.fos_buckling < tbf:
+                print("\t- Member_"+str(m.idx)+": Increase moment of inertia.")
+                MADE_A_RECOMMENDATION = True
+
+        if not MADE_A_RECOMMENDATION:
+            print("No recommendations.")
