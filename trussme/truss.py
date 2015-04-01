@@ -228,8 +228,10 @@ class Truss(object):
         print("\n")
         print("(0) SUMMARY OF ANALYSIS")
         print("=============================")
-        print("\t- The truss has a mass of " + format(self.mass, '.2f') + " kg, "
-              "and a total factor of safety of " + format(self.fos_total, '.2f')
+        print("\t- The truss has a mass of "
+              + format(self.mass, '.2f')
+              + " kg, and a total factor of safety of "
+              + format(self.fos_total, '.2f')
               + ". ")
         print("\t- The limit state is " + self.limit_state + ".")
 
@@ -268,8 +270,11 @@ class Truss(object):
                     print("\t- The design goal for " + str(success_string[0])
                           + " was satisfied.")
                 elif len(success_string) is 2:
-                    print("\t- The design goals for " + str(success_string[0])
-                          + " and " + str(success_string[1]) + " were satisfied.")
+                    print("\t- The design goals for "
+                          + str(success_string[0])
+                          + " and "
+                          + str(success_string[1])
+                          + " were satisfied.")
                 else:
                     print("\t- The design goals for"),
                     for st in success_string[0:-1]:
@@ -281,10 +286,13 @@ class Truss(object):
                     print("\t- The design goal for " + str(failure_string[0])
                           + " was not satisfied.")
                 elif len(failure_string) is 2:
-                    print("- The design goals for " + str(failure_string[0])
-                          + " and " + str(failure_string[1]) + " were not satisfied.")
+                    print("- The design goals for "
+                          + str(failure_string[0])
+                          + " and "
+                          + str(failure_string[1])
+                          + " were not satisfied.")
                 else:
-                    print("The design goals for"),
+                    print("\t- The design goals for"),
                     for st in failure_string[0:-1]:
                         print(st+","),
                     print("and "+str(failure_string[-1])+" were not satisfied.")
@@ -462,11 +470,35 @@ class Truss(object):
                 tyf = 1.0
                 tbf = 1.0
             if m.fos_yielding < tyf:
-                print("\t- Member_"+str(m.idx)+": Increase cross-sectional area.")
+                print("\t- Member_"+str(m.idx)+" is yielding. "
+                      "Try increasing the cross-sectional area.")
+                print("\t\t- Current area: " + format(m.I, '.2e') + " m^2")
+                print("\t\t- Recommended area: "
+                      + format(m.area*self.goals["min_fos_yielding"]
+                               /m.fos_yielding, '.2e') + " m^2")
+                print("\t\t- Try increasing member dimensions by a factor of "
+                      "at least " + format(pow(self.goals["min_fos_yielding"]
+                                               /m.fos_yielding, 0.5), '.3f'))
                 MADE_A_RECOMMENDATION = True
-            if m.fos_buckling < tbf:
-                print("\t- Member_"+str(m.idx)+": Increase moment of inertia.")
+            if 0 < m.fos_buckling < tbf:
+                print("\t- Member_"+str(m.idx)+" is buckling. "
+                      "Try increasing the moment of inertia.")
+                print("\t\t- Current moment of inertia: "
+                      + format(m.I, '.2e') + " m^4")
+                print("\t\t- Recommended moment of inertia: "
+                      + format(m.I*self.goals["min_fos_buckling"]
+                               /m.fos_buckling, '.2e') + " m^4")
+                print("\t\t- Try increasing member dimensions by a factor of "
+                      "at least " + format(pow(self.goals["min_fos_buckling"]
+                                               /m.fos_buckling, 0.25), '.3f')
+                      +".")
+                MADE_A_RECOMMENDATION = True
+            if m.fos_buckling > tbf and m.fos_yielding > tyf:
+                if self.mass > self.goals["max_mass"]:
+                    print("\t- Member_"+str(m.idx)+" is strong enough, so try "
+                          "decreasing the cross-sectional area to decrease "
+                          "mass.")
                 MADE_A_RECOMMENDATION = True
 
         if not MADE_A_RECOMMENDATION:
-            print("No recommendations.")
+            print("No recommendations. All design goals met.")
