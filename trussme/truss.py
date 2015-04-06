@@ -286,7 +286,7 @@ class Truss(object):
                     print("\t- The design goal for " + str(failure_string[0])
                           + " was not satisfied.")
                 elif len(failure_string) is 2:
-                    print("- The design goals for "
+                    print("\t- The design goals for "
                           + str(failure_string[0])
                           + " and "
                           + str(failure_string[1])
