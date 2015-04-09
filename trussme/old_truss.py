@@ -261,7 +261,7 @@ class Truss(object):
         return xysave[idx]
     
     def _force_eval(self, D):
-        Tj = numpy.zeros([3, numpy.size(D["connections"], axis=1)])
+        tj = numpy.zeros([3, numpy.size(D["connections"], axis=1)])
         w = numpy.array([numpy.size(D["reactions"], axis=0), numpy.size(D["reactions"], axis=1)])
         SS = numpy.zeros([3*w[1], 3*w[1]])
         U = 1.0 - D["reactions"]
@@ -278,7 +278,7 @@ class Truss(object):
             s = numpy.outer(T, T)
             G = D["elastic_modulus"][i]*D["area"][i]/Le
             ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1), numpy.concatenate((-s, s), axis=1)), axis=0)
-            Tj[:, i] = G*T
+            tj[:, i] = G*T
             e = list(range((3*H[0]), (3*H[0] + 3))) + list(range((3*H[1]), (3*H[1] + 3)))
             for ii in range(6):
                 for j in range(6):
@@ -295,7 +295,7 @@ class Truss(object):
         ff = numpy.where(U.T==1)
         for i in range(len(ff[0])):
             U[ff[1][i], ff[0][i]] = Uff[i]
-        F = numpy.sum(numpy.multiply(Tj, U[:, D["connections"][1,:]] - U[:, D["connections"][0,:]]), axis=0)
+        F = numpy.sum(numpy.multiply(tj, U[:, D["connections"][1,:]] - U[:, D["connections"][0,:]]), axis=0)
         if numpy.linalg.cond(SSff) > pow(10,10):
             F *= pow(10, 10)
         R = numpy.sum(SS*U.T.flat[:], axis=1).reshape([w[1], w[0]]).T
