@@ -8,7 +8,7 @@ import os
 
 class Truss(object):
 
-    g = 9.81
+    g = 9.80665
 
     def __init__(self):
         # Make a list to store members in
@@ -171,19 +171,19 @@ class Truss(object):
 
         # Build the global stiffness matrix
         for i in range(numpy.size(truss_info["connections"], axis=1)):
-            H = truss_info["connections"][:, i]
-            C = truss_info["coordinates"][:, H[1]] \
-                - truss_info["coordinates"][:, H[0]]
-            Le = numpy.linalg.norm(C)
-            T = C/Le
-            s = numpy.outer(T, T)
-            G = truss_info["elastic_modulus"][i]*truss_info["area"][i]/Le
-            ss = G*numpy.concatenate((numpy.concatenate((s, -s), axis=1),
-                                      numpy.concatenate((-s, s), axis=1)),
+            ends = truss_info["connections"][:, i]
+            length_vector = truss_info["coordinates"][:, ends[1]] \
+                - truss_info["coordinates"][:, ends[0]]
+            length = numpy.linalg.norm(length_vector)
+            direction = length_vector/length
+            d2 = numpy.outer(direction, direction)
+            ea_over_l = truss_info["elastic_modulus"][i]*truss_info["area"][i]/length
+            ss = ea_over_l*numpy.concatenate((numpy.concatenate((d2, -d2), axis=1),
+                                      numpy.concatenate((-d2, d2), axis=1)),
                                      axis=0)
-            tj[:, i] = G*T
-            e = list(range((3*H[0]), (3*H[0] + 3))) \
-                + list(range((3*H[1]), (3*H[1] + 3)))
+            tj[:, i] = ea_over_l*direction
+            e = list(range((3*ends[0]), (3*ends[0] + 3))) \
+                + list(range((3*ends[1]), (3*ends[1] + 3)))
             for ii in range(6):
                 for j in range(6):
                     SS[e[ii], e[j]] += ss[ii, j]
