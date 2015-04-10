@@ -1,5 +1,6 @@
 import numpy
 import warnings
+from trussme.physical_properties import materials
 
 
 class Member(object):
@@ -11,9 +12,6 @@ class Member(object):
     shapes = ["pipe", "bar", "square", "box"]
 
     # Material options and characteristics
-    #            name     rho   E               Fy
-    materials = {"A36":  [7800, 200*pow(10, 9), 250*pow(10, 6)],
-                 "A992": [7850, 200*pow(10, 9), 345*pow(10, 6)]}
 
     def __init__(self, joint_a, joint_b):
         # Save id number
@@ -52,7 +50,7 @@ class Member(object):
 
         # Calculate properties
         self.set_shape("pipe", update_props=False)
-        self.set_material("A36", update_props=False)
+        self.set_material(numpy.random.choice(materials.keys()), update_props=False)
         self.set_parameters(t=0.002, r=0.02, update_props=True)
 
     def set_shape(self, new_shape, update_props=True):
@@ -86,13 +84,13 @@ class Member(object):
             self.material = new_material
         else:
             raise ValueError(new_material+' is not a defined shape. Try ' +
-                             ', '.join(self.materials.keys()[0:-1]) + ', or ' +
-                             self.materials.keys()[-1] + '.')
+                             ', '.join(materials.keys()[0:-1]) + ', or ' +
+                             materials.keys()[-1] + '.')
 
         # Set material properties
-        self.rho = self.materials[new_material][0]
-        self.elastic_modulus = self.materials[new_material][1]
-        self.Fy = self.materials[new_material][2]
+        self.rho = materials[new_material]["rho"]
+        self.elastic_modulus = materials[new_material]["E"]
+        self.Fy = materials[new_material]["Fy"]
 
         # If required, update properties
         if update_props:
@@ -208,7 +206,7 @@ class Member(object):
             return False
 
     def material_name_is_ok(self, name):
-        if name in self.materials.keys():
+        if name in materials.keys():
             return True
         else:
             return False

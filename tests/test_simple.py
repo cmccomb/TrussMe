@@ -49,10 +49,10 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.add_member(4, 10)
         self.T.add_member(10, 5)
 
-        # self.T.set_goal(min_fos_buckling=3.0,
-        #                 min_fos_yielding=1.5,
-        #                 max_mass=5.0,
-        #                 max_deflection=6e-3)
+        self.T.set_goal(min_fos_buckling=1.5,
+                        min_fos_yielding=1.5,
+                        max_mass=5.0,
+                        max_deflection=6e-3)
 
         self.T.print_report()
 
