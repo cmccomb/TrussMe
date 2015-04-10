@@ -1,6 +1,6 @@
 import numpy
 import warnings
-from trussme.physical_properties import materials
+from trussme.physical_properties import materials, valid_member_name
 
 
 class Member(object):
@@ -10,8 +10,6 @@ class Member(object):
 
     # Shape types
     shapes = ["pipe", "bar", "square", "box"]
-
-    # Material options and characteristics
 
     def __init__(self, joint_a, joint_b):
         # Save id number
@@ -50,7 +48,7 @@ class Member(object):
 
         # Calculate properties
         self.set_shape("pipe", update_props=False)
-        self.set_material(numpy.random.choice(materials.keys()), update_props=False)
+        self.set_material("A36", update_props=False)
         self.set_parameters(t=0.002, r=0.02, update_props=True)
 
     def set_shape(self, new_shape, update_props=True):
@@ -80,7 +78,7 @@ class Member(object):
             self.calc_properties()
 
     def set_material(self, new_material, update_props=True):
-        if self.material_name_is_ok(new_material):
+        if valid_member_name(new_material):
             self.material = new_material
         else:
             raise ValueError(new_material+' is not a defined shape. Try ' +
@@ -205,8 +203,4 @@ class Member(object):
         else:
             return False
 
-    def material_name_is_ok(self, name):
-        if name in materials.keys():
-            return True
-        else:
-            return False
+
