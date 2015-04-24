@@ -1,7 +1,9 @@
 import numpy
-from trussme import truss
 import unittest
+import os
+from trussme import truss
 
+TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -56,7 +58,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T.print_report()
 
     def test_truss_from_file(self):
-        self.B = truss.Truss("./example.trs")
+        self.B = truss.Truss(TEST_TRUSS_FILENAME)
 
         self.B.set_goal(min_fos_buckling=1.5,
                         min_fos_yielding=1.5,
