@@ -4,17 +4,13 @@ from trussme.physical_properties import materials, valid_member_name
 
 
 class Member(object):
-    
-    # Save the number of members
-    number_of_members = 0
 
     # Shape types
     shapes = ["pipe", "bar", "square", "box"]
 
     def __init__(self, joint_a, joint_b):
         # Save id number
-        self.idx = self.number_of_members
-        Member.number_of_members += 1
+        self.idx = -1
 
         # Shape independent variables
         self.shape = ''

@@ -8,8 +8,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def setUp(self):
         self.T = truss.Truss()
 
-    def test_truss(self):
-
+    def test_truss_construction(self):
         self.T.add_support(numpy.array([0.0, 0.0, 0.0]), d=2)
         self.T.add_joint(  numpy.array([1.0, 0.0, 0.0]), d=2)
         self.T.add_joint(  numpy.array([2.0, 0.0, 0.0]), d=2)
@@ -55,6 +54,17 @@ class TestSequenceFunctions(unittest.TestCase):
                         max_deflection=6e-3)
 
         self.T.print_report()
+
+    def test_truss_from_file(self):
+        self.B = truss.Truss("./example.trs")
+
+        self.B.set_goal(min_fos_buckling=1.5,
+                        min_fos_yielding=1.5,
+                        max_mass=5.0,
+                        max_deflection=6e-3)
+
+        self.B.print_report()
+
 
 if __name__ == "__main__":
     unittest.main()

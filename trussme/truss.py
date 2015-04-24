@@ -9,7 +9,7 @@ import os
 
 class Truss(object):
 
-    def __init__(self):
+    def __init__(self, file_name=""):
         # Make a list to store members in
         self.members = []
 
@@ -34,6 +34,38 @@ class Truss(object):
                       "max_mass": -1,
                       "max_deflection": -1}
         self.THERE_ARE_GOALS = False
+
+        if file_name is not "":
+            with open(file_name, 'r') as f:
+                for idx, line in enumerate(f):
+                    if line[0] is "J":
+                        info = line.split()[1:]
+                        self.add_joint(numpy.array(
+                            [float(x) for x in info[:3]]))
+                        self.joints[-1].translation = numpy.array(
+                            [[int(x)] for x in info[3:]])
+                    elif line[0] is "M":
+                        info = line.split()[1:]
+                        self.add_member(int(info[0]), int(info[1]))
+                        self.members[-1].set_material(info[2])
+                        self.members[-1].set_shape(info[3])
+
+                        # Parse parameters
+                        ks = []
+                        vs = []
+                        for param in range(4, len(info)):
+                            kvpair = info[param].split("=")
+                            ks.append(kvpair[0])
+                            vs.append(float(kvpair[1]))
+                        self.members[-1].set_parameters(**dict(zip(ks, vs)))
+                    elif line[0] is "L":
+                        info = line.split()[1:]
+                        self.joints[int(info[0])].loads[0] = float(info[1])
+                        self.joints[int(info[0])].loads[1] = float(info[2])
+                        self.joints[int(info[0])].loads[2] = float(info[3])
+                    elif line[0] is not "#" and not line.isspace():
+                        raise ValueError("'"+line[0] +
+                                         "' is not a valid line beginner.")
 
     def set_goal(self, **kwargs):
         self.THERE_ARE_GOALS = True
@@ -60,18 +92,22 @@ class Truss(object):
         # Make the joint
         self.joints.append(joint.Joint(coordinates))
         self.joints[self.number_of_joints].pinned(d=d)
+        self.joints[-1].idx = self.number_of_joints
         self.number_of_joints += 1
 
     def add_joint(self, coordinates, d=3):
         # Make the joint
         self.joints.append(joint.Joint(coordinates))
         self.joints[self.number_of_joints].free(d=d)
+        self.joints[-1].idx = self.number_of_joints
         self.number_of_joints += 1
 
     def add_member(self, joint_index_a, joint_index_b):
         # Make a member
         self.members.append(member.Member(self.joints[joint_index_a],
                                           self.joints[joint_index_b]))
+
+        self.members[-1].idx = self.number_of_members
 
         # Update joints
         self.joints[joint_index_a].members.append(self.members[-1])

@@ -2,14 +2,10 @@ import numpy
 
 
 class Joint(object):
-    
-    # Saving the number of joints
-    number_of_joints = 0
 
     def __init__(self, coordinates):
         # Save the joint id
-        self.idx = self.number_of_joints
-        Joint.number_of_joints += 1
+        self.idx = -1
 
         # Coordinates of the joint
         self.coordinates = coordinates
