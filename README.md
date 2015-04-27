@@ -3,16 +3,10 @@
 Provides basic construction and analysis capabilities for trusses.
 
 ## Construction
-1. Option to initialize a random truss design.
-2. Add/remove member
-3. Change size of member
-5. Add/remove joint
-6. Move joint
+Add joints and members, and vary the material and cross-section of specific members in the truss. There is also an Option to create truss from <code>.trs</code> file
 
 ## Analysis
-1. Calculate mass
-2. Calculate force/FOS
-
+Calculate mass, forces, and the factor of safety (FOS) against buckling and yielding. Create a truss analysis report that provides approximate design recommendations
 
 ### Acknowledgements
-Force calculations based on this MATLAB function by [Hossein Rahami](http://www.mathworks.com/matlabcentral/fileexchange/authors/27559).
+Force calculations based on a MATLAB function by [Hossein Rahami](http://www.mathworks.com/matlabcentral/fileexchange/authors/27559).

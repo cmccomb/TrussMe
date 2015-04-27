@@ -194,7 +194,9 @@ class Truss(object):
         else:
             self.limit_state = 'yielding'
 
-    def print_report(self, file_name=""):
+    def report(self, file_name=""):
+        print(os.getcwd())
+
         # DO the calcs
         self.calc_mass()
         self.calc_fos()

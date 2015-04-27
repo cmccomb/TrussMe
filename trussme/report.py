@@ -55,7 +55,7 @@ def print_summary(f, the_truss):
                       + str(success_string[1])
                       + " were satisfied.")
             else:
-                pw(f, "\t- The design goals for", nl=False)
+                pw(f, "\t- The design goals for ", nl=False)
                 for st in success_string[0:-1]:
                     pw(f, st+",", nl=False)
                 pw(f, "and "+str(success_string[-1])+" were satisfied.")
@@ -71,7 +71,7 @@ def print_summary(f, the_truss):
                       + str(failure_string[1])
                       + " were not satisfied.")
             else:
-                pw(f, "\t- The design goals for", nl=False)
+                pw(f, "\t- The design goals for ", nl=False)
                 for st in failure_string[0:-1]:
                     pw(f, st+",", nl=False)
                 pw(f, "and "+str(failure_string[-1])+" were not satisfied.")
