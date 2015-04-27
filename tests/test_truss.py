@@ -70,7 +70,10 @@ class TestSequenceFunctions(unittest.TestCase):
         self.B.print_report("report_2.txt")
 
     def test_same_output(self):
-        self.assertTrue(filecmp.cmp("report_1.txt", "report_2.txt"))
+        file_are_the_same = filecmp.cmp(
+            os.path.join(os.path.dirname(__file__), 'report_1.txt'),
+            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        self.assertTrue(file_are_the_same)
 
 
 if __name__ == "__main__":
