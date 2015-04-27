@@ -5,6 +5,7 @@ from trussme import truss
 
 TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
 
+
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
@@ -12,17 +13,17 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_truss_construction(self):
         self.T.add_support(numpy.array([0.0, 0.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([1.0, 0.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([2.0, 0.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([3.0, 0.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([4.0, 0.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([1.0, 0.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([2.0, 0.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([3.0, 0.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([4.0, 0.0, 0.0]), d=2)
         self.T.add_support(numpy.array([5.0, 0.0, 0.0]), d=2)
 
-        self.T.add_joint(  numpy.array([0.5, 1.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([1.5, 1.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([2.5, 1.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([3.5, 1.0, 0.0]), d=2)
-        self.T.add_joint(  numpy.array([4.5, 1.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([0.5, 1.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([1.5, 1.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([2.5, 1.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([3.5, 1.0, 0.0]), d=2)
+        self.T.add_joint(numpy.array([4.5, 1.0, 0.0]), d=2)
 
         self.T.joints[7].loads[1] = -20000
         self.T.joints[8].loads[1] = -20000
