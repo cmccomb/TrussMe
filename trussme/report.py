@@ -57,7 +57,7 @@ def print_summary(f, the_truss):
             else:
                 pw(f, "\t- The design goals for ", nl=False)
                 for st in success_string[0:-1]:
-                    pw(f, st+",", nl=False)
+                    pw(f, st+", ", nl=False)
                 pw(f, "and "+str(success_string[-1])+" were satisfied.")
 
         if len(failure_string) is not 0:
@@ -71,7 +71,7 @@ def print_summary(f, the_truss):
                       + str(failure_string[1])
                       + " were not satisfied.")
             else:
-                pw(f, "\t- The design goals for ", nl=False)
+                pw(f, "\t- The design goals for", nl=False)
                 for st in failure_string[0:-1]:
                     pw(f, st+",", nl=False)
                 pw(f, "and "+str(failure_string[-1])+" were not satisfied.")
@@ -314,12 +314,12 @@ def print_recommendations(f, the_truss):
 
 def pw(f, string, nl=True, v=True):
     if nl is False:
-        if v is False:
+        if v is True:
             print(string),
         if f is not "":
             f.write(string)
     elif nl is True:
-        if v is False:
+        if v is True:
             print(string)
         if f is not "":
             f.write(string+"\n")
