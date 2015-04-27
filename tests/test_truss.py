@@ -1,6 +1,7 @@
 import numpy
 import unittest
 import os
+import filecmp
 from trussme import truss
 
 TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
@@ -56,7 +57,7 @@ class TestSequenceFunctions(unittest.TestCase):
                         max_mass=5.0,
                         max_deflection=6e-3)
 
-        self.T.print_report()
+        self.T.print_report("report_1.txt")
 
     def test_truss_from_file(self):
         self.B = truss.Truss(TEST_TRUSS_FILENAME)
@@ -66,7 +67,10 @@ class TestSequenceFunctions(unittest.TestCase):
                         max_mass=5.0,
                         max_deflection=6e-3)
 
-        self.B.print_report()
+        self.B.print_report("report_2.txt")
+
+    def test_same_output(self):
+        self.assertTrue(filecmp.cmp("report_1.txt", "report_2.txt"))
 
 
 if __name__ == "__main__":

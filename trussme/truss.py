@@ -194,19 +194,29 @@ class Truss(object):
         else:
             self.limit_state = 'yielding'
 
-    def print_report(self):
+    def print_report(self, file_name=""):
         # DO the calcs
         self.calc_mass()
         self.calc_fos()
 
-        print(time.strftime('%X %x %Z'))
-        print(os.getcwd())
+        if file_name is "":
+            f = ""
+        else:
+            f = open(file_name, 'w')
 
-        report.print_summary(self)
+        # Print date and time
+        report.pw(f, time.strftime('%X %x %Z'))
+        report.pw(f, os.getcwd())
 
-        report.print_instantiation_information(self)
+        report.print_summary(f, self)
 
-        report.print_stress_analysis(self)
+        report.print_instantiation_information(f, self)
+
+        report.print_stress_analysis(f, self)
 
         if self.THERE_ARE_GOALS:
-            report.print_recommendations(self)
+            report.print_recommendations(f, self)
+
+        # Try to close, and except if
+        if file_name is not "":
+            f.close()
