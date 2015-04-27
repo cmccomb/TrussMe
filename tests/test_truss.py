@@ -57,7 +57,8 @@ class TestSequenceFunctions(unittest.TestCase):
                         max_mass=5.0,
                         max_deflection=6e-3)
 
-        self.T.print_report("report_1.txt")
+        self.T.print_report(
+            os.path.join(os.path.dirname(__file__), 'report_1.txt'))
 
     def test_truss_from_file(self):
         self.B = truss.Truss(TEST_TRUSS_FILENAME)
@@ -67,7 +68,8 @@ class TestSequenceFunctions(unittest.TestCase):
                         max_mass=5.0,
                         max_deflection=6e-3)
 
-        self.B.print_report("report_2.txt")
+        self.B.print_report(
+            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
 
     def test_same_output(self):
         file_are_the_same = filecmp.cmp(

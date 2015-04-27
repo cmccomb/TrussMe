@@ -312,12 +312,14 @@ def print_recommendations(f, the_truss):
         pw(f, "No recommendations. All design goals met.")
 
 
-def pw(f, string, nl=True):
+def pw(f, string, nl=True, v=True):
     if nl is False:
-        print(string),
+        if v is False:
+            print(string),
         if f is not "":
             f.write(string)
     elif nl is True:
-        print(string)
+        if v is False:
+            print(string)
         if f is not "":
             f.write(string+"\n")
