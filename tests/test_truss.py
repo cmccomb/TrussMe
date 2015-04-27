@@ -58,8 +58,6 @@ class TestSequenceFunctions(unittest.TestCase):
                          max_mass=5.0,
                          max_deflection=6e-3)
 
-
-        print(os.path.join(os.path.dirname(__file__), 'report_1.txt'))
         self.T1.report(
             os.path.join(os.path.dirname(__file__), 'report_1.txt'))
 
