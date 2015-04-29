@@ -221,3 +221,47 @@ class Truss(object):
         # Try to close, and except if
         if file_name is not "":
             f.close()
+
+    def save(self, file_name=""):
+        if file_name is "":
+            file_name = time.strftime('%X %x %Z')
+
+        with open(file_name, "w") as f:
+            # Do the joints
+            load_string = ""
+            for j in self.joints:
+                f.write("J" + "\t"
+                        + str(j.coordinates[0]) + "\t"
+                        + str(j.coordinates[1]) + "\t"
+                        + str(j.coordinates[2]) + "\t"
+                        + str(j.translation[0, 0]) + "\t"
+                        + str(j.translation[1, 0]) + "\t"
+                        + str(j.translation[2, 0]) + "\n")
+                if numpy.sum(j.loads) != 0:
+                    load_string += "L" + "\t"
+                    load_string += str(j.idx) + "\t"
+                    load_string += str(j.loads[0, 0]) + "\t"
+                    load_string += str(j.loads[1, 0]) + "\t"
+                    load_string += str(j.loads[2, 0]) + "\t"
+                    load_string += "\n"
+
+
+            # Do the members
+            for m in self.members:
+                f.write("M" + "\t"
+                        + str(m.joints[0].idx) + "\t"
+                        + str(m.joints[1].idx) + "\t"
+                        + m.material + "\t"
+                        + m.shape + "\t")
+                if m.t != "N/A":
+                    f.write("t=" + str(m.t) + "\t")
+                if m.r != "N/A":
+                    f.write("r=" + str(m.r) + "\t")
+                if m.w != "N/A":
+                    f.write("w=" + str(m.w) + "\t")
+                if m.h != "N/A":
+                    f.write("h=" + str(m.h) + "\t")
+                f.write("\n")
+
+            # Do the loads
+            f.write(load_string)

@@ -70,6 +70,11 @@ class TestSequenceFunctions(unittest.TestCase):
         self.T2.report(
             os.path.join(os.path.dirname(__file__), 'report_2.txt'))
 
+    def test_save_and_rebuild(self):
+        self.T2.save("asdf.trs")
+        self.T3 = truss.Truss("asdf.trs")
+        self.T3.report("report_3.txt")
+
     # Currently faulty, need to fix.
     # def test_same_output(self):
         # file_are_the_same = filecmp.cmp(
