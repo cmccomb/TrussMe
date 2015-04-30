@@ -1,6 +1,8 @@
 # truss-me [![Build Status](https://travis-ci.org/cmccomb/truss-me.svg?branch=master)](https://travis-ci.org/cmccomb/truss-me)
 Provides basic construction and analysis capabilities for trusses.
 
+![Truss me, k?](http://cdn.meme.am/instances/500x/61734928.jpg)
+
 ## Construction
 Add joints and members, and vary the material and cross-section of specific members in the truss. There is also an option to create truss from <code>.trs</code> file
 

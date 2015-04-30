@@ -245,7 +245,6 @@ class Truss(object):
                     load_string += str(j.loads[2, 0]) + "\t"
                     load_string += "\n"
 
-
             # Do the members
             for m in self.members:
                 f.write("M" + "\t"

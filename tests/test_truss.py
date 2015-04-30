@@ -10,10 +10,8 @@ TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
+        # Build truss from scratch
         self.T1 = truss.Truss()
-        self.T2 = truss.Truss(TEST_TRUSS_FILENAME)
-
-    def test_truss_construction(self):
         self.T1.add_support(numpy.array([0.0, 0.0, 0.0]), d=2)
         self.T1.add_joint(numpy.array([1.0, 0.0, 0.0]), d=2)
         self.T1.add_joint(numpy.array([2.0, 0.0, 0.0]), d=2)
@@ -58,29 +56,49 @@ class TestSequenceFunctions(unittest.TestCase):
                          max_mass=5.0,
                          max_deflection=6e-3)
 
-        self.T1.report(
-            os.path.join(os.path.dirname(__file__), 'report_1.txt'))
-
-    def test_truss_from_file(self):
+        # Build truss from file
+        self.T2 = truss.Truss(TEST_TRUSS_FILENAME)
         self.T2.set_goal(min_fos_buckling=1.5,
                          min_fos_yielding=1.5,
                          max_mass=5.0,
                          max_deflection=6e-3)
 
+    def test_save_and_compare(self):
+        # Save reports
+        self.T1.report(
+            os.path.join(os.path.dirname(__file__), 'report_1.txt'))
         self.T2.report(
             os.path.join(os.path.dirname(__file__), 'report_2.txt'))
 
+        # Test for sameness
+        file_are_the_same = filecmp.cmp(
+            os.path.join(os.path.dirname(__file__), 'report_1.txt'),
+            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        self.assertTrue(file_are_the_same)
+
+        print(os.system('ls'))
+
     def test_save_and_rebuild(self):
+        # Save
+        self.T2.report(
+            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
         self.T2.save("asdf.trs")
+
+        # Rebuild
         self.T3 = truss.Truss("asdf.trs")
+        self.T3.set_goal(min_fos_buckling=1.5,
+                         min_fos_yielding=1.5,
+                         max_mass=5.0,
+                         max_deflection=6e-3)
         self.T3.report("report_3.txt")
+
+        print(os.system('ls'))
+
+        # Compare
 
     # Currently faulty, need to fix.
     # def test_same_output(self):
-        # file_are_the_same = filecmp.cmp(
-        #     os.path.join(os.path.dirname(__file__), 'report_1.txt'),
-            # os.path.join(os.path.dirname(__file__), 'report_2.txt'))
-        # self.assertTrue(file_are_the_same)
+    #     print(os.system('ls'))
 
 
 if __name__ == "__main__":
