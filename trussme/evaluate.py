@@ -20,9 +20,11 @@ def the_forces(truss_info):
         length = numpy.linalg.norm(length_vector)
         direction = length_vector/length
         d2 = numpy.outer(direction, direction)
-        ea_over_l = truss_info["elastic_modulus"][i]*truss_info["area"][i]/length
+        ea_over_l = truss_info["elastic_modulus"][i]*truss_info["area"][i]\
+            / length
         ss = ea_over_l*numpy.concatenate((numpy.concatenate((d2, -d2), axis=1),
-            numpy.concatenate((-d2, d2), axis=1)), axis=0)
+                                          numpy.concatenate((-d2, d2), axis=1)),
+                                         axis=0)
         tj[:, i] = ea_over_l*direction
         e = list(range((3*ends[0]), (3*ends[0] + 3))) \
             + list(range((3*ends[1]), (3*ends[1] + 3)))
