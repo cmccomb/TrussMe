@@ -88,7 +88,8 @@ class TestSequenceFunctions(unittest.TestCase):
                          min_fos_yielding=1.5,
                          max_mass=5.0,
                          max_deflection=6e-3)
-        self.T3.report("report_3.txt")
+        self.T3.report(
+            os.path.join(os.path.dirname(__file__), 'report_3.txt'))
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
