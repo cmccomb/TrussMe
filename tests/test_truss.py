@@ -64,8 +64,8 @@ class TestSequenceFunctions(unittest.TestCase):
                     max_deflection=6e-3)
 
         # Save reports
-        t1.report(os.path.join(os.path.dirname(__file__), 'report_1.txt'))
-        t2.report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        t1.save_report(os.path.join(os.path.dirname(__file__), 'report_1.txt'))
+        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
@@ -86,8 +86,8 @@ class TestSequenceFunctions(unittest.TestCase):
                     max_deflection=6e-3)
 
         # Save
-        t2.report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
-        t2.save(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
+        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        t2.save_truss(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
 
         # Rebuild
         t3 = truss.Truss(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
@@ -95,7 +95,7 @@ class TestSequenceFunctions(unittest.TestCase):
                     min_fos_yielding=1.5,
                     max_mass=5.0,
                     max_deflection=6e-3)
-        t3.report(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
+        t3.save_report(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(

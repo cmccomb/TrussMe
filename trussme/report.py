@@ -3,16 +3,16 @@ import pandas
 import trussme.physical_properties as pp
 
 
-def print_summary(f, the_truss):
-    pw(f, "\n")
-    pw(f, "(0) SUMMARY OF ANALYSIS")
-    pw(f, "=============================")
+def print_summary(f, the_truss, verb=False):
+    pw(f, "\n", v=verb)
+    pw(f, "(0) SUMMARY OF ANALYSIS", v=verb)
+    pw(f, "=============================", v=verb)
     pw(f, "\t- The truss has a mass of "
           + format(the_truss.mass, '.2f')
           + " kg, and a total factor of safety of "
           + format(the_truss.fos_total, '.2f')
-          + ". ")
-    pw(f, "\t- The limit state is " + the_truss.limit_state + ".")
+          + ". ", v=verb)
+    pw(f, "\t- The limit state is " + the_truss.limit_state + ".", v=verb)
 
     if the_truss.THERE_ARE_GOALS:
         success_string = []
@@ -47,43 +47,43 @@ def print_summary(f, the_truss):
         if len(success_string) is not 0:
             if len(success_string) is 1:
                 pw(f, "\t- The design goal for " + str(success_string[0])
-                      + " was satisfied.")
+                      + " was satisfied.", v=verb)
             elif len(success_string) is 2:
                 pw(f, "\t- The design goals for "
                       + str(success_string[0])
                       + " and "
                       + str(success_string[1])
-                      + " were satisfied.")
+                      + " were satisfied.", v=verb)
             else:
-                pw(f, "\t- The design goals for ", nl=False)
+                pw(f, "\t- The design goals for ", nl=False, v=verb)
                 for st in success_string[0:-1]:
-                    pw(f, st+", ", nl=False)
-                pw(f, "and "+str(success_string[-1])+" were satisfied.")
+                    pw(f, st+", ", nl=False, v=verb)
+                pw(f, "and "+str(success_string[-1])+" were satisfied.", v=verb)
 
         if len(failure_string) is not 0:
             if len(failure_string) is 1:
                 pw(f, "\t- The design goal for " + str(failure_string[0])
-                      + " was not satisfied.")
+                      + " was not satisfied.", v=verb)
             elif len(failure_string) is 2:
                 pw(f, "\t- The design goals for "
                       + str(failure_string[0])
                       + " and "
                       + str(failure_string[1])
-                      + " were not satisfied.")
+                      + " were not satisfied.", v=verb)
             else:
-                pw(f, "\t- The design goals for", nl=False)
+                pw(f, "\t- The design goals for", nl=False, v=verb)
                 for st in failure_string[0:-1]:
-                    pw(f, st+",", nl=False)
-                pw(f, "and "+str(failure_string[-1])+" were not satisfied.")
+                    pw(f, st+",", nl=False, v=verb)
+                pw(f, "and "+str(failure_string[-1])+" were not satisfied.", v=verb)
 
 
-def print_instantiation_information(f, the_truss):
-    pw(f, "\n")
-    pw(f, "(1) INSTANTIATION INFORMATION")
-    pw(f, "=============================")
+def print_instantiation_information(f, the_truss, verb=False):
+    pw(f, "\n", v=verb)
+    pw(f, "(1) INSTANTIATION INFORMATION", v=verb)
+    pw(f, "=============================", v=verb)
 
     # Print joint information
-    pw(f, "\n--- JOINTS ---")
+    pw(f, "\n--- JOINTS ---", v=verb)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -103,10 +103,10 @@ def print_instantiation_information(f, the_truss):
                                     "X-Support",
                                     "Y-Support",
                                     "Z-Support"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
     # Print member information
-    pw(f, "\n--- MEMBERS ---")
+    pw(f, "\n--- MEMBERS ---", v=verb)
     data = []
     rows = []
     for m in the_truss.members:
@@ -130,11 +130,11 @@ def print_instantiation_information(f, the_truss):
                                     "Width(m)",
                                     "Radius(m)",
                                     "Thickness(m)"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
     # Print material list
     unique_materials = numpy.unique([m.material for m in the_truss.members])
-    pw(f, "\n--- MATERIALS ---")
+    pw(f, "\n--- MATERIALS ---", v=verb)
     data = []
     rows = []
     for mat in unique_materials:
@@ -149,16 +149,16 @@ def print_instantiation_information(f, the_truss):
                            columns=["Density(kg/m3)",
                                     "Elastic Modulus(GPa)",
                                     "Yield Strength(MPa)"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
 
-def print_stress_analysis(f, the_truss):
-    pw(f, "\n")
-    pw(f, "(2) STRESS ANALYSIS INFORMATION")
-    pw(f, "===============================")
+def print_stress_analysis(f, the_truss, verb=False):
+    pw(f, "\n", v=verb)
+    pw(f, "(2) STRESS ANALYSIS INFORMATION", v=verb)
+    pw(f, "===============================", v=verb)
 
     # Print information about loads
-    pw(f, "\n--- LOADING ---")
+    pw(f, "\n--- LOADING ---", v=verb)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -174,10 +174,10 @@ def print_stress_analysis(f, the_truss):
                            columns=["X-Load",
                                     "Y-Load",
                                     "Z-Load"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
     # Print information about reactions
-    pw(f, "\n--- REACTIONS ---")
+    pw(f, "\n--- REACTIONS ---", v=verb)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -194,10 +194,10 @@ def print_stress_analysis(f, the_truss):
                            columns=["X-Reaction(kN)",
                                     "Y-Reaction(kN)",
                                     "Z-Reaction(kN)"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
     # Print information about members
-    pw(f, "\n--- FORCES AND STRESSES ---")
+    pw(f, "\n--- FORCES AND STRESSES ---", v=verb)
     data = []
     rows = []
     for m in the_truss.members:
@@ -215,10 +215,10 @@ def print_stress_analysis(f, the_truss):
                                     "Axial-force(kN)",
                                     "FOS-yielding",
                                     "FOS-buckling"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
     # Print information about members
-    pw(f, "\n--- DEFLECTIONS ---")
+    pw(f, "\n--- DEFLECTIONS ---", v=verb)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -235,14 +235,14 @@ def print_stress_analysis(f, the_truss):
                            columns=["X-Defl.(mm)",
                                     "Y-Defl.(mm)",
                                     "Z-Defl.(mm)"])
-        .to_string(justify="left"))
+        .to_string(justify="left"), v=verb)
 
 
-def print_recommendations(f, the_truss):
+def print_recommendations(f, the_truss, verb=False):
     made_a_recommendation = False
-    pw(f, "\n")
-    pw(f, "(3) RECOMMENDATIONS")
-    pw(f, "===============================")
+    pw(f, "\n", v=verb)
+    pw(f, "(3) RECOMMENDATIONS", v=verb)
+    pw(f, "===============================", v=verb)
 
     if the_truss.goals["max_mass"] is not -1:
         tm = the_truss.goals["max_mass"]
@@ -262,28 +262,28 @@ def print_recommendations(f, the_truss):
 
         if m.fos_yielding < tyf:
             pw(f, "\t- Member_"+'{0:02d}'.format(m.idx)+" is yielding. "
-                  "Try increasing the cross-sectional area.")
-            pw(f, "\t\t- Current area: " + format(m.I, '.2e') + " m^2")
+                  "Try increasing the cross-sectional area.", v=verb)
+            pw(f, "\t\t- Current area: " + format(m.I, '.2e') + " m^2", v=verb)
             pw(f, "\t\t- Recommended area: "
                   + format(m.area*the_truss.goals["min_fos_yielding"]
-                           / m.fos_yielding, '.2e') + " m^2")
+                           / m.fos_yielding, '.2e') + " m^2", v=verb)
             pw(f, "\t\t- Try increasing member dimensions by a factor of "
                   "at least " + format(pow(the_truss.goals["min_fos_yielding"]
-                                           / m.fos_yielding, 0.5), '.3f'))
+                                           / m.fos_yielding, 0.5), '.3f'), v=verb)
             made_a_recommendation = True
 
         if 0 < m.fos_buckling < tbf:
             pw(f, "\t- Member_"+'{0:02d}'.format(m.idx)+" is buckling. "
-                  "Try increasing the moment of inertia.")
+                  "Try increasing the moment of inertia.", v=verb)
             pw(f, "\t\t- Current moment of inertia: "
-                  + format(m.I, '.2e') + " m^4")
+                  + format(m.I, '.2e') + " m^4", v=verb)
             pw(f, "\t\t- Recommended moment of inertia: "
                   + format(m.I*the_truss.goals["min_fos_buckling"]
-                           / m.fos_buckling, '.2e') + " m^4")
+                           / m.fos_buckling, '.2e') + " m^4", v=verb)
             pw(f, "\t\t- Try increasing member dimensions by a factor of "
                   "at least " + format(pow(the_truss.goals["min_fos_buckling"]
                                            / m.fos_buckling, 0.25), '.3f')
-                  + ".")
+                  + ".", v=verb)
             made_a_recommendation = True
 
         if m.fos_buckling > tbf \
@@ -292,7 +292,7 @@ def print_recommendations(f, the_truss):
             if the_truss.mass > the_truss.goals["max_mass"]:
                 pw(f, "\t- Member_"+'{0:02d}'.format(m.idx)+" is strong "
                       "enough, so try decreasing the cross-sectional area "
-                      "to decrease mass.")
+                      "to decrease mass.", v=verb)
             made_a_recommendation = True
 
     for j in the_truss.joints:
@@ -304,12 +304,12 @@ def print_recommendations(f, the_truss):
         if numpy.linalg.norm(j.deflections) > td:
             pw(f, "\t- Joint_"+'{0:02d}'.format(j.idx)+" is deflecting "
                   "excessively. Try increasing the cross-sectional area of "
-                  "adjacent members. These include:")
+                  "adjacent members. These include:", v=verb)
             for m in j.members:
-                pw(f, "\t\t- Member_"+'{0:02d}'.format(m.idx))
+                pw(f, "\t\t- Member_"+'{0:02d}'.format(m.idx), v=verb)
 
     if not made_a_recommendation:
-        pw(f, "No recommendations. All design goals met.")
+        pw(f, "No recommendations. All design goals met.", v=verb)
 
 
 def pw(f, string, nl=True, v=False):
