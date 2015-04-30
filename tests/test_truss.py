@@ -76,8 +76,6 @@ class TestSequenceFunctions(unittest.TestCase):
             os.path.join(os.path.dirname(__file__), 'report_2.txt'))
         self.assertTrue(file_are_the_same)
 
-        print(os.system('ls'))
-
     def test_save_and_rebuild(self):
         # Save
         self.T2.report(
@@ -92,14 +90,11 @@ class TestSequenceFunctions(unittest.TestCase):
                          max_deflection=6e-3)
         self.T3.report("report_3.txt")
 
-        print(os.system('ls'))
-
-        # Compare
-
-    # Currently faulty, need to fix.
-    # def test_same_output(self):
-    #     print(os.system('ls'))
-
+        # Test for sameness
+        file_are_the_same = filecmp.cmp(
+            os.path.join(os.path.dirname(__file__), 'report_3.txt'),
+            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        self.assertTrue(file_are_the_same)
 
 if __name__ == "__main__":
     unittest.main()
