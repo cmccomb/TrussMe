@@ -6,6 +6,7 @@ from trussme import evaluate
 from trussme.physical_properties import g
 import time
 import os
+import warnings
 
 
 class Truss(object):
@@ -27,6 +28,7 @@ class Truss(object):
         self.fos_buckling = 0
         self.fos_total = 0
         self.limit_state = ''
+        self.condition = 0
 
         # Design goals
         self.goals = {"min_fos_total": -1,
@@ -168,7 +170,8 @@ class Truss(object):
                       "loads": loads,
                       "area": area}
 
-        forces, deflections, reactions = evaluate.the_forces(truss_info)
+        forces, deflections, reactions, self.condition = \
+            evaluate.the_forces(truss_info)
 
         for i in range(self.number_of_members):
             self.members[i].set_force(forces[i])
@@ -193,6 +196,10 @@ class Truss(object):
             self.limit_state = 'buckling'
         else:
             self.limit_state = 'yielding'
+
+        if self.condition > pow(10, 5):
+            warnings.warn("The condition number is " + str(self.condition)
+                          + ". Results may be inaccurate.")
 
     def __report(self, file_name="", verb=False):
 

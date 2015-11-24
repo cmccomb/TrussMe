@@ -1,6 +1,5 @@
 import numpy
 
-
 def the_forces(truss_info):
     tj = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
     w = numpy.array([numpy.size(truss_info["reactions"], axis=0),
@@ -46,9 +45,12 @@ def the_forces(truss_info):
     forces = numpy.sum(numpy.multiply(
         tj, deflections[:, truss_info["connections"][1, :]]
         - deflections[:, truss_info["connections"][0, :]]), axis=0)
-    if numpy.linalg.cond(SSff) > pow(10, 10):
-        forces *= pow(10, 10)
+
+    # Check the condition number, and warn the user if it is out of range
+    cond = numpy.linalg.cond(SSff)
+
+    # Compute the reactions
     reactions = numpy.sum(dof*deflections.T.flat[:], axis=1)\
         .reshape([w[1], w[0]]).T
 
-    return forces, deflections, reactions
+    return forces, deflections, reactions, cond
