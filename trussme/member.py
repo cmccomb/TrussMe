@@ -151,12 +151,12 @@ class Member(object):
             self.I = (numpy.pi/4.)*(self.r**4 - (self.r - 2*self.t)**4)
         elif self.shape == "bar":
             self.I = (numpy.pi/4.)*self.r**4
-        elif self.shape == "box":
+        elif self.shape == "square":
             if self.h > self.w:
                 self.I = (1./12.)*self.w*self.h**3
             else:
                 self.I = (1./12.)*self.h*self.w**3
-        elif self.shape == "square":
+        elif self.shape == "box":
             if self.h > self.w:
                 self.I = (1./12.)*(self.w*self.h**3)\
                     - (1./12.)*(self.w - 2*self.t)*(self.h - 2*self.t)**3
