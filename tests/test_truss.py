@@ -97,10 +97,10 @@ class TestSequenceFunctions(unittest.TestCase):
                     max_deflection=6e-3)
         t3.save_report(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
 
-        # with open(os.path.join(os.path.dirname(__file__), 'report_3.txt')) as f:
-        #     print(f.read())
-        # with open(os.path.join(os.path.dirname(__file__), 'report_2.txt')) as f:
-        #     print(f.read())
+        with open(os.path.join(os.path.dirname(__file__), 'report_3.txt')) as f:
+            print(f.read())
+        with open(os.path.join(os.path.dirname(__file__), 'report_2.txt')) as f:
+            print(f.read())
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
