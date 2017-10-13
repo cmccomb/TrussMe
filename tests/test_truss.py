@@ -108,5 +108,6 @@ class TestSequenceFunctions(unittest.TestCase):
         os.remove(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
         os.remove(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
 
+
 if __name__ == "__main__":
     unittest.main()
