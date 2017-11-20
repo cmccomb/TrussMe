@@ -109,9 +109,9 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertTrue(file_are_the_same)
 
         # Clean up
-        os.remove(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
-        os.remove(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
-        os.remove(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
+        # os.remove(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        # os.remove(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
+        # os.remove(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
 
 
 if __name__ == "__main__":

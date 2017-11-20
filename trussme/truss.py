@@ -213,7 +213,7 @@ class Truss(object):
             f = open(file_name, 'w')
 
         # Print date and time
-        report.pw(f, time.strftime('%X'), v=verb)
+        report.pw(f, time.strftime('%x'), v=verb)
         report.pw(f, os.getcwd(), v=verb)
 
         report.print_summary(f, self, verb=verb)
