@@ -1,3 +1,5 @@
 .idea/*
 tests/report*
 tests/asdf.trs
+test/__pychache__/*
+trussme/__pycache__/*
