@@ -1,1 +1,1 @@
-See [the docs](https://hsdl.github.io/TrussMe/) for more information.
+See [the docs](https://thredgroup.github.io/TrussMe/) for more information.
