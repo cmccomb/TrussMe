@@ -18,4 +18,4 @@ jobs:
       - name: install dependencies
         run: pip install -r requirements.txt
       - name: create the visualization
-        run: nosetests --nocapture
+        run: pip install nosetests && nosetests --nocapture
