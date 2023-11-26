@@ -48,7 +48,7 @@ class Member(object):
         self.set_material("A36", update_props=False)
         self.set_parameters(t=0.002, r=0.02, update_props=True)
 
-    def set_shape(self, new_shape: Literal["pipe", "bar", "square", "box"], update_props: bool = True):
+    def set_shape(self, new_shape: typing.Literal["pipe", "bar", "square", "box"], update_props: bool = True):
         # Read and save hte shape name
         if self.shape_name_is_ok(new_shape):
             self.shape = new_shape
