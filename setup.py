@@ -15,7 +15,7 @@ setup(
     long_description=readme,
     author='Christopher McComb',
     author_email='chris.c.mccomb@gmail.com',
-    url='https://github.com/cmccomb/truss-me',
+    url='https://github.com/cmccomb/TrussMe',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests'))
 )
