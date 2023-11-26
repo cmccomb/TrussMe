@@ -6,7 +6,7 @@ from trussme.physical_properties import materials, valid_material_name
 class Member(object):
 
     # Shape types
-    shapes = ["pipe", "bar", "square", "box"]
+    shapes: list[str] = ["pipe", "bar", "square", "box"]
 
     def __init__(self, joint_a, joint_b):
         # Save id number
