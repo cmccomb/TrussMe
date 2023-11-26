@@ -1,1 +1,2 @@
-See [the docs](https://thredgroup.github.io/TrussMe/) for more information.
+# trussme
+A simple truss solver written in Python.
