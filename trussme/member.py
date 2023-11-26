@@ -1,6 +1,6 @@
 import numpy
 import warnings
-from trussme.physical_properties import materials, valid_member_name
+from trussme.physical_properties import materials, valid_material_name
 
 
 class Member(object):
@@ -74,7 +74,7 @@ class Member(object):
             self.calc_properties()
 
     def set_material(self, new_material, update_props=True):
-        if valid_member_name(new_material):
+        if valid_material_name(new_material):
             self.material = new_material
         else:
             raise ValueError(new_material+' is not a defined shape. Try ' +

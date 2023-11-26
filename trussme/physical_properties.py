@@ -15,7 +15,7 @@ materials = {"A36":     {"rho": 7800,
 
 
 # Checks to see if material name is valid
-def valid_member_name(name):
+def valid_material_name(name):
     if name in materials.keys():
         return True
     else:
