@@ -1,5 +1,6 @@
 import numpy
 
+
 def the_forces(truss_info):
     tj = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
     w = numpy.array([numpy.size(truss_info["reactions"], axis=0),
