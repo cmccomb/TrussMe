@@ -1,0 +1,21 @@
+name: update viz
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  full_update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: pip install -r requirements.txt
+      - name: create the visualization
+        run: nosetests --nocapture
