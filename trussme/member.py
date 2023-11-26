@@ -1,4 +1,5 @@
 import numpy
+import typing
 import warnings
 from trussme.physical_properties import materials, valid_material_name
 
@@ -8,7 +9,7 @@ class Member(object):
     # Shape types
     shapes: list[str] = ["pipe", "bar", "square", "box"]
 
-    def __init__(self, joint_a, joint_b):
+    def __init__(self, joint_a: int, joint_b: int):
         # Save id number
         self.idx = -1
 
@@ -47,7 +48,7 @@ class Member(object):
         self.set_material("A36", update_props=False)
         self.set_parameters(t=0.002, r=0.02, update_props=True)
 
-    def set_shape(self, new_shape, update_props=True):
+    def set_shape(self, new_shape: Literal["pipe", "bar", "square", "box"], update_props: bool = True):
         # Read and save hte shape name
         if self.shape_name_is_ok(new_shape):
             self.shape = new_shape
