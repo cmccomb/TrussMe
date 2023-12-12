@@ -16,5 +16,5 @@ setup(
     author='Christopher McComb',
     author_email='chris.c.mccomb@gmail.com',
     url='https://github.com/cmccomb/TrussMe',
-    packages=find_packages()
+    packages=find_packages(exclude='tests')
 )
