@@ -133,16 +133,16 @@ def print_instantiation_information(f, the_truss, verb=False):
         .to_string(justify="left"), v=verb)
 
     # Print material list
-    unique_materials = numpy.unique([m.material for m in the_truss.members])
+    unique_materials = list({v['name']:v for v in the_truss.materials}.values())
     pw(f, "\n--- MATERIALS ---", v=verb)
     data = []
     rows = []
     for mat in unique_materials:
-        rows.append(mat)
+        rows.append(mat["name"])
         data.append([
-            str(pp.materials[mat]["rho"]),
-            str(pp.materials[mat]["E"]/pow(10, 9)),
-            str(pp.materials[mat]["Fy"]/pow(10, 6))])
+            str(mat["rho"]),
+            str(mat["E"]/pow(10, 9)),
+            str(mat["Fy"]/pow(10, 6))])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,

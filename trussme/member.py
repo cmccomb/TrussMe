@@ -1,7 +1,7 @@
 import numpy
 import typing
 import warnings
-from trussme.physical_properties import materials, valid_material_name
+from trussme.physical_properties import Material, MATERIALS
 
 
 class Member(object):
@@ -45,7 +45,7 @@ class Member(object):
 
         # Calculate properties
         self.set_shape("pipe", update_props=False)
-        self.set_material("A36", update_props=False)
+        self.set_material(MATERIALS[0], update_props=False)
         self.set_parameters(t=0.002, r=0.02, update_props=True)
 
     def set_shape(self, new_shape: typing.Literal["pipe", "bar", "square", "box"], update_props: bool = True):
@@ -74,18 +74,12 @@ class Member(object):
         if update_props:
             self.calc_properties()
 
-    def set_material(self, new_material, update_props=True):
-        if valid_material_name(new_material):
-            self.material = new_material
-        else:
-            raise ValueError(new_material+' is not a defined shape. Try ' +
-                             ', '.join(materials.keys()[0:-1]) + ', or ' +
-                             materials.keys()[-1] + '.')
-
+    def set_material(self, new_material: Material, update_props: bool = True):
         # Set material properties
-        self.rho = materials[new_material]["rho"]
-        self.elastic_modulus = materials[new_material]["E"]
-        self.Fy = materials[new_material]["Fy"]
+        self.material = new_material["name"]
+        self.rho = new_material["rho"]
+        self.elastic_modulus = new_material["E"]
+        self.Fy = new_material["Fy"]
 
         # If required, update properties
         if update_props:

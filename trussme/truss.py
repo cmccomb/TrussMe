@@ -3,7 +3,7 @@ from trussme import joint
 from trussme import member
 from trussme import report
 from trussme import evaluate
-from trussme.physical_properties import g
+from trussme.physical_properties import g, Material, MATERIALS
 import time
 import os
 import warnings
@@ -17,6 +17,9 @@ class Truss(object):
 
         # Make a list to store joints in
         self.joints = []
+
+        # Make a list to store materials in
+        self.materials: list[Material] = [MATERIALS[0]]
 
         # Variables to store number of joints and members
         self.number_of_joints = 0
@@ -41,7 +44,16 @@ class Truss(object):
         if file_name is not "":
             with open(file_name, 'r') as f:
                 for idx, line in enumerate(f):
-                    if line[0] is "J":
+                    if line[0] is "S":
+                        info = line.split()[1:]
+                        self.materials.append({
+                            "name": info[0],
+                            "rho": float(info[1]),
+                            "E": float(info[2]),
+                            "Fy": float(info[3]),
+                        })
+
+                    elif line[0] is "J":
                         info = line.split()[1:]
                         self.add_joint(numpy.array(
                             [float(x) for x in info[:3]]))
@@ -50,7 +62,8 @@ class Truss(object):
                     elif line[0] is "M":
                         info = line.split()[1:]
                         self.add_member(int(info[0]), int(info[1]))
-                        self.members[-1].set_material(info[2])
+                        material = next(item for item in self.materials if item["name"] == info[2])
+                        self.members[-1].set_material(material)
                         self.members[-1].set_shape(info[3])
 
                         # Parse parameters
