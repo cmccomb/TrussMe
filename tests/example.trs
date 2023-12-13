@@ -5,7 +5,7 @@
 # This block defines materials used in subsequent member definitions. The
 # order of hte columns is:
 # S name, density, elastic modulus, yield strength
-S   A36 7800.0  200_000_000_000.0   250_000_000.0
+S   A36_Steel 7800.0  200_000_000_000.0   250_000_000.0
 
 # This block defines joints. The order of the columns is
 # J X-coord, Y-coord, Z-coord, X-support, Y-support, Z-support
@@ -23,25 +23,25 @@ J   4.5   1.0   0.0   0   0   1
 
 # This block defines members. The order of the columns is
 # M joint1, joint2, material, shape, {parameters for shape, t=X, etc.}
-M   0   1   A36 pipe    r=0.02    t=0.002
-M   1   2   A36 pipe    r=0.02    t=0.002
-M   2   3   A36 pipe    r=0.02    t=0.002
-M   3   4   A36 pipe    r=0.02    t=0.002
-M   4   5   A36 pipe    r=0.02    t=0.002
-M   6   7   A36 pipe    r=0.02    t=0.002
-M   7   8   A36 pipe    r=0.02    t=0.002
-M   8   9   A36 pipe    r=0.02    t=0.002
-M   9   10  A36 pipe    r=0.02    t=0.002
-M   0   6   A36 pipe    r=0.02    t=0.002
-M   6   1   A36 pipe    r=0.02    t=0.002
-M   1   7   A36 pipe    r=0.02    t=0.002
-M   7   2   A36 pipe    r=0.02    t=0.002
-M   2   8   A36 pipe    r=0.02    t=0.002
-M   8   3   A36 pipe    r=0.02    t=0.002
-M   3   9   A36 pipe    r=0.02    t=0.002
-M   9   4   A36 pipe    r=0.02    t=0.002
-M   4   10  A36 pipe    r=0.02    t=0.002
-M   10  5   A36 pipe    r=0.02    t=0.002
+M   0   1   A36_Steel pipe    r=0.02    t=0.002
+M   1   2   A36_Steel pipe    r=0.02    t=0.002
+M   2   3   A36_Steel pipe    r=0.02    t=0.002
+M   3   4   A36_Steel pipe    r=0.02    t=0.002
+M   4   5   A36_Steel pipe    r=0.02    t=0.002
+M   6   7   A36_Steel pipe    r=0.02    t=0.002
+M   7   8   A36_Steel pipe    r=0.02    t=0.002
+M   8   9   A36_Steel pipe    r=0.02    t=0.002
+M   9   10  A36_Steel pipe    r=0.02    t=0.002
+M   0   6   A36_Steel pipe    r=0.02    t=0.002
+M   6   1   A36_Steel pipe    r=0.02    t=0.002
+M   1   7   A36_Steel pipe    r=0.02    t=0.002
+M   7   2   A36_Steel pipe    r=0.02    t=0.002
+M   2   8   A36_Steel pipe    r=0.02    t=0.002
+M   8   3   A36_Steel pipe    r=0.02    t=0.002
+M   3   9   A36_Steel pipe    r=0.02    t=0.002
+M   9   4   A36_Steel pipe    r=0.02    t=0.002
+M   4   10  A36_Steel pipe    r=0.02    t=0.002
+M   10  5   A36_Steel pipe    r=0.02    t=0.002
 
 # This block defines loads. The order of the columns is:
 # L joint, x-load, y-load, z-load

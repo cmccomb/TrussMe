@@ -16,7 +16,7 @@ Material = TypedDict("Material", {
 # Material properties
 MATERIALS: list[Material] = [
     {
-        "name": "A36",
+        "name": "A36_Steel",
         "rho": 7800.0,
         "E":   200*pow(10, 9),
         "Fy":  250*pow(10, 6)
