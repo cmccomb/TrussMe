@@ -12,7 +12,7 @@ import warnings
 
 class Truss(object):
 
-    def __init__(self, file_name=""):
+    def __init__(self, file_name: str = ""):
         # Make a list to store members in
         self.members: list[Member] = []
 
