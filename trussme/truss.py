@@ -12,7 +12,7 @@ import warnings
 
 class Truss(object):
 
-    def __init__(self, file_name: str = ""):
+    def __init__(self):
         # Make a list to store members in
         self.members: list[Member] = []
 
@@ -41,48 +41,6 @@ class Truss(object):
                       "max_mass": -1,
                       "max_deflection": -1}
         self.THERE_ARE_GOALS = False
-
-        if file_name is not "":
-            with open(file_name, 'r') as f:
-                for idx, line in enumerate(f):
-                    if line[0] is "S":
-                        info = line.split()[1:]
-                        self.materials.append({
-                            "name": info[0],
-                            "rho": float(info[1]),
-                            "E": float(info[2]),
-                            "Fy": float(info[3]),
-                        })
-
-                    elif line[0] is "J":
-                        info = line.split()[1:]
-                        self.add_joint(numpy.array(
-                            [float(x) for x in info[:3]]))
-                        self.joints[-1].translation = numpy.array(
-                            [[int(x)] for x in info[3:]])
-                    elif line[0] is "M":
-                        info = line.split()[1:]
-                        self.add_member(int(info[0]), int(info[1]))
-                        material = next(item for item in self.materials if item["name"] == info[2])
-                        self.members[-1].set_material(material)
-                        self.members[-1].set_shape(info[3])
-
-                        # Parse parameters
-                        ks = []
-                        vs = []
-                        for param in range(4, len(info)):
-                            kvpair = info[param].split("=")
-                            ks.append(kvpair[0])
-                            vs.append(float(kvpair[1]))
-                        self.members[-1].set_parameters(**dict(zip(ks, vs)))
-                    elif line[0] is "L":
-                        info = line.split()[1:]
-                        self.joints[int(info[0])].loads[0] = float(info[1])
-                        self.joints[int(info[0])].loads[1] = float(info[2])
-                        self.joints[int(info[0])].loads[2] = float(info[3])
-                    elif line[0] is not "#" and not line.isspace():
-                        raise ValueError("'"+line[0] +
-                                         "' is not a valid line beginner.")
 
     def set_goal(self, **kwargs):
         self.THERE_ARE_GOALS = True
@@ -294,3 +252,50 @@ class Truss(object):
 
             # Do the loads
             f.write(load_string)
+
+
+def read_trs(file_name: str) -> Truss:
+    truss = Truss()
+
+    with open(file_name, 'r') as f:
+        for idx, line in enumerate(f):
+            if line[0] is "S":
+                info = line.split()[1:]
+                truss.materials.append({
+                    "name": info[0],
+                    "rho": float(info[1]),
+                    "E": float(info[2]),
+                    "Fy": float(info[3]),
+                })
+
+            elif line[0] is "J":
+                info = line.split()[1:]
+                truss.add_joint(numpy.array(
+                    [float(x) for x in info[:3]]))
+                truss.joints[-1].translation = numpy.array(
+                    [[int(x)] for x in info[3:]])
+            elif line[0] is "M":
+                info = line.split()[1:]
+                truss.add_member(int(info[0]), int(info[1]))
+                material = next(item for item in truss.materials if item["name"] == info[2])
+                truss.members[-1].set_material(material)
+                truss.members[-1].set_shape(info[3])
+
+                # Parse parameters
+                ks = []
+                vs = []
+                for param in range(4, len(info)):
+                    kvpair = info[param].split("=")
+                    ks.append(kvpair[0])
+                    vs.append(float(kvpair[1]))
+                truss.members[-1].set_parameters(**dict(zip(ks, vs)))
+            elif line[0] is "L":
+                info = line.split()[1:]
+                truss.joints[int(info[0])].loads[0] = float(info[1])
+                truss.joints[int(info[0])].loads[1] = float(info[2])
+                truss.joints[int(info[0])].loads[2] = float(info[3])
+            elif line[0] is not "#" and not line.isspace():
+                raise ValueError("'" + line[0] +
+                                 "' is not a valid line beginner.")
+
+    return truss

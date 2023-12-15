@@ -2,7 +2,7 @@ import numpy
 import unittest
 import os
 import filecmp
-from trussme import truss
+import trussme
 
 TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
 
@@ -11,7 +11,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_build_methods(self):
         # Build truss from scratch
-        t1 = truss.Truss()
+        t1 = trussme.Truss()
         t1.add_support(numpy.array([0.0, 0.0, 0.0]), d=2)
         t1.add_joint(numpy.array([1.0, 0.0, 0.0]), d=2)
         t1.add_joint(numpy.array([2.0, 0.0, 0.0]), d=2)
@@ -57,7 +57,7 @@ class TestSequenceFunctions(unittest.TestCase):
                     max_deflection=6e-3)
 
         # Build truss from file
-        t2 = truss.Truss(TEST_TRUSS_FILENAME)
+        t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
         t2.set_goal(min_fos_buckling=1.5,
                     min_fos_yielding=1.5,
                     max_mass=5.0,
@@ -79,7 +79,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_save_and_rebuild(self):
         # Build truss from file
-        t2 = truss.Truss(TEST_TRUSS_FILENAME)
+        t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
         t2.set_goal(min_fos_buckling=1.5,
                     min_fos_yielding=1.5,
                     max_mass=5.0,
@@ -90,7 +90,7 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.save_truss(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
 
         # Rebuild
-        t3 = truss.Truss(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
+        t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
         t3.set_goal(min_fos_buckling=1.5,
                     min_fos_yielding=1.5,
                     max_mass=5.0,

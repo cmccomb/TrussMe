@@ -2,6 +2,7 @@ import numpy
 from numpy.typing import NDArray
 from typing import Literal
 
+
 class Joint(object):
 
     def __init__(self, coordinates: NDArray[float]):
