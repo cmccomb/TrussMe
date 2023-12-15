@@ -1,6 +1,6 @@
 import numpy
 import pandas
-import trussme.physical_properties as pp
+import trussme.member as pp
 
 
 def print_summary(f, the_truss, verbose: bool = False):
@@ -140,7 +140,7 @@ def print_instantiation_information(f, the_truss, verbose=False):
     for mat in unique_materials:
         rows.append(mat["name"])
         data.append([
-            str(mat["rho"]),
+            str(mat["density"]),
             str(mat["E"]/pow(10, 9)),
             str(mat["Fy"]/pow(10, 6))])
 

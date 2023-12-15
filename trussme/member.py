@@ -1,8 +1,42 @@
 import numpy
 import warnings
-from trussme.physical_properties import Material, MATERIALS
 from trussme.joint import Joint
-from typing import Literal, Union
+from typing import Literal, Union, TypedDict
+
+
+# Gravitational constant for computing weight from mass
+g: float = 9.80665
+
+
+Material = TypedDict("Material", {
+        "name": str,
+        "density": float,
+        "E": float,
+        "Fy": float,
+})
+
+
+# Material properties
+MATERIALS: list[Material] = [
+    {
+        "name": "A36_Steel",
+        "density": 7800.0,
+        "E":   200*pow(10, 9),
+        "Fy":  250*pow(10, 6)
+    },
+    {
+        "name": "A992_Steel",
+        "density": 7800.0,
+        "E":   200*pow(10, 9),
+        "Fy":  345*pow(10, 6)
+    },
+    {
+        "name": "6061_T6_Aluminum",
+        "density": 2700.0,
+        "E":   68.9*pow(10, 9),
+        "Fy":  276*pow(10, 6)
+    }
+]
 
 
 class Pipe(object):
@@ -58,6 +92,7 @@ class Square(object):
     def to_str(self) -> str:
         return "square"
 
+
 class Box(object):
     def __init__(self, w: float = 0.0, h: float = 0.0, t: float = 0.0):
         self.w: float = w
@@ -96,7 +131,7 @@ class Member(object):
         self.material: str = ''  # string specifying material
         self.elastic_modulus: float = 0.0        # Elastic modulus
         self.Fy: float = 0.0       # yield strength
-        self.rho: float = 0.0      # material density
+        self.density: float = 0.0      # material density
 
         # Dependent variables
         self.area: float = 0.0   # Cross-sectional area
@@ -119,6 +154,8 @@ class Member(object):
         self.set_shape(Pipe(t=0.002, r=0.02), update_props=False)
         self.set_material(MATERIALS[0], update_props=True)
 
+        self.calc_properties()
+
     def set_shape(self, new_shape: Shape, update_props: bool = True):
         self.shape = new_shape
 
@@ -129,7 +166,7 @@ class Member(object):
     def set_material(self, new_material: Material, update_props: bool = True):
         # Set material properties
         self.material = new_material["name"]
-        self.rho = new_material["rho"]
+        self.density = new_material["density"]
         self.elastic_modulus = new_material["E"]
         self.Fy = new_material["Fy"]
 
@@ -157,7 +194,7 @@ class Member(object):
         self.area = self.shape.area()
 
     def calc_lw(self):
-        self.LW = self.area * self.rho
+        self.LW = self.area * self.density
 
     def calc_geometry(self):
         self.end_a = self.joints[0].coordinates
@@ -174,11 +211,3 @@ class Member(object):
     def update_joints(self, joint_a, joint_b):
         self.joints = [joint_a, joint_b]
         self.calc_geometry()
-
-    def shape_name_is_ok(self, name):
-        if name in self.shapes:
-            return True
-        else:
-            return False
-
-

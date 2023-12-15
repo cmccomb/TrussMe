@@ -1,10 +1,9 @@
 import numpy
 from numpy.typing import NDArray
 from trussme.joint import Joint
-from trussme.member import Member, Pipe, Box, Square, Bar
+from trussme.member import Member, Pipe, Box, Square, Bar, g, Material, MATERIALS
 from trussme import report
 from trussme import evaluate
-from trussme.physical_properties import g, Material, MATERIALS
 import time
 import os
 import warnings
@@ -263,7 +262,7 @@ def read_trs(file_name: str) -> Truss:
                 info = line.split()[1:]
                 truss.materials.append({
                     "name": info[0],
-                    "rho": float(info[1]),
+                    "density": float(info[1]),
                     "E": float(info[2]),
                     "Fy": float(info[3]),
                 })
