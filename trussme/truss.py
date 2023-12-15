@@ -148,7 +148,7 @@ class Truss(object):
             evaluate.the_forces(truss_info)
 
         for i in range(self.number_of_members):
-            self.members[i].set_force(forces[i])
+            self.members[i].force = forces[i]
 
         for i in range(self.number_of_joints):
             for j in range(3):
