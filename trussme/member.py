@@ -132,78 +132,48 @@ class Member(object):
         # Material properties
         self.material: Material = None
 
-        # Dependent variables
-        self.area: float = 0.0   # Cross-sectional area
-        self.I: float = 0.0   # Moment of inertia
-        self.LW: float = 0.0  # Linear weight
-
         # Variables to store information about truss state
         self.force: float = 0
         self.fos_yielding: float = 0
         self.fos_buckling: float = 0
-        self.mass: float = 0
 
         # Variable to store location in truss
         self.joints = [joint_a, joint_b]
-        self.length: float = 0.0
-        self.end_a = []
-        self.end_b = []
 
         # Calculate properties
         self.set_shape(Pipe(t=0.002, r=0.02), update_props=False)
         self.set_material(MATERIALS[0], update_props=True)
 
-        self.calc_properties()
-
     def set_shape(self, new_shape: Shape, update_props: bool = True):
         self.shape = new_shape
-
-        # If required, update properties
-        if update_props:
-            self.calc_properties()
 
     def set_material(self, new_material: Material, update_props: bool = True):
         # Set material properties
         self.material = new_material
 
-        # If required, update properties
-        if update_props:
-            self.calc_properties()
 
-    def calc_properties(self):
-        # Calculate moment of inertia
-        self.calc_moi()
+    @property
+    def moment_of_inertia(self) -> float:
+        return self.shape.moi()
 
-        # Calculate the cross-sectional area
-        self.calc_area()
+    @property
+    def area(self) -> float:
+        return self.shape.area()
 
-        # Calculate the linear mass
-        self.calc_lw()
+    @property
+    def linear_weight(self) -> float:
+        return self.area * self.material["density"]
 
-        # Update length, etc.
-        self.calc_geometry()
+    @property
+    def length(self) -> float:
+        return numpy.linalg.norm(self.joints[0].coordinates - self.joints[1].coordinates)
 
-    def calc_moi(self):
-        self.I = self.shape.moi()
-
-    def calc_area(self):
-        self.area = self.shape.area()
-
-    def calc_lw(self):
-        self.LW = self.area * self.material["density"]
-
-    def calc_geometry(self):
-        self.end_a = self.joints[0].coordinates
-        self.end_b = self.joints[1].coordinates
-        self.length = numpy.linalg.norm(self.end_a - self.end_b)
-        self.mass = self.length*self.LW
+    @property
+    def mass(self) -> float:
+        return self.length*self.linear_weight
 
     def set_force(self, the_force):
         self.force = the_force
         self.fos_yielding = self.material["yield_strength"]/abs(self.force/self.area)
-        self.fos_buckling = -((numpy.pi**2)*self.material["elastic_modulus"]*self.I
+        self.fos_buckling = -((numpy.pi**2)*self.material["elastic_modulus"]*self.moment_of_inertia
                              /(self.length**2))/self.force
-
-    def update_joints(self, joint_a, joint_b):
-        self.joints = [joint_a, joint_b]
-        self.calc_geometry()

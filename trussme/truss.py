@@ -23,12 +23,7 @@ class Truss(object):
         # Make a list to store materials in
         self.materials: list[Material] = [MATERIALS[0]]
 
-        # Variables to store number of joints and members
-        self.number_of_joints: int = 0
-        self.number_of_members: int = 0
-
         # Variables to store truss characteristics
-        self.mass: float = 0.0
         self.fos_yielding: float = 0.0
         self.fos_buckling: float = 0.0
         self.fos_total: float = 0.0
@@ -42,6 +37,21 @@ class Truss(object):
                       "max_mass": -1,
                       "max_deflection": -1}
         self.THERE_ARE_GOALS: bool = False
+
+    @property
+    def number_of_members(self) -> int:
+        return len(self.members)
+
+    @property
+    def number_of_joints(self) -> int:
+        return len(self.joints)
+
+    @property
+    def mass(self):
+        mass = 0
+        for m in self.members:
+            mass += m.mass
+        return mass
 
     def set_goal(self, **kwargs):
         self.THERE_ARE_GOALS = True
@@ -67,37 +77,28 @@ class Truss(object):
     def add_support(self, coordinates: NDArray[float], d: int = 3):
         # Make the joint
         self.joints.append(Joint(coordinates))
-        self.joints[self.number_of_joints].pinned(d=d)
-        self.joints[-1].idx = self.number_of_joints
-        self.number_of_joints += 1
+        self.joints[-1].pinned(d=d)
+        self.joints[-1].idx = self.number_of_joints -1
 
     def add_joint(self, coordinates: NDArray[float], d: int = 3):
         # Make the joint
         self.joints.append(Joint(coordinates))
-        self.joints[self.number_of_joints].free(d=d)
-        self.joints[-1].idx = self.number_of_joints
-        self.number_of_joints += 1
+        self.joints[-1].free(d=d)
+        self.joints[-1].idx = self.number_of_joints -1
 
     def add_member(self, joint_index_a: int, joint_index_b: int):
         # Make a member
         self.members.append(Member(self.joints[joint_index_a],
                                    self.joints[joint_index_b]))
 
-        self.members[-1].idx = self.number_of_members
+        self.members[-1].idx = self.number_of_members - 1
 
         # Update joints
         self.joints[joint_index_a].members.append(self.members[-1])
         self.joints[joint_index_b].members.append(self.members[-1])
 
-        self.number_of_members += 1
-
     def move_joint(self, joint_index: int, coordinates: NDArray[float]):
         self.joints[joint_index].coordinates = coordinates
-
-    def calc_mass(self):
-        self.mass = 0
-        for m in self.members:
-            self.mass += m.mass
 
     def set_load(self, joint_index: int, load: NDArray[float]):
         self.joints[joint_index].loads = load
@@ -176,8 +177,6 @@ class Truss(object):
 
     def __report(self, file_name: str = "", verbose: bool = False):
 
-        # DO the calcs
-        self.calc_mass()
         self.calc_fos()
 
         if file_name is "":

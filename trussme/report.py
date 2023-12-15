@@ -203,7 +203,7 @@ def print_stress_analysis(f, the_truss, verbose=False):
     for m in the_truss.members:
         rows.append("Member_"+"{0:02d}".format(m.idx))
         data.append([m.area,
-                     format(m.I, '.2e'),
+                     format(m.moment_of_inertia, '.2e'),
                      format(m.force/pow(10, 3), '.2f'),
                      m.fos_yielding,
                      m.fos_buckling if m.fos_buckling > 0 else "N/A"])
@@ -263,7 +263,7 @@ def print_recommendations(f, the_truss, verbose=False):
         if m.fos_yielding < tyf:
             pw(f, "\t- Member_"+'{0:02d}'.format(m.idx)+" is yielding. "
                   "Try increasing the cross-sectional area.", v=verbose)
-            pw(f, "\t\t- Current area: " + format(m.I, '.2e') + " m^2", v=verbose)
+            pw(f, "\t\t- Current area: " + format(m.moment_of_inertia, '.2e') + " m^2", v=verbose)
             pw(f, "\t\t- Recommended area: "
                   + format(m.area*the_truss.goals["min_fos_yielding"]
                            / m.fos_yielding, '.2e') + " m^2", v=verbose)
