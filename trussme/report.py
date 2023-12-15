@@ -114,11 +114,11 @@ def print_instantiation_information(f, the_truss, verbose=False):
         data.append([str(m.joints[0].idx),
                      str(m.joints[1].idx),
                      m.material,
-                     m.shape,
-                     m.h,
-                     m.w,
-                     m.r,
-                     m.t])
+                     m.shape.to_str(),
+                     m.shape.h,
+                     m.shape.w,
+                     m.shape.r,
+                     m.shape.t])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,

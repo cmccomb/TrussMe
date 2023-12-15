@@ -1,7 +1,7 @@
 import numpy
 from numpy.typing import NDArray
 from trussme.joint import Joint
-from trussme.member import Member
+from trussme.member import Member, Pipe, Box, Square, Bar
 from trussme import report
 from trussme import evaluate
 from trussme.physical_properties import g, Material, MATERIALS
@@ -239,15 +239,15 @@ class Truss(object):
                         + str(m.joints[0].idx) + "\t"
                         + str(m.joints[1].idx) + "\t"
                         + m.material + "\t"
-                        + m.shape + "\t")
-                if m.t != "N/A":
-                    f.write("t=" + str(m.t) + "\t")
-                if m.r != "N/A":
-                    f.write("r=" + str(m.r) + "\t")
-                if m.w != "N/A":
-                    f.write("w=" + str(m.w) + "\t")
-                if m.h != "N/A":
-                    f.write("h=" + str(m.h) + "\t")
+                        + m.shape.to_str() + "\t")
+                if str(m.shape.t) != "N/A":
+                    f.write("t=" + str(m.shape.t) + "\t")
+                if str(m.shape.r) != "N/A":
+                    f.write("r=" + str(m.shape.r) + "\t")
+                if str(m.shape.w) != "N/A":
+                    f.write("w=" + str(m.shape.w) + "\t")
+                if str(m.shape.h) != "N/A":
+                    f.write("h=" + str(m.shape.h) + "\t")
                 f.write("\n")
 
             # Do the loads
@@ -279,7 +279,6 @@ def read_trs(file_name: str) -> Truss:
                 truss.add_member(int(info[0]), int(info[1]))
                 material = next(item for item in truss.materials if item["name"] == info[2])
                 truss.members[-1].set_material(material)
-                truss.members[-1].set_shape(info[3])
 
                 # Parse parameters
                 ks = []
@@ -288,7 +287,9 @@ def read_trs(file_name: str) -> Truss:
                     kvpair = info[param].split("=")
                     ks.append(kvpair[0])
                     vs.append(float(kvpair[1]))
-                truss.members[-1].set_parameters(**dict(zip(ks, vs)))
+                shape = eval(str(info[3]).title())(**dict(zip(ks, vs)))
+                truss.members[-1].set_shape(shape)
+
             elif line[0] is "L":
                 info = line.split()[1:]
                 truss.joints[int(info[0])].loads[0] = float(info[1])

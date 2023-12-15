@@ -15,6 +15,7 @@ TrussInfo = TypedDict("TrussInfo", {
 
 
 def the_forces(truss_info: TrussInfo) -> tuple[NDArray[float], NDArray[float], NDArray[float], float]:
+    print(truss_info['area'])
     tj: numpy.ndarray = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
     w: numpy.ndarray = numpy.array(
         [numpy.size(truss_info["reactions"], axis=0), numpy.size(truss_info["reactions"], axis=1)])
