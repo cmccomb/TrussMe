@@ -1,8 +1,66 @@
 import numpy
-import typing
 import warnings
 from trussme.physical_properties import Material, MATERIALS
 from trussme.joint import Joint
+from typing import Literal, Union
+
+
+class Pipe(object):
+    def __init__(self, r: float, t: float):
+        self.r: float = r
+        self.t: float = t
+
+    def moi(self) -> float:
+        return (numpy.pi / 4.) * (self.r ** 4 - (self.r - 2 * self.t) ** 4)
+
+    def area(self) -> float:
+        return numpy.pi * (self.r ** 2 - (self.r - self.t) ** 2)
+
+
+class Bar(object):
+    def __init__(self, r: float):
+        self.r: float = r
+
+    def moi(self) -> float:
+        return (numpy.pi / 4.) * self.r ** 4
+
+    def area(self) -> float:
+        return numpy.pi*self.r**2
+
+
+class Square(object):
+    def __init__(self, w: float, h: float):
+        self.w: float = w
+        self.h: float = h
+
+    def moi(self) -> float:
+        if self.h > self.w:
+            return (1./12.)*self.w*self.h**3
+        else:
+            return (1./12.)*self.h*self.w**3
+
+    def area(self) -> float:
+        return self.w * self.h
+
+class Box(object):
+    def __init__(self, w: float, h: float, t: float):
+        self.w: float = w
+        self.h: float = h
+        self.t: float = t
+
+    def moi(self) -> float:
+        if self.h > self.w:
+            return (1./12.)*(self.w*self.h**3)\
+                - (1./12.)*(self.w - 2*self.t)*(self.h - 2*self.t)**3
+        else:
+            return (1./12.)*(self.h*self.w**3)\
+                - (1./12.)*(self.h - 2*self.t)*(self.w - 2*self.t)**3
+
+    def area(self) -> float:
+        return self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
+
+
+Shape = Union[Pipe, Bar, Square, Box, None]
 
 
 class Member(object):
@@ -15,7 +73,7 @@ class Member(object):
         self.idx = -1
 
         # Shape independent variables
-        self.shape: str = ''
+        self.shape: Shape = None
         self.t: float = 0.0  # thickness
         self.w: float = 0.0  # outer width
         self.h: float = 0.0  # outer height
@@ -49,7 +107,7 @@ class Member(object):
         self.set_material(MATERIALS[0], update_props=False)
         self.set_parameters(t=0.002, r=0.02, update_props=True)
 
-    def set_shape(self, new_shape: typing.Literal["pipe", "bar", "square", "box"], update_props: bool = True):
+    def set_shape(self, new_shape: Literal["pipe", "bar", "square", "box"], update_props: bool = True):
         # Read and save hte shape name
         if self.shape_name_is_ok(new_shape):
             self.shape = new_shape
