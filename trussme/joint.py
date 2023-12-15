@@ -1,9 +1,10 @@
 import numpy
-
+from numpy.typing import NDArray
+from typing import Literal
 
 class Joint(object):
 
-    def __init__(self, coordinates: numpy.ndarray):
+    def __init__(self, coordinates: NDArray[float]):
         # Save the joint id
         self.idx = -1
 
@@ -25,7 +26,7 @@ class Joint(object):
         # Loads
         self.deflections = numpy.zeros([3, 1])
 
-    def free(self, d:int = 3):
+    def free(self, d: int = 3):
         self.translation = numpy.zeros([3, 1])
         # If 2d, add out of plane support
         if d is 2:
@@ -35,8 +36,8 @@ class Joint(object):
         # Restrict all translation
         self.translation = numpy.ones([3, 1])
 
-    def roller(self, axis: str = 'y', d: int = 3):
-        # Only support reaction along denotated axis
+    def roller(self, axis: Literal["x", "y"] = 'y', d: int = 3):
+        # Only support reaction along denoted axis
         self.translation = numpy.zeros([3, 1])
         self.translation[ord(axis)-120] = 1
 

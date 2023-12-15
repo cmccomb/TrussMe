@@ -1,6 +1,7 @@
 import numpy
-from trussme import joint
-from trussme import member
+from numpy.typing import NDArray
+from trussme.joint import Joint
+from trussme.member import Member
 from trussme import report
 from trussme import evaluate
 from trussme.physical_properties import g, Material, MATERIALS
@@ -13,23 +14,23 @@ class Truss(object):
 
     def __init__(self, file_name=""):
         # Make a list to store members in
-        self.members = []
+        self.members: list[Member] = []
 
         # Make a list to store joints in
-        self.joints = []
+        self.joints: list[Joint] = []
 
         # Make a list to store materials in
         self.materials: list[Material] = [MATERIALS[0]]
 
         # Variables to store number of joints and members
-        self.number_of_joints = 0
-        self.number_of_members = 0
+        self.number_of_joints: int = 0
+        self.number_of_members: int = 0
 
         # Variables to store truss characteristics
-        self.mass = 0
-        self.fos_yielding = 0
-        self.fos_buckling = 0
-        self.fos_total = 0
+        self.mass: float = 0.0
+        self.fos_yielding: float = 0.0
+        self.fos_buckling: float = 0.0
+        self.fos_total: float = 0.0
         self.limit_state = ''
         self.condition = 0
 
@@ -104,23 +105,23 @@ class Truss(object):
                                      'min_fos_buckling, '
                                      'max_mass, or max_deflection.')
 
-    def add_support(self, coordinates, d=3):
+    def add_support(self, coordinates: NDArray[float], d: int = 3):
         # Make the joint
-        self.joints.append(joint.Joint(coordinates))
+        self.joints.append(Joint(coordinates))
         self.joints[self.number_of_joints].pinned(d=d)
         self.joints[-1].idx = self.number_of_joints
         self.number_of_joints += 1
 
-    def add_joint(self, coordinates, d=3):
+    def add_joint(self, coordinates: NDArray[float], d: int = 3):
         # Make the joint
-        self.joints.append(joint.Joint(coordinates))
+        self.joints.append(Joint(coordinates))
         self.joints[self.number_of_joints].free(d=d)
         self.joints[-1].idx = self.number_of_joints
         self.number_of_joints += 1
 
-    def add_member(self, joint_index_a, joint_index_b):
+    def add_member(self, joint_index_a: int, joint_index_b: int):
         # Make a member
-        self.members.append(member.Member(self.joints[joint_index_a],
+        self.members.append(Member(self.joints[joint_index_a],
                                           self.joints[joint_index_b]))
 
         self.members[-1].idx = self.number_of_members
@@ -131,7 +132,7 @@ class Truss(object):
 
         self.number_of_members += 1
 
-    def move_joint(self, joint_index, coordinates):
+    def move_joint(self, joint_index: int, coordinates: NDArray[float]):
         self.joints[joint_index].coordinates = coordinates
 
     def calc_mass(self):
@@ -139,8 +140,8 @@ class Truss(object):
         for m in self.members:
             self.mass += m.mass
 
-    def set_load(self, joint_index, load):
-        self.joints[joint_index].load = load
+    def set_load(self, joint_index: int, load: NDArray[float]):
+        self.joints[joint_index].loads = load
 
     def calc_fos(self):
         # Pull supports and add to D
@@ -214,7 +215,7 @@ class Truss(object):
             warnings.warn("The condition number is " + str(self.condition)
                           + ". Results may be inaccurate.")
 
-    def __report(self, file_name="", verb=False):
+    def __report(self, file_name: str = "", verb: bool = False):
 
         # DO the calcs
         self.calc_mass()
@@ -242,16 +243,16 @@ class Truss(object):
         if file_name is not "":
             f.close()
 
-    def print_and_save_report(self, file_name):
+    def print_and_save_report(self, file_name: str):
         self.__report(file_name=file_name, verb=True)
 
     def print_report(self):
         self.__report(file_name="", verb=True)
 
-    def save_report(self, file_name):
+    def save_report(self, file_name: str):
         self.__report(file_name=file_name, verb=False)
 
-    def save_truss(self, file_name=""):
+    def save_truss(self, file_name: str = ""):
         if file_name is "":
             file_name = time.strftime('%X %x %Z')
 

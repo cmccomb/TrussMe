@@ -2,6 +2,7 @@ import numpy
 import typing
 import warnings
 from trussme.physical_properties import Material, MATERIALS
+from trussme.joint import Joint
 
 
 class Member(object):
@@ -9,37 +10,37 @@ class Member(object):
     # Shape types
     shapes: list[str] = ["pipe", "bar", "square", "box"]
 
-    def __init__(self, joint_a: int, joint_b: int):
+    def __init__(self, joint_a: Joint, joint_b: Joint):
         # Save id number
         self.idx = -1
 
         # Shape independent variables
-        self.shape = ''
-        self.t = 0.0  # thickness
-        self.w = 0.0  # outer width
-        self.h = 0.0  # outer height
-        self.r = 0.0  # outer radius
+        self.shape: str = ''
+        self.t: float = 0.0  # thickness
+        self.w: float = 0.0  # outer width
+        self.h: float = 0.0  # outer height
+        self.r: float = 0.0  # outer radius
 
         # Material properties
-        self.material = ''  # string specifying material
-        self.elastic_modulus = 0.0        # Elastic modulus
-        self.Fy = 0.0       # yield strength
-        self.rho = 0.0      # material density
+        self.material: str = ''  # string specifying material
+        self.elastic_modulus: float = 0.0        # Elastic modulus
+        self.Fy: float = 0.0       # yield strength
+        self.rho: float = 0.0      # material density
 
         # Dependent variables
-        self.area = 0.0   # Cross-sectional area
-        self.I = 0.0   # Moment of inertia
-        self.LW = 0.0  # Linear weight
+        self.area: float = 0.0   # Cross-sectional area
+        self.I: float = 0.0   # Moment of inertia
+        self.LW: float = 0.0  # Linear weight
 
         # Variables to store information about truss state
-        self.force = 0
-        self.fos_yielding = 0
-        self.fos_buckling = 0
-        self.mass = 0
+        self.force: float = 0
+        self.fos_yielding: float = 0
+        self.fos_buckling: float = 0
+        self.mass: float = 0
 
         # Variable to store location in truss
         self.joints = [joint_a, joint_b]
-        self.length = 0
+        self.length: float = 0.0
         self.end_a = []
         self.end_b = []
 
