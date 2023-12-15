@@ -1,10 +1,9 @@
 import numpy
 import pandas
 import trussme.physical_properties as pp
-from trussme.truss import Truss
 
 
-def print_summary(f, the_truss: Truss, verbose: bool = False):
+def print_summary(f, the_truss, verbose: bool = False):
     pw(f, "\n", v=verbose)
     pw(f, "(0) SUMMARY OF ANALYSIS", v=verbose)
     pw(f, "=============================", v=verbose)

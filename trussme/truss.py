@@ -215,7 +215,7 @@ class Truss(object):
             warnings.warn("The condition number is " + str(self.condition)
                           + ". Results may be inaccurate.")
 
-    def __report(self, file_name: str = "", verb: bool = False):
+    def __report(self, file_name: str = "", verbose: bool = False):
 
         # DO the calcs
         self.calc_mass()
@@ -227,30 +227,30 @@ class Truss(object):
             f = open(file_name, 'w')
 
         # Print date and time
-        report.pw(f, time.strftime('%x'), v=verb)
-        report.pw(f, os.getcwd(), v=verb)
+        report.pw(f, time.strftime('%x'), v=verbose)
+        report.pw(f, os.getcwd(), v=verbose)
 
-        report.print_summary(f, self, verb=verb)
+        report.print_summary(f, self, verbose=verbose)
 
-        report.print_instantiation_information(f, self, verb=verb)
+        report.print_instantiation_information(f, self, verbose=verbose)
 
-        report.print_stress_analysis(f, self, verb=verb)
+        report.print_stress_analysis(f, self, verbose=verbose)
 
         if self.THERE_ARE_GOALS:
-            report.print_recommendations(f, self, verb=verb)
+            report.print_recommendations(f, self, verbose=verbose)
 
         # Try to close, and except if
         if file_name is not "":
             f.close()
 
     def print_and_save_report(self, file_name: str):
-        self.__report(file_name=file_name, verb=True)
+        self.__report(file_name=file_name, verbose=True)
 
     def print_report(self):
-        self.__report(file_name="", verb=True)
+        self.__report(file_name="", verbose=True)
 
     def save_report(self, file_name: str):
-        self.__report(file_name=file_name, verb=False)
+        self.__report(file_name=file_name, verbose=False)
 
     def save_truss(self, file_name: str = ""):
         if file_name is "":
