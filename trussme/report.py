@@ -141,8 +141,8 @@ def print_instantiation_information(f, the_truss, verbose=False):
         rows.append(mat["name"])
         data.append([
             str(mat["density"]),
-            str(mat["E"]/pow(10, 9)),
-            str(mat["Fy"]/pow(10, 6))])
+            str(mat["elastic_modulus"]/pow(10, 9)),
+            str(mat["yield_strength"]/pow(10, 6))])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,

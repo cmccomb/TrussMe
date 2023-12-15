@@ -1,12 +1,14 @@
+import os
+import time
+import warnings
+
 import numpy
 from numpy.typing import NDArray
-from trussme.joint import Joint
-from trussme.member import Member, Pipe, Box, Square, Bar, g, Material, MATERIALS
-from trussme import report
+
 from trussme import evaluate
-import time
-import os
-import warnings
+from trussme import report
+from trussme.joint import Joint
+from trussme.member import Member, g, Material, MATERIALS, Pipe, Box, Square, Bar
 
 
 class Truss(object):
@@ -30,8 +32,8 @@ class Truss(object):
         self.fos_yielding: float = 0.0
         self.fos_buckling: float = 0.0
         self.fos_total: float = 0.0
-        self.limit_state = ''
-        self.condition = 0
+        self.limit_state: str = ''
+        self.condition: float = 0.0
 
         # Design goals
         self.goals = {"min_fos_total": -1,
@@ -39,7 +41,7 @@ class Truss(object):
                       "min_fos_yielding": -1,
                       "max_mass": -1,
                       "max_deflection": -1}
-        self.THERE_ARE_GOALS = False
+        self.THERE_ARE_GOALS: bool = False
 
     def set_goal(self, **kwargs):
         self.THERE_ARE_GOALS = True
@@ -56,11 +58,11 @@ class Truss(object):
                 self.goals["max_deflection"] = kwargs["max_deflection"]
             else:
                 self.THERE_ARE_GOALS = False
-                raise ValueError(key+' is not a valid defined design goal. '
-                                     'Try min_fos_total, '
-                                     'min_fos_yielding, '
-                                     'min_fos_buckling, '
-                                     'max_mass, or max_deflection.')
+                raise ValueError(key + ' is not a valid defined design goal. '
+                                       'Try min_fos_total, '
+                                       'min_fos_yielding, '
+                                       'min_fos_buckling, '
+                                       'max_mass, or max_deflection.')
 
     def add_support(self, coordinates: NDArray[float], d: int = 3):
         # Make the joint
@@ -79,7 +81,7 @@ class Truss(object):
     def add_member(self, joint_index_a: int, joint_index_b: int):
         # Make a member
         self.members.append(Member(self.joints[joint_index_a],
-                                          self.joints[joint_index_b]))
+                                   self.joints[joint_index_b]))
 
         self.members[-1].idx = self.number_of_members
 
@@ -114,8 +116,8 @@ class Truss(object):
             reactions[1, i] = self.joints[i].translation[1]
             reactions[2, i] = self.joints[i].translation[2]
             loads[0, i] = self.joints[i].loads[0]
-            loads[1, i] = self.joints[i].loads[1]\
-                - sum([m.mass/2.0*g for m in self.joints[i].members])
+            loads[1, i] = self.joints[i].loads[1] \
+                          - sum([m.mass / 2.0 * g for m in self.joints[i].members])
             loads[2, i] = self.joints[i].loads[2]
 
         # Pull out E and A
@@ -123,7 +125,7 @@ class Truss(object):
         area = []
         connections = []
         for m in self.members:
-            elastic_modulus.append(m.elastic_modulus)
+            elastic_modulus.append(m.material["elastic_modulus"])
             area.append(m.area)
             connections.append([j.idx for j in m.joints])
 
@@ -237,7 +239,7 @@ class Truss(object):
                 f.write("M" + "\t"
                         + str(m.joints[0].idx) + "\t"
                         + str(m.joints[1].idx) + "\t"
-                        + m.material + "\t"
+                        + m.material["name"] + "\t"
                         + m.shape.to_str() + "\t")
                 if str(m.shape.t) != "N/A":
                     f.write("t=" + str(m.shape.t) + "\t")
@@ -263,8 +265,8 @@ def read_trs(file_name: str) -> Truss:
                 truss.materials.append({
                     "name": info[0],
                     "density": float(info[1]),
-                    "E": float(info[2]),
-                    "Fy": float(info[3]),
+                    "elastic_modulus": float(info[2]),
+                    "yield_strength": float(info[3]),
                 })
 
             elif line[0] is "J":
@@ -295,7 +297,6 @@ def read_trs(file_name: str) -> Truss:
                 truss.joints[int(info[0])].loads[1] = float(info[2])
                 truss.joints[int(info[0])].loads[2] = float(info[3])
             elif line[0] is not "#" and not line.isspace():
-                raise ValueError("'" + line[0] +
-                                 "' is not a valid line beginner.")
+                raise ValueError("'" + line[0] + "' is not a valid line initializer.")
 
     return truss

@@ -1,19 +1,21 @@
 import numpy
-import warnings
 from trussme.joint import Joint
-from typing import Literal, Union, TypedDict
+from typing import Union, TypedDict
 
 
 # Gravitational constant for computing weight from mass
 g: float = 9.80665
 
 
-Material = TypedDict("Material", {
+Material = Union[
+    TypedDict("Material", {
         "name": str,
         "density": float,
-        "E": float,
-        "Fy": float,
-})
+        "elastic_modulus": float,
+        "yield_strength": float,
+    }),
+    None
+]
 
 
 # Material properties
@@ -21,20 +23,20 @@ MATERIALS: list[Material] = [
     {
         "name": "A36_Steel",
         "density": 7800.0,
-        "E":   200*pow(10, 9),
-        "Fy":  250*pow(10, 6)
+        "elastic_modulus":   200*pow(10, 9),
+        "yield_strength":  250*pow(10, 6)
     },
     {
         "name": "A992_Steel",
         "density": 7800.0,
-        "E":   200*pow(10, 9),
-        "Fy":  345*pow(10, 6)
+        "elastic_modulus":   200*pow(10, 9),
+        "yield_strength":  345*pow(10, 6)
     },
     {
         "name": "6061_T6_Aluminum",
         "density": 2700.0,
-        "E":   68.9*pow(10, 9),
-        "Fy":  276*pow(10, 6)
+        "elastic_modulus":   68.9*pow(10, 9),
+        "yield_strength":  276*pow(10, 6)
     }
 ]
 
@@ -128,10 +130,7 @@ class Member(object):
         self.shape: Shape = None
 
         # Material properties
-        self.material: str = ''  # string specifying material
-        self.elastic_modulus: float = 0.0        # Elastic modulus
-        self.Fy: float = 0.0       # yield strength
-        self.density: float = 0.0      # material density
+        self.material: Material = None
 
         # Dependent variables
         self.area: float = 0.0   # Cross-sectional area
@@ -165,10 +164,7 @@ class Member(object):
 
     def set_material(self, new_material: Material, update_props: bool = True):
         # Set material properties
-        self.material = new_material["name"]
-        self.density = new_material["density"]
-        self.elastic_modulus = new_material["E"]
-        self.Fy = new_material["Fy"]
+        self.material = new_material
 
         # If required, update properties
         if update_props:
@@ -194,7 +190,7 @@ class Member(object):
         self.area = self.shape.area()
 
     def calc_lw(self):
-        self.LW = self.area * self.density
+        self.LW = self.area * self.material["density"]
 
     def calc_geometry(self):
         self.end_a = self.joints[0].coordinates
@@ -204,8 +200,8 @@ class Member(object):
 
     def set_force(self, the_force):
         self.force = the_force
-        self.fos_yielding = self.Fy/abs(self.force/self.area)
-        self.fos_buckling = -((numpy.pi**2)*self.elastic_modulus*self.I
+        self.fos_yielding = self.material["yield_strength"]/abs(self.force/self.area)
+        self.fos_buckling = -((numpy.pi**2)*self.material["elastic_modulus"]*self.I
                              /(self.length**2))/self.force
 
     def update_joints(self, joint_a, joint_b):
