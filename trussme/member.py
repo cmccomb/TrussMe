@@ -127,10 +127,10 @@ class Member(object):
         self.idx = -1
 
         # Shape independent variables
-        self.shape: Shape = None
+        self.shape: Shape = Pipe(t=0.002, r=0.02)
 
         # Material properties
-        self.material: Material = None
+        self.material: Material = MATERIALS[0]
 
         # Variables to store information about truss state
         self._force: float = 0
@@ -138,16 +138,24 @@ class Member(object):
         # Variable to store location in truss
         self.joints = [joint_a, joint_b]
 
-        # Calculate properties
-        self.set_shape(Pipe(t=0.002, r=0.02))
-        self.set_material(MATERIALS[0])
-
     def set_shape(self, new_shape: Shape):
         self.shape = new_shape
 
     def set_material(self, new_material: Material):
         # Set material properties
         self.material = new_material
+
+    @property
+    def yield_strength(self) -> float:
+        return self.material["yield_strength"]
+
+    @property
+    def density(self) -> float:
+        return self.material["density"]
+
+    @property
+    def elastic_modulus(self) -> float:
+        return self.material["elastic_modulus"]
 
     @property
     def moment_of_inertia(self) -> float:
@@ -159,7 +167,7 @@ class Member(object):
 
     @property
     def linear_weight(self) -> float:
-        return self.area * self.material["density"]
+        return self.area * self.density
 
     @property
     def length(self) -> float:
@@ -179,9 +187,9 @@ class Member(object):
 
     @property
     def fos_yielding(self) -> float:
-        return self.material["yield_strength"] / abs(self.force / self.area)
+        return self.yield_strength / abs(self.force / self.area)
 
     @property
     def fos_buckling(self) -> float:
-        return -((numpy.pi**2)*self.material["elastic_modulus"]*self.moment_of_inertia
+        return -((numpy.pi**2)*self.elastic_modulus*self.moment_of_inertia
                              /(self.length**2))/self.force

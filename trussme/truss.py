@@ -126,7 +126,7 @@ class Truss(object):
         area = []
         connections = []
         for m in self.members:
-            elastic_modulus.append(m.material["elastic_modulus"])
+            elastic_modulus.append(m.elastic_modulus)
             area.append(m.area)
             connections.append([j.idx for j in m.joints])
 
