@@ -51,7 +51,7 @@ class Shape(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def to_str(self) -> str:
+    def name(self) -> str:
         pass
 
 
@@ -68,7 +68,8 @@ class Pipe(Shape):
     def area(self) -> float:
         return numpy.pi * (self.r ** 2 - (self.r - self.t) ** 2)
 
-    def to_str(self) -> str:
+    @property
+    def name(self) -> str:
         return "pipe"
 
 
@@ -85,7 +86,8 @@ class Bar(Shape):
     def area(self) -> float:
         return numpy.pi*self.r**2
 
-    def to_str(self) -> str:
+    @property
+    def name(self) -> str:
         return "bar"
 
 
@@ -105,7 +107,8 @@ class Square(Shape):
     def area(self) -> float:
         return self.w * self.h
 
-    def to_str(self) -> str:
+    @property
+    def name(self) -> str:
         return "square"
 
 
@@ -127,7 +130,8 @@ class Box(Shape):
     def area(self) -> float:
         return self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
 
-    def to_str(self) -> str:
+    @property
+    def name(self) -> str:
         return "box"
 
 
