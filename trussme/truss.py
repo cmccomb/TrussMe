@@ -223,7 +223,7 @@ class Truss(object):
                         + str(m.joints[0].idx) + "\t"
                         + str(m.joints[1].idx) + "\t"
                         + m.material["name"] + "\t"
-                        + m.shape.name + "\t")
+                        + m.shape.name() + "\t")
                 if str(m.shape.t) != "N/A":
                     f.write("t=" + str(m.shape.t) + "\t")
                 if str(m.shape.r) != "N/A":

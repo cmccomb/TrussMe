@@ -43,6 +43,13 @@ MATERIALS: list[Material] = [
 
 class Shape(abc.ABC):
     @abc.abstractmethod
+    def __init__(self):
+        self.w = "N/A"
+        self.h = "N/A"
+        self.t = "N/A"
+        self.r = "N/A"
+
+    @abc.abstractmethod
     def moi(self) -> float:
         pass
 
@@ -68,7 +75,6 @@ class Pipe(Shape):
     def area(self) -> float:
         return numpy.pi * (self.r ** 2 - (self.r - self.t) ** 2)
 
-    @property
     def name(self) -> str:
         return "pipe"
 
@@ -86,7 +92,6 @@ class Bar(Shape):
     def area(self) -> float:
         return numpy.pi*self.r**2
 
-    @property
     def name(self) -> str:
         return "bar"
 
@@ -107,7 +112,6 @@ class Square(Shape):
     def area(self) -> float:
         return self.w * self.h
 
-    @property
     def name(self) -> str:
         return "square"
 
@@ -130,7 +134,6 @@ class Box(Shape):
     def area(self) -> float:
         return self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
 
-    @property
     def name(self) -> str:
         return "box"
 

@@ -114,7 +114,7 @@ def print_instantiation_information(f, the_truss, verbose=False):
         data.append([str(m.joints[0].idx),
                      str(m.joints[1].idx),
                      m.material_name,
-                     m.shape.name,
+                     m.shape.name(),
                      m.shape.h,
                      m.shape.w,
                      m.shape.r,
