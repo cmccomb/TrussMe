@@ -5,7 +5,7 @@ from typing import Literal
 
 class Joint(object):
 
-    def __init__(self, coordinates: NDArray[float]):
+    def __init__(self, coordinates: list[float]):
         # Save the joint id
         self.idx = -1
 
@@ -16,7 +16,7 @@ class Joint(object):
         self.translation = numpy.ones([3, 1])
 
         # Loads
-        self.loads = numpy.zeros([3, 1])
+        self.loads: list[float] = [0.0, 0.0, 0.0]
 
         # Store connected members
         self.members = []

@@ -186,7 +186,7 @@ class Member(object):
 
     @property
     def length(self) -> float:
-        return numpy.linalg.norm(self.joints[0].coordinates - self.joints[1].coordinates)
+        return numpy.linalg.norm(numpy.array(self.joints[0].coordinates) - numpy.array(self.joints[1].coordinates))
 
     @property
     def mass(self) -> float:

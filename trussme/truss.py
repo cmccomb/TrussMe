@@ -88,13 +88,13 @@ class Truss(object):
                                        'min_fos_buckling, '
                                        'max_mass, or max_deflection.')
 
-    def add_support(self, coordinates: NDArray[float], d: int = 3):
+    def add_support(self, coordinates: list[float], d: int = 3):
         # Make the joint
         self.joints.append(Joint(coordinates))
         self.joints[-1].pinned(d=d)
         self.joints[-1].idx = self.number_of_joints -1
 
-    def add_joint(self, coordinates: NDArray[float], d: int = 3):
+    def add_joint(self, coordinates: list[float], d: int = 3):
         # Make the joint
         self.joints.append(Joint(coordinates))
         self.joints[-1].free(d=d)
@@ -111,10 +111,10 @@ class Truss(object):
         self.joints[joint_index_a].members.append(self.members[-1])
         self.joints[joint_index_b].members.append(self.members[-1])
 
-    def move_joint(self, joint_index: int, coordinates: NDArray[float]):
+    def move_joint(self, joint_index: int, coordinates: list[float]):
         self.joints[joint_index].coordinates = coordinates
 
-    def set_load(self, joint_index: int, load: NDArray[float]):
+    def set_load(self, joint_index: int, load: list[float]):
         self.joints[joint_index].loads = load
 
     def calc_fos(self):
@@ -212,9 +212,9 @@ class Truss(object):
                 if numpy.sum(j.loads) != 0:
                     load_string += "L" + "\t"
                     load_string += str(j.idx) + "\t"
-                    load_string += str(j.loads[0, 0]) + "\t"
-                    load_string += str(j.loads[1, 0]) + "\t"
-                    load_string += str(j.loads[2, 0]) + "\t"
+                    load_string += str(j.loads[0]) + "\t"
+                    load_string += str(j.loads[1]) + "\t"
+                    load_string += str(j.loads[2]) + "\t"
                     load_string += "\n"
 
             # Do the members
@@ -255,8 +255,7 @@ def read_trs(file_name: str) -> Truss:
 
             elif line[0] == "J":
                 info = line.split()[1:]
-                truss.add_joint(numpy.array(
-                    [float(x) for x in info[:3]]))
+                truss.add_joint([float(x) for x in info[:3]])
                 truss.joints[-1].translation = numpy.array(
                     [[int(x)] for x in info[3:]])
             elif line[0] == "M":

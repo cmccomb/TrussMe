@@ -162,11 +162,11 @@ def print_stress_analysis(f, the_truss, verbose=False):
     rows = []
     for j in the_truss.joints:
         rows.append("Joint_"+"{0:02d}".format(j.idx))
-        data.append([str(j.loads[0][0]/pow(10, 3)),
-                     format((j.loads[1][0]
+        data.append([str(j.loads[0]/pow(10, 3)),
+                     format((j.loads[1]
                              - sum([m.mass/2.0*pp.g for m
                                     in j.members]))/pow(10, 3), '.2f'),
-                     str(j.loads[2][0]/pow(10, 3))])
+                     str(j.loads[2]/pow(10, 3))])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
