@@ -24,10 +24,6 @@ class Truss(object):
         self.materials: list[Material] = [MATERIALS[0]]
 
         # Variables to store truss characteristics
-        self.fos_yielding: float = 0.0
-        self.fos_buckling: float = 0.0
-        self.fos_total: float = 0.0
-        self.limit_state: str = ''
         self.condition: float = 0.0
 
         # Design goals
@@ -47,11 +43,30 @@ class Truss(object):
         return len(self.joints)
 
     @property
-    def mass(self):
+    def mass(self) -> float:
         mass = 0
         for m in self.members:
             mass += m.mass
         return mass
+
+    @property
+    def fos_yielding(self) -> float:
+        return min([m.fos_yielding for m in self.members])
+
+    @property
+    def fos_buckling(self) -> float:
+        return min([m.fos_buckling if m.fos_buckling > 0 else 10000 for m in self.members])
+
+    @property
+    def fos_total(self) -> float:
+        return min(self.fos_buckling, self.fos_yielding)
+
+    @property
+    def limit_state(self) -> str:
+        if self.fos_buckling < self.fos_yielding:
+            return 'buckling'
+        else:
+            return 'yielding'
 
     def set_goal(self, **kwargs):
         self.THERE_ARE_GOALS = True
@@ -104,48 +119,24 @@ class Truss(object):
         self.joints[joint_index].loads = load
 
     def calc_fos(self):
-        # Pull supports and add to D
-        coordinates = []
-        for j in self.joints:
-            coordinates.append(j.coordinates)
 
-        # Build Re
-        reactions = numpy.zeros([3, self.number_of_joints])
         loads = numpy.zeros([3, self.number_of_joints])
-        for i in range(len(self.joints)):
-            reactions[0, i] = self.joints[i].translation[0]
-            reactions[1, i] = self.joints[i].translation[1]
-            reactions[2, i] = self.joints[i].translation[2]
+        for i in range(self.number_of_joints):
             loads[0, i] = self.joints[i].loads[0]
-            loads[1, i] = self.joints[i].loads[1] \
-                          - sum([m.mass / 2.0 * g for m in self.joints[i].members])
+            loads[1, i] = self.joints[i].loads[1] - sum([member.mass / 2.0 * g for member in self.joints[i].members])
             loads[2, i] = self.joints[i].loads[2]
 
-        # Pull out E and A
-        elastic_modulus = []
-        area = []
-        connections = []
-        for m in self.members:
-            elastic_modulus.append(m.elastic_modulus)
-            area.append(m.area)
-            connections.append([j.idx for j in m.joints])
-
-        # Make everything an array
-        area = numpy.array(area)
-        elastic_modulus = numpy.array(elastic_modulus)
-        coordinates = numpy.array(coordinates).T
-        connections = numpy.array(connections).T
-
         # Pull everything into a dict
-        truss_info = {"elastic_modulus": elastic_modulus,
-                      "coordinates": coordinates,
-                      "connections": connections,
-                      "reactions": reactions,
-                      "loads": loads,
-                      "area": area}
+        truss_info = {
+            "elastic_modulus": numpy.array([member.elastic_modulus for member in self.members]),
+            "coordinates": numpy.array([joint.coordinates for joint in self.joints]).T,
+            "connections": numpy.array([[j.idx for j in member.joints] for member in self.members]).T,
+            "reactions": numpy.array([list(joint.translation.flatten()) for joint in self.joints]).T,
+            "loads": loads,
+            "area": numpy.array([member.area for member in self.members])
+        }
 
-        forces, deflections, reactions, self.condition = \
-            evaluate.the_forces(truss_info)
+        forces, deflections, reactions, condition = evaluate.the_forces(truss_info)
 
         for i in range(self.number_of_members):
             self.members[i].force = forces[i]
@@ -159,20 +150,8 @@ class Truss(object):
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = deflections[j, i]
 
-        # Pull out the member factors of safety
-        self.fos_buckling = min([m.fos_buckling if m.fos_buckling > 0
-                                 else 10000 for m in self.members])
-        self.fos_yielding = min([m.fos_yielding for m in self.members])
-
-        # Get total FOS and limit state
-        self.fos_total = min(self.fos_buckling, self.fos_yielding)
-        if self.fos_buckling < self.fos_yielding:
-            self.limit_state = 'buckling'
-        else:
-            self.limit_state = 'yielding'
-
-        if self.condition > pow(10, 5):
-            warnings.warn("The condition number is " + str(self.condition)
+        if condition > pow(10, 5):
+            warnings.warn("The condition number is " + str(condition)
                           + ". Results may be inaccurate.")
 
     def __report(self, file_name: str = "", verbose: bool = False):
