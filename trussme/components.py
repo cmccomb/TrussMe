@@ -1,19 +1,16 @@
 import numpy
-from typing import Union, TypedDict, Literal
+from typing import TypedDict, Literal
 import abc
 
 # Gravitational constant for computing weight from mass
 g: float = 9.80665
 
-Material = Union[
-    TypedDict("Material", {
-        "name": str,
-        "density": float,
-        "elastic_modulus": float,
-        "yield_strength": float,
-    }),
-    None
-]
+Material = TypedDict("Material", {
+    "name": str,
+    "density": float,
+    "elastic_modulus": float,
+    "yield_strength": float,
+})
 
 # Material properties
 MATERIALS: list[Material] = [
@@ -139,7 +136,7 @@ class Joint(object):
 
     def __init__(self, coordinates: list[float]):
         # Save the joint id
-        self.idx: int = -1
+        self.idx: int = 0
 
         # Coordinates of the joint
         self.coordinates = coordinates
@@ -183,7 +180,7 @@ class Member(object):
 
     def __init__(self, begin_joint: Joint, end_joint: Joint):
         # Save id number
-        self.idx: int = -1
+        self.idx: int = 0
 
         # Shape independent variables
         self.shape: Shape = Pipe(t=0.002, r=0.02)
