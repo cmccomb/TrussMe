@@ -23,9 +23,6 @@ class Truss(object):
         # Make a list to store materials in
         self.materials: list[Material] = [MATERIALS[0]]
 
-        # Variables to store truss characteristics
-        self.condition: float = 0.0
-
         # Design goals
         self.goals = {"min_fos_total": -1,
                       "min_fos_buckling": -1,
