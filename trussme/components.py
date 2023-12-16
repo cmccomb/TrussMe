@@ -165,7 +165,7 @@ class Joint(object):
         if d is 2:
             self.translation[2] = True
 
-    def pinned(self, d: int = 3):
+    def pinned(self):
         # Restrict all translation
         self.translation = [True, True, True]
 
@@ -195,8 +195,8 @@ class Member(object):
         self._force: float = 0
 
         # Variable to store location in truss
-        self.begin_joint = begin_joint
-        self.end_joint = end_joint
+        self.begin_joint: Joint = begin_joint
+        self.end_joint: Joint = end_joint
 
     def set_shape(self, new_shape: Shape):
         self.shape = new_shape
@@ -246,7 +246,7 @@ class Member(object):
         return self._force
 
     @force.setter
-    def force(self, new_force):
+    def force(self, new_force: float):
         self._force = new_force
 
     @property

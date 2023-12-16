@@ -111,8 +111,8 @@ def print_instantiation_information(f, the_truss, verbose=False):
     rows = []
     for m in the_truss.members:
         rows.append("Member_"+"{0:02d}".format(m.idx))
-        data.append([str(m.joints[0].idx),
-                     str(m.joints[1].idx),
+        data.append([str(m.begin_joint.idx),
+                     str(m.end_joint.idx),
                      m.material_name,
                      m.shape.name(),
                      m.shape.h,

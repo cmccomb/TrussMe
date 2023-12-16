@@ -4,6 +4,7 @@ import warnings
 
 import numpy
 from numpy.typing import NDArray
+from typing import Literal
 
 from trussme import evaluate
 from trussme import report
@@ -87,17 +88,23 @@ class Truss(object):
                                        'min_fos_buckling, '
                                        'max_mass, or max_deflection.')
 
-    def add_support(self, coordinates: list[float], d: int = 3):
+    def add_pinned_support(self, coordinates: list[float]):
         # Make the joint
         self.joints.append(Joint(coordinates))
-        self.joints[-1].pinned(d=d)
-        self.joints[-1].idx = self.number_of_joints -1
+        self.joints[-1].pinned()
+        self.joints[-1].idx = self.number_of_joints - 1
+
+    def add_roller_support(self, coordinates: list[float], axis: Literal["x", "y"] = 'y', d: int = 3):
+        # Make the joint
+        self.joints.append(Joint(coordinates))
+        self.joints[-1].roller(axis=axis, d=d)
+        self.joints[-1].idx = self.number_of_joints - 1
 
     def add_joint(self, coordinates: list[float], d: int = 3):
         # Make the joint
         self.joints.append(Joint(coordinates))
         self.joints[-1].free(d=d)
-        self.joints[-1].idx = self.number_of_joints -1
+        self.joints[-1].idx = self.number_of_joints - 1
 
     def add_member(self, joint_index_a: int, joint_index_b: int):
         # Make a member
@@ -128,7 +135,7 @@ class Truss(object):
         truss_info = {
             "elastic_modulus": numpy.array([member.elastic_modulus for member in self.members]),
             "coordinates": numpy.array([joint.coordinates for joint in self.joints]).T,
-            "connections": numpy.array([[j.idx for j in member.joints] for member in self.members]).T,
+            "connections": numpy.array([[member.begin_joint.idx, member.end_joint.idx] for member in self.members]).T,
             "reactions": numpy.array([joint.translation for joint in self.joints]).T,
             "loads": loads,
             "area": numpy.array([member.area for member in self.members])
@@ -219,8 +226,8 @@ class Truss(object):
             # Do the members
             for m in self.members:
                 f.write("M" + "\t"
-                        + str(m.joints[0].idx) + "\t"
-                        + str(m.joints[1].idx) + "\t"
+                        + str(m.begin_joint.idx) + "\t"
+                        + str(m.end_joint.idx) + "\t"
                         + m.material["name"] + "\t"
                         + m.shape.name() + "\t")
                 if m.shape.t:
