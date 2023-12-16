@@ -1,2 +1,2 @@
 from .truss import Truss, read_trs
-from .member import MATERIALS, Shape, Material, Box, Pipe, Bar, Square
+from .components import MATERIALS, Shape, Material, Box, Pipe, Bar, Square

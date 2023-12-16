@@ -1,11 +1,9 @@
 import numpy
-from trussme.joint import Joint
-from typing import Union, TypedDict
+from typing import Union, TypedDict, Literal
 import abc
 
 # Gravitational constant for computing weight from mass
 g: float = 9.80665
-
 
 Material = Union[
     TypedDict("Material", {
@@ -17,26 +15,25 @@ Material = Union[
     None
 ]
 
-
 # Material properties
 MATERIALS: list[Material] = [
     {
         "name": "A36_Steel",
         "density": 7800.0,
-        "elastic_modulus":   200*pow(10, 9),
-        "yield_strength":  250*pow(10, 6)
+        "elastic_modulus": 200 * pow(10, 9),
+        "yield_strength": 250 * pow(10, 6)
     },
     {
         "name": "A992_Steel",
         "density": 7800.0,
-        "elastic_modulus":   200*pow(10, 9),
-        "yield_strength":  345*pow(10, 6)
+        "elastic_modulus": 200 * pow(10, 9),
+        "yield_strength": 345 * pow(10, 6)
     },
     {
         "name": "6061_T6_Aluminum",
         "density": 2700.0,
-        "elastic_modulus":   68.9*pow(10, 9),
-        "yield_strength":  276*pow(10, 6)
+        "elastic_modulus": 68.9 * pow(10, 9),
+        "yield_strength": 276 * pow(10, 6)
     }
 ]
 
@@ -90,7 +87,7 @@ class Bar(Shape):
         return (numpy.pi / 4.) * self.r ** 4
 
     def area(self) -> float:
-        return numpy.pi*self.r**2
+        return numpy.pi * self.r ** 2
 
     def name(self) -> str:
         return "bar"
@@ -105,9 +102,9 @@ class Square(Shape):
 
     def moi(self) -> float:
         if self.h > self.w:
-            return (1./12.)*self.w*self.h**3
+            return (1. / 12.) * self.w * self.h ** 3
         else:
-            return (1./12.)*self.h*self.w**3
+            return (1. / 12.) * self.h * self.w ** 3
 
     def area(self) -> float:
         return self.w * self.h
@@ -125,24 +122,68 @@ class Box(Shape):
 
     def moi(self) -> float:
         if self.h > self.w:
-            return (1./12.)*(self.w*self.h**3)\
-                - (1./12.)*(self.w - 2*self.t)*(self.h - 2*self.t)**3
+            return (1. / 12.) * (self.w * self.h ** 3) \
+                - (1. / 12.) * (self.w - 2 * self.t) * (self.h - 2 * self.t) ** 3
         else:
-            return (1./12.)*(self.h*self.w**3)\
-                - (1./12.)*(self.h - 2*self.t)*(self.w - 2*self.t)**3
+            return (1. / 12.) * (self.h * self.w ** 3) \
+                - (1. / 12.) * (self.h - 2 * self.t) * (self.w - 2 * self.t) ** 3
 
     def area(self) -> float:
-        return self.w*self.h - (self.h - 2*self.t)*(self.w - 2*self.t)
+        return self.w * self.h - (self.h - 2 * self.t) * (self.w - 2 * self.t)
 
     def name(self) -> str:
         return "box"
 
 
+class Joint(object):
+
+    def __init__(self, coordinates: list[float]):
+        # Save the joint id
+        self.idx: int = -1
+
+        # Coordinates of the joint
+        self.coordinates = coordinates
+
+        # Allowed translation in x, y, and z
+        self.translation: list[bool] = [True, True, True]
+
+        # Loads
+        self.loads: list[float] = [0.0, 0.0, 0.0]
+
+        # Store connected members
+        self.members: list[Member] = []
+
+        # Loads
+        self.reactions: list[float] = [0.0, 0.0, 0.0]
+
+        # Loads
+        self.deflections: list[float] = [0.0, 0.0, 0.0]
+
+    def free(self, d: int = 3):
+        self.translation = [False, False, False]
+        # If 2d, add out of plane support
+        if d is 2:
+            self.translation[2] = True
+
+    def pinned(self, d: int = 3):
+        # Restrict all translation
+        self.translation = [True, True, True]
+
+    def roller(self, axis: Literal["x", "y"] = 'y', d: int = 3):
+        # Only support reaction along denoted axis
+        self.translation = [False, False, False]
+        self.translation[ord(axis) - 120] = True
+
+        # If 2d, add out of plane support
+        if d is 2:
+            self.translation[2] = True
+
+
 class Member(object):
 
-    def __init__(self, joint_a: Joint, joint_b: Joint):
+    def __init__(self, begin_joint: Joint, end_joint: Joint):
         # Save id number
-        self.idx = -1
+        self.idx: int = -1
 
         # Shape independent variables
         self.shape: Shape = Pipe(t=0.002, r=0.02)
@@ -154,7 +195,8 @@ class Member(object):
         self._force: float = 0
 
         # Variable to store location in truss
-        self.joints = [joint_a, joint_b]
+        self.begin_joint = begin_joint
+        self.end_joint = end_joint
 
     def set_shape(self, new_shape: Shape):
         self.shape = new_shape
@@ -193,11 +235,11 @@ class Member(object):
 
     @property
     def length(self) -> float:
-        return numpy.linalg.norm(numpy.array(self.joints[0].coordinates) - numpy.array(self.joints[1].coordinates))
+        return numpy.linalg.norm(numpy.array(self.begin_joint.coordinates) - numpy.array(self.end_joint.coordinates))
 
     @property
     def mass(self) -> float:
-        return self.length*self.linear_weight
+        return self.length * self.linear_weight
 
     @property
     def force(self) -> float:
@@ -213,5 +255,5 @@ class Member(object):
 
     @property
     def fos_buckling(self) -> float:
-        return -((numpy.pi**2)*self.elastic_modulus*self.moment_of_inertia
-                             /(self.length**2))/self.force
+        return -((numpy.pi ** 2) * self.elastic_modulus * self.moment_of_inertia
+                 / (self.length ** 2)) / self.force

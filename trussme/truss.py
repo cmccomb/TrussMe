@@ -7,8 +7,7 @@ from numpy.typing import NDArray
 
 from trussme import evaluate
 from trussme import report
-from trussme.joint import Joint
-from trussme.member import Member, g, Material, Pipe, Box, Square, Bar
+from trussme.components import Joint, Member, g, Material, Pipe, Box, Square, Bar
 
 
 class Truss(object):

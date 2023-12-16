@@ -1,6 +1,6 @@
 import numpy
 import pandas
-import trussme.member as pp
+import trussme.components as pp
 
 
 def print_summary(f, the_truss, verbose: bool = False):
@@ -181,11 +181,11 @@ def print_stress_analysis(f, the_truss, verbose=False):
     rows = []
     for j in the_truss.joints:
         rows.append("Joint_"+"{0:02d}".format(j.idx))
-        data.append([format(j.reactions[0][0]/pow(10, 3), '.2f')
+        data.append([format(j.reactions[0]/pow(10, 3), '.2f')
                      if j.translation[0] != 0.0 else "N/A",
-                     format(j.reactions[1][0]/pow(10, 3), '.2f')
+                     format(j.reactions[1]/pow(10, 3), '.2f')
                      if j.translation[1] != 0.0 else "N/A",
-                     format(j.reactions[2][0]/pow(10, 3), '.2f')
+                     format(j.reactions[2]/pow(10, 3), '.2f')
                      if j.translation[2] != 0.0 else "N/A"])
 
     pw(f, pandas.DataFrame(data,
@@ -222,11 +222,11 @@ def print_stress_analysis(f, the_truss, verbose=False):
     rows = []
     for j in the_truss.joints:
         rows.append("Joint_"+"{0:02d}".format(j.idx))
-        data.append([format(j.deflections[0][0]*pow(10, 3), '.5f')
+        data.append([format(j.deflections[0]*pow(10, 3), '.5f')
                      if j.translation[0] == 0.0 else "N/A",
-                     format(j.deflections[1][0]*pow(10, 3), '.5f')
+                     format(j.deflections[1]*pow(10, 3), '.5f')
                      if j.translation[1] == 0.0 else "N/A",
-                     format(j.deflections[2][0]*pow(10, 3), '.5f')
+                     format(j.deflections[2]*pow(10, 3), '.5f')
                      if j.translation[2] == 0.0 else "N/A"])
 
     pw(f, pandas.DataFrame(data,
