@@ -1,7 +1,7 @@
 import numpy
 from trussme.joint import Joint
 from typing import Union, TypedDict
-
+import abc
 
 # Gravitational constant for computing weight from mass
 g: float = 9.80665
@@ -41,7 +41,21 @@ MATERIALS: list[Material] = [
 ]
 
 
-class Pipe(object):
+class Shape(abc.ABC):
+    @abc.abstractmethod
+    def moi(self) -> float:
+        pass
+
+    @abc.abstractmethod
+    def area(self) -> float:
+        pass
+
+    @abc.abstractmethod
+    def to_str(self) -> str:
+        pass
+
+
+class Pipe(Shape):
     def __init__(self, r: float = 0.0, t: float = 0.0):
         self.r: float = r
         self.t: float = t
@@ -58,7 +72,7 @@ class Pipe(object):
         return "pipe"
 
 
-class Bar(object):
+class Bar(Shape):
     def __init__(self, r: float = 0.0):
         self.r: float = r
         self.w = "N/A"
@@ -75,7 +89,7 @@ class Bar(object):
         return "bar"
 
 
-class Square(object):
+class Square(Shape):
     def __init__(self, w: float = 0.0, h: float = 0.0):
         self.w: float = w
         self.h: float = h
@@ -95,7 +109,7 @@ class Square(object):
         return "square"
 
 
-class Box(object):
+class Box(Shape):
     def __init__(self, w: float = 0.0, h: float = 0.0, t: float = 0.0):
         self.w: float = w
         self.h: float = h
@@ -115,9 +129,6 @@ class Box(object):
 
     def to_str(self) -> str:
         return "box"
-
-
-Shape = Union[Pipe, Bar, Square, Box, None]
 
 
 class Member(object):
