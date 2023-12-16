@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from trussme import evaluate
 from trussme import report
 from trussme.joint import Joint
-from trussme.member import Member, g, Material, MATERIALS, Pipe, Box, Square, Bar
+from trussme.member import Member, g, Material, Pipe, Box, Square, Bar
 
 
 class Truss(object):
@@ -19,9 +19,6 @@ class Truss(object):
 
         # Make a list to store joints in
         self.joints: list[Joint] = []
-
-        # Make a list to store materials in
-        self.materials: list[Material] = [MATERIALS[0]]
 
         # Design goals
         self.goals = {"min_fos_total": -1,
@@ -57,6 +54,11 @@ class Truss(object):
     @property
     def fos_total(self) -> float:
         return min(self.fos_buckling, self.fos_yielding)
+
+    @property
+    def materials(self) -> list[Material]:
+        material_library: list[Material] = [member.material for member in self.members]
+        return list({v['name']: v for v in material_library}.values())
 
     @property
     def limit_state(self) -> str:
@@ -191,6 +193,14 @@ class Truss(object):
             file_name = time.strftime('%X %x %Z')
 
         with open(file_name, "w") as f:
+            # Do materials
+            for material in self.materials:
+                f.write("S" + "\t"
+                        + str(material["name"]) + "\t"
+                        + str(material["density"]) + "\t"
+                        + str(material["elastic_modulus"]) + "\t"
+                        + str(material["yield_strength"]) + "\n")
+
             # Do the joints
             load_string = ""
             for j in self.joints:
@@ -232,12 +242,13 @@ class Truss(object):
 
 def read_trs(file_name: str) -> Truss:
     truss = Truss()
+    material_library: list[Material] = []
 
     with open(file_name, 'r') as f:
         for idx, line in enumerate(f):
             if line[0] is "S":
                 info = line.split()[1:]
-                truss.materials.append({
+                material_library.append({
                     "name": info[0],
                     "density": float(info[1]),
                     "elastic_modulus": float(info[2]),
@@ -253,7 +264,7 @@ def read_trs(file_name: str) -> Truss:
             elif line[0] is "M":
                 info = line.split()[1:]
                 truss.add_member(int(info[0]), int(info[1]))
-                material = next(item for item in truss.materials if item["name"] == info[2])
+                material = next(item for item in material_library if item["name"] == info[2])
                 truss.members[-1].set_material(material)
 
                 # Parse parameters

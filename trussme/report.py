@@ -113,7 +113,7 @@ def print_instantiation_information(f, the_truss, verbose=False):
         rows.append("Member_"+"{0:02d}".format(m.idx))
         data.append([str(m.joints[0].idx),
                      str(m.joints[1].idx),
-                     m.material,
+                     m.material_name,
                      m.shape.to_str(),
                      m.shape.h,
                      m.shape.w,
@@ -133,11 +133,10 @@ def print_instantiation_information(f, the_truss, verbose=False):
         .to_string(justify="left"), v=verbose)
 
     # Print material list
-    unique_materials = list({v['name']:v for v in the_truss.materials}.values())
     pw(f, "\n--- MATERIALS ---", v=verbose)
     data = []
     rows = []
-    for mat in unique_materials:
+    for mat in the_truss.materials:
         rows.append(mat["name"])
         data.append([
             str(mat["density"]),

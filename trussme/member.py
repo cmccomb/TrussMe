@@ -169,6 +169,10 @@ class Member(object):
         return self.material["elastic_modulus"]
 
     @property
+    def material_name(self) -> str:
+        return self.material["name"]
+
+    @property
     def moment_of_inertia(self) -> float:
         return self.shape.moi()
 
