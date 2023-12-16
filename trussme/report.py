@@ -91,9 +91,9 @@ def print_instantiation_information(f, the_truss, verbose=False):
         data.append([str(j.coordinates[0]),
                      str(j.coordinates[1]),
                      str(j.coordinates[2]),
-                     str(bool(j.translation[0][0])),
-                     str(bool(j.translation[1][0])),
-                     str(bool(j.translation[2][0]))])
+                     str(j.translation[0]),
+                     str(j.translation[1]),
+                     str(j.translation[2])])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
@@ -182,11 +182,11 @@ def print_stress_analysis(f, the_truss, verbose=False):
     for j in the_truss.joints:
         rows.append("Joint_"+"{0:02d}".format(j.idx))
         data.append([format(j.reactions[0][0]/pow(10, 3), '.2f')
-                     if j.translation[0][0] != 0.0 else "N/A",
+                     if j.translation[0] != 0.0 else "N/A",
                      format(j.reactions[1][0]/pow(10, 3), '.2f')
-                     if j.translation[1][0] != 0.0 else "N/A",
+                     if j.translation[1] != 0.0 else "N/A",
                      format(j.reactions[2][0]/pow(10, 3), '.2f')
-                     if j.translation[2][0] != 0.0 else "N/A"])
+                     if j.translation[2] != 0.0 else "N/A"])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
@@ -223,11 +223,11 @@ def print_stress_analysis(f, the_truss, verbose=False):
     for j in the_truss.joints:
         rows.append("Joint_"+"{0:02d}".format(j.idx))
         data.append([format(j.deflections[0][0]*pow(10, 3), '.5f')
-                     if j.translation[0][0] == 0.0 else "N/A",
+                     if j.translation[0] == 0.0 else "N/A",
                      format(j.deflections[1][0]*pow(10, 3), '.5f')
-                     if j.translation[1][0] == 0.0 else "N/A",
+                     if j.translation[1] == 0.0 else "N/A",
                      format(j.deflections[2][0]*pow(10, 3), '.5f')
-                     if j.translation[2][0] == 0.0 else "N/A"])
+                     if j.translation[2] == 0.0 else "N/A"])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,

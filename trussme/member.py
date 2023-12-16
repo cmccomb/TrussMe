@@ -44,10 +44,10 @@ MATERIALS: list[Material] = [
 class Shape(abc.ABC):
     @abc.abstractmethod
     def __init__(self):
-        self.w = "N/A"
-        self.h = "N/A"
-        self.t = "N/A"
-        self.r = "N/A"
+        self.w = None
+        self.h = None
+        self.t = None
+        self.r = None
 
     @abc.abstractmethod
     def moi(self) -> float:
@@ -66,8 +66,8 @@ class Pipe(Shape):
     def __init__(self, r: float = 0.0, t: float = 0.0):
         self.r: float = r
         self.t: float = t
-        self.w = "N/A"
-        self.h = "N/A"
+        self.w = None
+        self.h = None
 
     def moi(self) -> float:
         return (numpy.pi / 4.) * (self.r ** 4 - (self.r - 2 * self.t) ** 4)
@@ -82,9 +82,9 @@ class Pipe(Shape):
 class Bar(Shape):
     def __init__(self, r: float = 0.0):
         self.r: float = r
-        self.w = "N/A"
-        self.h = "N/A"
-        self.t = "N/A"
+        self.w = None
+        self.h = None
+        self.t = None
 
     def moi(self) -> float:
         return (numpy.pi / 4.) * self.r ** 4
@@ -100,8 +100,8 @@ class Square(Shape):
     def __init__(self, w: float = 0.0, h: float = 0.0):
         self.w: float = w
         self.h: float = h
-        self.t = "N/A"
-        self.r = "N/A"
+        self.t = None
+        self.r = None
 
     def moi(self) -> float:
         if self.h > self.w:
@@ -121,7 +121,7 @@ class Box(Shape):
         self.w: float = w
         self.h: float = h
         self.t: float = t
-        self.r = "N/A"
+        self.r = None
 
     def moi(self) -> float:
         if self.h > self.w:

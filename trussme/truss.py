@@ -130,7 +130,7 @@ class Truss(object):
             "elastic_modulus": numpy.array([member.elastic_modulus for member in self.members]),
             "coordinates": numpy.array([joint.coordinates for joint in self.joints]).T,
             "connections": numpy.array([[j.idx for j in member.joints] for member in self.members]).T,
-            "reactions": numpy.array([list(joint.translation.flatten()) for joint in self.joints]).T,
+            "reactions": numpy.array([joint.translation for joint in self.joints]).T,
             "loads": loads,
             "area": numpy.array([member.area for member in self.members])
         }
@@ -206,9 +206,9 @@ class Truss(object):
                         + str(j.coordinates[0]) + "\t"
                         + str(j.coordinates[1]) + "\t"
                         + str(j.coordinates[2]) + "\t"
-                        + str(j.translation[0, 0]) + "\t"
-                        + str(j.translation[1, 0]) + "\t"
-                        + str(j.translation[2, 0]) + "\n")
+                        + str(int(j.translation[0])) + "\t"
+                        + str(int(j.translation[1])) + "\t"
+                        + str(int(j.translation[2])) + "\n")
                 if numpy.sum(j.loads) != 0:
                     load_string += "L" + "\t"
                     load_string += str(j.idx) + "\t"
@@ -224,13 +224,13 @@ class Truss(object):
                         + str(m.joints[1].idx) + "\t"
                         + m.material["name"] + "\t"
                         + m.shape.name() + "\t")
-                if str(m.shape.t) != "N/A":
+                if m.shape.t:
                     f.write("t=" + str(m.shape.t) + "\t")
-                if str(m.shape.r) != "N/A":
+                if m.shape.r:
                     f.write("r=" + str(m.shape.r) + "\t")
-                if str(m.shape.w) != "N/A":
+                if m.shape.w:
                     f.write("w=" + str(m.shape.w) + "\t")
-                if str(m.shape.h) != "N/A":
+                if m.shape.h:
                     f.write("h=" + str(m.shape.h) + "\t")
                 f.write("\n")
 
@@ -256,8 +256,7 @@ def read_trs(file_name: str) -> Truss:
             elif line[0] == "J":
                 info = line.split()[1:]
                 truss.add_joint([float(x) for x in info[:3]])
-                truss.joints[-1].translation = numpy.array(
-                    [[int(x)] for x in info[3:]])
+                truss.joints[-1].translation = [bool(int(x)) for x in info[3:]]
             elif line[0] == "M":
                 info = line.split()[1:]
                 truss.add_member(int(info[0]), int(info[1]))

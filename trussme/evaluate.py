@@ -21,6 +21,10 @@ def the_forces(truss_info: TrussInfo) -> tuple[NDArray[float], NDArray[float], N
         [numpy.size(truss_info["reactions"], axis=0), numpy.size(truss_info["reactions"], axis=1)])
     dof: numpy.ndarray = numpy.zeros([3 * w[1], 3 * w[1]])
     deflections: numpy.ndarray = numpy.ones(w)
+    print("deflections")
+    print(deflections)
+    print("reactions")
+    print(truss_info["reactions"])
     deflections -= truss_info["reactions"]
 
     # This identifies joints that can be loaded
