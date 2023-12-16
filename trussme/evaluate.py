@@ -9,8 +9,8 @@ TrussInfo = TypedDict("TrussInfo", {
     "connections": numpy.ndarray,
     "loads": numpy.ndarray,
     "reactions": numpy.ndarray,
-    "area": float,
-    "elastic_modulus": float
+    "area": numpy.ndarray,
+    "elastic_modulus": numpy.ndarray
 })
 
 
