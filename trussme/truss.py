@@ -70,15 +70,15 @@ class Truss(object):
     def set_goal(self, **kwargs):
         self.THERE_ARE_GOALS = True
         for key in kwargs:
-            if key is "min_fos_total":
+            if key == "min_fos_total":
                 self.goals["min_fos_total"] = kwargs["min_fos_total"]
-            elif key is "min_fos_yielding":
+            elif key == "min_fos_yielding":
                 self.goals["min_fos_yielding"] = kwargs["min_fos_yielding"]
-            elif key is "min_fos_buckling":
+            elif key == "min_fos_buckling":
                 self.goals["min_fos_buckling"] = kwargs["min_fos_buckling"]
-            elif key is "max_mass":
+            elif key == "max_mass":
                 self.goals["max_mass"] = kwargs["max_mass"]
-            elif key is "max_deflection":
+            elif key == "max_deflection":
                 self.goals["max_deflection"] = kwargs["max_deflection"]
             else:
                 self.THERE_ARE_GOALS = False
@@ -157,7 +157,7 @@ class Truss(object):
 
         self.calc_fos()
 
-        if file_name is "":
+        if file_name == "":
             f = ""
         else:
             f = open(file_name, 'w')
@@ -176,7 +176,7 @@ class Truss(object):
             report.print_recommendations(f, self, verbose=verbose)
 
         # Try to close, and except if
-        if file_name is not "":
+        if file_name != "":
             f.close()
 
     def print_and_save_report(self, file_name: str):
@@ -188,9 +188,7 @@ class Truss(object):
     def save_report(self, file_name: str):
         self.__report(file_name=file_name, verbose=False)
 
-    def save_truss(self, file_name: str = ""):
-        if file_name is "":
-            file_name = time.strftime('%X %x %Z')
+    def save_truss(self, file_name: str):
 
         with open(file_name, "w") as f:
             # Do materials
@@ -246,7 +244,7 @@ def read_trs(file_name: str) -> Truss:
 
     with open(file_name, 'r') as f:
         for idx, line in enumerate(f):
-            if line[0] is "S":
+            if line[0] == "S":
                 info = line.split()[1:]
                 material_library.append({
                     "name": info[0],
@@ -255,13 +253,13 @@ def read_trs(file_name: str) -> Truss:
                     "yield_strength": float(info[3]),
                 })
 
-            elif line[0] is "J":
+            elif line[0] == "J":
                 info = line.split()[1:]
                 truss.add_joint(numpy.array(
                     [float(x) for x in info[:3]]))
                 truss.joints[-1].translation = numpy.array(
                     [[int(x)] for x in info[3:]])
-            elif line[0] is "M":
+            elif line[0] == "M":
                 info = line.split()[1:]
                 truss.add_member(int(info[0]), int(info[1]))
                 material = next(item for item in material_library if item["name"] == info[2])
@@ -277,12 +275,12 @@ def read_trs(file_name: str) -> Truss:
                 shape = eval(str(info[3]).title())(**dict(zip(ks, vs)))
                 truss.members[-1].set_shape(shape)
 
-            elif line[0] is "L":
+            elif line[0] == "L":
                 info = line.split()[1:]
                 truss.joints[int(info[0])].loads[0] = float(info[1])
                 truss.joints[int(info[0])].loads[1] = float(info[2])
                 truss.joints[int(info[0])].loads[2] = float(info[3])
-            elif line[0] is not "#" and not line.isspace():
+            elif line[0] != "#" and not line.isspace():
                 raise ValueError("'" + line[0] + "' is not a valid line initializer.")
 
     return truss
