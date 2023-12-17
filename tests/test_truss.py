@@ -1,7 +1,7 @@
-import numpy
-import unittest
-import os
 import filecmp
+import os
+import unittest
+
 import trussme
 
 TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
@@ -68,8 +68,7 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.md'))
 
         # Test for sameness
-        file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), 'report_1.md'),
+        file_are_the_same = filecmp.cmp(os.path.join(os.path.dirname(__file__), 'report_1.md'),
             os.path.join(os.path.dirname(__file__), 'report_2.md'))
         self.assertTrue(file_are_the_same)
 
@@ -104,8 +103,7 @@ class TestSequenceFunctions(unittest.TestCase):
             print(f.read())
 
         # Test for sameness
-        file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), 'report_3.md'),
+        file_are_the_same = filecmp.cmp(os.path.join(os.path.dirname(__file__), 'report_3.md'),
             os.path.join(os.path.dirname(__file__), 'report_2.md'))
         self.assertTrue(file_are_the_same)
 

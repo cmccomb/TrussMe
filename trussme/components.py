@@ -1,38 +1,19 @@
-import numpy
-from typing import TypedDict, Literal
 import abc
+from typing import TypedDict, Literal
+
+import numpy
 
 # Gravitational constant for computing weight from mass
 g: float = 9.80665
 
-Material = TypedDict("Material", {
-    "name": str,
-    "density": float,
-    "elastic_modulus": float,
-    "yield_strength": float,
-})
+Material = TypedDict("Material", {"name": str, "density": float, "elastic_modulus": float, "yield_strength": float, })
 
 # Material properties
 MATERIALS: list[Material] = [
-    {
-        "name": "A36_Steel",
-        "density": 7800.0,
-        "elastic_modulus": 200 * pow(10, 9),
-        "yield_strength": 250 * pow(10, 6)
-    },
-    {
-        "name": "A992_Steel",
-        "density": 7800.0,
-        "elastic_modulus": 200 * pow(10, 9),
-        "yield_strength": 345 * pow(10, 6)
-    },
-    {
-        "name": "6061_T6_Aluminum",
-        "density": 2700.0,
-        "elastic_modulus": 68.9 * pow(10, 9),
-        "yield_strength": 276 * pow(10, 6)
-    }
-]
+    {"name": "A36_Steel", "density": 7800.0, "elastic_modulus": 200 * pow(10, 9), "yield_strength": 250 * pow(10, 6)},
+    {"name": "A992_Steel", "density": 7800.0, "elastic_modulus": 200 * pow(10, 9), "yield_strength": 345 * pow(10, 6)},
+    {"name": "6061_T6_Aluminum", "density": 2700.0, "elastic_modulus": 68.9 * pow(10, 9),
+        "yield_strength": 276 * pow(10, 6)}]
 
 
 class Shape(abc.ABC):
@@ -119,11 +100,9 @@ class Box(Shape):
 
     def moi(self) -> float:
         if self.h > self.w:
-            return (1. / 12.) * (self.w * self.h ** 3) \
-                - (1. / 12.) * (self.w - 2 * self.t) * (self.h - 2 * self.t) ** 3
+            return (1. / 12.) * (self.w * self.h ** 3) - (1. / 12.) * (self.w - 2 * self.t) * (self.h - 2 * self.t) ** 3
         else:
-            return (1. / 12.) * (self.h * self.w ** 3) \
-                - (1. / 12.) * (self.h - 2 * self.t) * (self.w - 2 * self.t) ** 3
+            return (1. / 12.) * (self.h * self.w ** 3) - (1. / 12.) * (self.h - 2 * self.t) * (self.w - 2 * self.t) ** 3
 
     def area(self) -> float:
         return self.w * self.h - (self.h - 2 * self.t) * (self.w - 2 * self.t)
@@ -252,5 +231,4 @@ class Member(object):
 
     @property
     def fos_buckling(self) -> float:
-        return -((numpy.pi ** 2) * self.elastic_modulus * self.moment_of_inertia
-                 / (self.length ** 2)) / self.force
+        return -((numpy.pi ** 2) * self.elastic_modulus * self.moment_of_inertia / (self.length ** 2)) / self.force

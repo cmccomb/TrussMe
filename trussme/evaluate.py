@@ -3,15 +3,8 @@ from typing import TypedDict
 import numpy
 from numpy.typing import NDArray
 
-
-TrussInfo = TypedDict("TrussInfo", {
-    "coordinates": numpy.ndarray,
-    "connections": numpy.ndarray,
-    "loads": numpy.ndarray,
-    "reactions": numpy.ndarray,
-    "area": numpy.ndarray,
-    "elastic_modulus": numpy.ndarray
-})
+TrussInfo = TypedDict("TrussInfo", {"coordinates": numpy.ndarray, "connections": numpy.ndarray, "loads": numpy.ndarray,
+    "reactions": numpy.ndarray, "area": numpy.ndarray, "elastic_modulus": numpy.ndarray})
 
 
 def the_forces(truss_info: TrussInfo) -> tuple[NDArray[float], NDArray[float], NDArray[float], float]:
@@ -53,8 +46,9 @@ def the_forces(truss_info: TrussInfo) -> tuple[NDArray[float], NDArray[float], N
     ff = numpy.where(deflections.T == 1)
     for i in range(len(ff[0])):
         deflections[ff[1][i], ff[0][i]] = flat_deflections[i]
-    forces = numpy.sum(numpy.multiply(tj,
-        deflections[:, truss_info["connections"][1, :]] - deflections[:, truss_info["connections"][0, :]]), axis=0)
+    forces = numpy.sum(numpy.multiply(tj, deflections[:, truss_info["connections"][1, :]] - deflections[:,
+                                                                                            truss_info["connections"][0,
+                                                                                            :]]), axis=0)
 
     # Check the condition number, and warn the user if it is out of range
     cond = numpy.linalg.cond(SSff)

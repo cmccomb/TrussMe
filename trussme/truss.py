@@ -1,15 +1,12 @@
 import dataclasses
-import os
-import time
 import warnings
+from typing import Literal
 
 import numpy
-from numpy.typing import NDArray
-from typing import Literal
 
 from trussme import evaluate
 from trussme import report
-from trussme.components import Joint, Member, g, Material, Pipe, Box, Square, Bar
+from trussme.components import Joint, Member, g, Material
 
 
 @dataclasses.dataclass
