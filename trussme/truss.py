@@ -1,3 +1,4 @@
+import dataclasses
 import os
 import time
 import warnings
@@ -11,6 +12,15 @@ from trussme import report
 from trussme.components import Joint, Member, g, Material, Pipe, Box, Square, Bar
 
 
+@dataclasses.dataclass
+class Goals:
+    min_fos_total: float = 1.0
+    min_fos_buckling: float = 1.0
+    min_fos_yielding: float = 1.0
+    max_mass: float = numpy.inf
+    max_deflection: float = numpy.inf
+
+
 class Truss(object):
 
     def __init__(self):
@@ -21,12 +31,7 @@ class Truss(object):
         self.joints: list[Joint] = []
 
         # Design goals
-        self.goals = {"min_fos_total": -1,
-                      "min_fos_buckling": -1,
-                      "min_fos_yielding": -1,
-                      "max_mass": -1,
-                      "max_deflection": -1}
-        self.THERE_ARE_GOALS: bool = False
+        self.goals: Goals = Goals()
 
     @property
     def number_of_members(self) -> int:
@@ -56,6 +61,10 @@ class Truss(object):
         return min(self.fos_buckling, self.fos_yielding)
 
     @property
+    def deflection(self) -> float:
+        return max([numpy.linalg.norm(joint.deflections) for joint in self.joints])
+
+    @property
     def materials(self) -> list[Material]:
         material_library: list[Material] = [member.material for member in self.members]
         return list({v['name']: v for v in material_library}.values())
@@ -67,26 +76,45 @@ class Truss(object):
         else:
             return 'yielding'
 
-    def set_goal(self, **kwargs):
-        self.THERE_ARE_GOALS = True
-        for key in kwargs:
-            if key == "min_fos_total":
-                self.goals["min_fos_total"] = kwargs["min_fos_total"]
-            elif key == "min_fos_yielding":
-                self.goals["min_fos_yielding"] = kwargs["min_fos_yielding"]
-            elif key == "min_fos_buckling":
-                self.goals["min_fos_buckling"] = kwargs["min_fos_buckling"]
-            elif key == "max_mass":
-                self.goals["max_mass"] = kwargs["max_mass"]
-            elif key == "max_deflection":
-                self.goals["max_deflection"] = kwargs["max_deflection"]
-            else:
-                self.THERE_ARE_GOALS = False
-                raise ValueError(key + ' is not a valid defined design goal. '
-                                       'Try min_fos_total, '
-                                       'min_fos_yielding, '
-                                       'min_fos_buckling, '
-                                       'max_mass, or max_deflection.')
+    @property
+    def minimum_fos_total(self) -> float:
+        return self.goals.min_fos_total
+
+    @minimum_fos_total.setter
+    def minimum_fos_total(self, new_fos: float):
+        self.goals.min_fos_total = new_fos
+
+    @property
+    def minimum_fos_yielding(self) -> float:
+        return self.goals.min_fos_yielding
+
+    @minimum_fos_yielding.setter
+    def minimum_fos_yielding(self, new_fos: float):
+        self.goals.min_fos_yielding = new_fos
+
+    @property
+    def minimum_fos_buckling(self) -> float:
+        return self.goals.min_fos_buckling
+
+    @minimum_fos_buckling.setter
+    def minimum_fos_buckling(self, new_fos: float):
+        self.goals.min_fos_buckling = new_fos
+
+    @property
+    def maximum_mass(self) -> float:
+        return self.goals.max_mass
+
+    @maximum_mass.setter
+    def maximum_mass(self, new_mass: float):
+        self.goals.max_mass = new_mass
+
+    @property
+    def maximum_deflection(self) -> float:
+        return self.goals.max_deflection
+
+    @maximum_deflection.setter
+    def maximum_deflection(self, new_deflection: float):
+        self.goals.max_deflection = new_deflection
 
     def add_pinned_support(self, coordinates: list[float]):
         # Make the joint
@@ -177,9 +205,6 @@ class Truss(object):
         report.print_instantiation_information(f, self, verbose=verbose)
 
         report.print_stress_analysis(f, self, verbose=verbose)
-
-        if self.THERE_ARE_GOALS:
-            report.print_recommendations(f, self, verbose=verbose)
 
         # Try to close, and except if
         if file_name != "":

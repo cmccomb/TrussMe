@@ -51,17 +51,17 @@ class TestSequenceFunctions(unittest.TestCase):
         t1.add_member(4, 10)
         t1.add_member(10, 5)
 
-        t1.set_goal(min_fos_buckling=1.5,
-                    min_fos_yielding=1.5,
-                    max_mass=5.0,
-                    max_deflection=6e-3)
+        t1.minimum_fos_buckling = 1.5
+        t1.min_fos_yielding = 1.5
+        t1.max_mass = 5.0
+        t1.maximum_deflection = 6e-3
 
         # Build truss from file
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
-        t2.set_goal(min_fos_buckling=1.5,
-                    min_fos_yielding=1.5,
-                    max_mass=5.0,
-                    max_deflection=6e-3)
+        t2.minimum_fos_buckling = 1.5
+        t2.min_fos_yielding = 1.5
+        t2.max_mass = 5.0
+        t2.maximum_deflection = 6e-3
 
         # Save reports
         t1.save_report(os.path.join(os.path.dirname(__file__), 'report_1.txt'))
@@ -80,10 +80,10 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_save_and_rebuild(self):
         # Build truss from file
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
-        t2.set_goal(min_fos_buckling=1.5,
-                    min_fos_yielding=1.5,
-                    max_mass=5.0,
-                    max_deflection=6e-3)
+        t2.minimum_fos_buckling = 1.5
+        t2.min_fos_yielding = 1.5
+        t2.max_mass = 5.0
+        t2.maximum_deflection = 6e-3
 
         # Save
         t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
@@ -91,10 +91,11 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Rebuild
         t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
-        t3.set_goal(min_fos_buckling=1.5,
-                    min_fos_yielding=1.5,
-                    max_mass=5.0,
-                    max_deflection=6e-3)
+        t3.minimum_fos_buckling = 1.5
+        t3.min_fos_yielding = 1.5
+        t3.max_mass = 5.0
+        t3.maximum_deflection = 6e-3
+
         t3.save_report(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
 
         with open(os.path.join(os.path.dirname(__file__), 'report_3.txt')) as f:
