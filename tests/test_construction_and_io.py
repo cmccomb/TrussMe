@@ -119,4 +119,26 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save
-        t2.to_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
+        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_4.md"))
+        t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.json"))
+
+        # Rebuild
+        t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.json"))
+        t3.minimum_fos_buckling = 1.5
+        t3.min_fos_yielding = 1.5
+        t3.max_mass = 5.0
+        t3.maximum_deflection = 6e-3
+
+        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_5.md"))
+
+        with open(os.path.join(os.path.dirname(__file__), "report_5.md")) as f:
+            print(f.read())
+        with open(os.path.join(os.path.dirname(__file__), "report_4.md")) as f:
+            print(f.read())
+
+        # Test for sameness
+        file_are_the_same = filecmp.cmp(
+            os.path.join(os.path.dirname(__file__), "report_5.md"),
+            os.path.join(os.path.dirname(__file__), "report_4.md"),
+        )
+        self.assertTrue(file_are_the_same)

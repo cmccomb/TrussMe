@@ -402,3 +402,35 @@ def read_trs(file_name: str) -> Truss:
                 raise ValueError("'" + line[0] + "' is not a valid line initializer.")
 
     return truss
+
+
+def read_json(file_name: str) -> Truss:
+    json_truss = json.load(open(file_name))
+
+    truss = Truss()
+    material_library: list[Material] = json_truss["materials"]
+
+    for joint in json_truss["joints"]:
+        truss.add_joint(joint["coordinates"])
+        truss.joints[-1].translation = joint["translation"]
+        truss.joints[-1].translation = joint["loads"]
+
+    for member in json_truss["members"]:
+        material: Material = next(
+            item for item in material_library if item["name"] == member["material"]
+        )
+        shape_params = member["shape"]
+        del shape_params["name"]
+        if member["shape"]["name"] == "pipe":
+            shape = Pipe(**dict(shape_params))
+        elif member["shape"]["name"] == "bar":
+            shape = Bar(**dict(shape_params))
+        elif member["shape"]["name"] == "square":
+            shape = Square(**dict(shape_params))
+        elif member["shape"]["name"] == "box":
+            shape = Box(**dict(shape_params))
+        truss.add_member(
+            member["begin_joint"], member["end_joint"], material=material, shape=shape
+        )
+
+    return truss
