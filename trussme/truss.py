@@ -17,7 +17,7 @@ from trussme.components import (
     Square,
     Shape,
     Box,
-    default_material,
+    MATERIALS,
 )
 
 
@@ -150,12 +150,12 @@ class Truss(object):
         self,
         joint_index_a: int,
         joint_index_b: int,
-        material: Material = default_material,
+        material: Material = MATERIALS[0],
         shape: Shape = Pipe(t=0.002, r=0.02),
     ):
-        member = Member(self.joints[joint_index_a], self.joints[joint_index_b])
-        member.set_shape(shape)
-        member.set_material(material)
+        member = Member(
+            self.joints[joint_index_a], self.joints[joint_index_b], material, shape
+        )
         member.idx = self.number_of_members
 
         # Make a member
@@ -370,11 +370,9 @@ def read_trs(file_name: str) -> Truss:
                 truss.joints[-1].translation = [bool(int(x)) for x in info[3:]]
             elif line[0] == "M":
                 info = line.split()[1:]
-                truss.add_member(int(info[0]), int(info[1]))
                 material = next(
                     item for item in material_library if item["name"] == info[2]
                 )
-                truss.members[-1].set_material(material)
 
                 # Parse parameters
                 ks = []
@@ -391,7 +389,7 @@ def read_trs(file_name: str) -> Truss:
                     shape = Square(**dict(zip(ks, vs)))
                 elif info[3] == "box":
                     shape = Box(**dict(zip(ks, vs)))
-                truss.members[-1].set_shape(shape)
+                truss.add_member(int(info[0]), int(info[1]), material, shape)
 
             elif line[0] == "L":
                 info = line.split()[1:]

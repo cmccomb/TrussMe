@@ -38,8 +38,6 @@ MATERIALS: list[Material] = [
     },
 ]
 
-default_material: Material = MATERIALS[0]
-
 
 class Shape(abc.ABC):
     @abc.abstractmethod
@@ -184,15 +182,17 @@ class Joint(object):
 
 
 class Member(object):
-    def __init__(self, begin_joint: Joint, end_joint: Joint):
+    def __init__(
+        self, begin_joint: Joint, end_joint: Joint, material: Material, shape: Shape
+    ):
         # Save id number
         self.idx: int = 0
 
         # Shape independent variables
-        self.shape: Shape = Pipe(t=0.002, r=0.02)
+        self.shape: Shape = shape
 
         # Material properties
-        self.material: Material = MATERIALS[0]
+        self.material: Material = material
 
         # Variables to store information about truss state
         self._force: float = 0
@@ -200,13 +200,6 @@ class Member(object):
         # Variable to store location in truss
         self.begin_joint: Joint = begin_joint
         self.end_joint: Joint = end_joint
-
-    def set_shape(self, new_shape: Shape):
-        self.shape = new_shape
-
-    def set_material(self, new_material: Material):
-        # Set material properties
-        self.material = new_material
 
     @property
     def yield_strength(self) -> float:
