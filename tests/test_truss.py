@@ -4,11 +4,10 @@ import unittest
 
 import trussme
 
-TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), 'example.trs')
+TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), "example.trs")
 
 
 class TestSequenceFunctions(unittest.TestCase):
-
     def test_build_methods(self):
         # Build truss from scratch
         t1 = trussme.Truss()
@@ -64,17 +63,19 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save reports
-        t1.save_report(os.path.join(os.path.dirname(__file__), 'report_1.md'))
-        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.md'))
+        t1.save_report(os.path.join(os.path.dirname(__file__), "report_1.md"))
+        t2.save_report(os.path.join(os.path.dirname(__file__), "report_2.md"))
 
         # Test for sameness
-        file_are_the_same = filecmp.cmp(os.path.join(os.path.dirname(__file__), 'report_1.md'),
-            os.path.join(os.path.dirname(__file__), 'report_2.md'))
+        file_are_the_same = filecmp.cmp(
+            os.path.join(os.path.dirname(__file__), "report_1.md"),
+            os.path.join(os.path.dirname(__file__), "report_2.md"),
+        )
         self.assertTrue(file_are_the_same)
 
         # Clean up
-        os.remove(os.path.join(os.path.dirname(__file__), 'report_1.md'))
-        os.remove(os.path.join(os.path.dirname(__file__), 'report_2.md'))
+        os.remove(os.path.join(os.path.dirname(__file__), "report_1.md"))
+        os.remove(os.path.join(os.path.dirname(__file__), "report_2.md"))
 
     def test_save_and_rebuild(self):
         # Build truss from file
@@ -85,26 +86,28 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save
-        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.md'))
-        t2.save_truss(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
+        t2.save_report(os.path.join(os.path.dirname(__file__), "report_2.md"))
+        t2.save_truss(os.path.join(os.path.dirname(__file__), "asdf.trs"))
 
         # Rebuild
-        t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
+        t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
         t3.minimum_fos_buckling = 1.5
         t3.min_fos_yielding = 1.5
         t3.max_mass = 5.0
         t3.maximum_deflection = 6e-3
 
-        t3.save_report(os.path.join(os.path.dirname(__file__), 'report_3.md'))
+        t3.save_report(os.path.join(os.path.dirname(__file__), "report_3.md"))
 
-        with open(os.path.join(os.path.dirname(__file__), 'report_3.md')) as f:
+        with open(os.path.join(os.path.dirname(__file__), "report_3.md")) as f:
             print(f.read())
-        with open(os.path.join(os.path.dirname(__file__), 'report_2.md')) as f:
+        with open(os.path.join(os.path.dirname(__file__), "report_2.md")) as f:
             print(f.read())
 
         # Test for sameness
-        file_are_the_same = filecmp.cmp(os.path.join(os.path.dirname(__file__), 'report_3.md'),
-            os.path.join(os.path.dirname(__file__), 'report_2.md'))
+        file_are_the_same = filecmp.cmp(
+            os.path.join(os.path.dirname(__file__), "report_3.md"),
+            os.path.join(os.path.dirname(__file__), "report_2.md"),
+        )
         self.assertTrue(file_are_the_same)
 
 

@@ -6,14 +6,37 @@ import numpy
 # Gravitational constant for computing weight from mass
 g: float = 9.80665
 
-Material = TypedDict("Material", {"name": str, "density": float, "elastic_modulus": float, "yield_strength": float, })
+Material = TypedDict(
+    "Material",
+    {
+        "name": str,
+        "density": float,
+        "elastic_modulus": float,
+        "yield_strength": float,
+    },
+)
 
 # Material properties
 MATERIALS: list[Material] = [
-    {"name": "A36_Steel", "density": 7800.0, "elastic_modulus": 200 * pow(10, 9), "yield_strength": 250 * pow(10, 6)},
-    {"name": "A992_Steel", "density": 7800.0, "elastic_modulus": 200 * pow(10, 9), "yield_strength": 345 * pow(10, 6)},
-    {"name": "6061_T6_Aluminum", "density": 2700.0, "elastic_modulus": 68.9 * pow(10, 9),
-        "yield_strength": 276 * pow(10, 6)}]
+    {
+        "name": "A36_Steel",
+        "density": 7800.0,
+        "elastic_modulus": 200 * pow(10, 9),
+        "yield_strength": 250 * pow(10, 6),
+    },
+    {
+        "name": "A992_Steel",
+        "density": 7800.0,
+        "elastic_modulus": 200 * pow(10, 9),
+        "yield_strength": 345 * pow(10, 6),
+    },
+    {
+        "name": "6061_T6_Aluminum",
+        "density": 2700.0,
+        "elastic_modulus": 68.9 * pow(10, 9),
+        "yield_strength": 276 * pow(10, 6),
+    },
+]
 
 
 class Shape(abc.ABC):
@@ -45,10 +68,10 @@ class Pipe(Shape):
         self.h = None
 
     def moi(self) -> float:
-        return (numpy.pi / 4.) * (self.r ** 4 - (self.r - 2 * self.t) ** 4)
+        return (numpy.pi / 4.0) * (self.r**4 - (self.r - 2 * self.t) ** 4)
 
     def area(self) -> float:
-        return numpy.pi * (self.r ** 2 - (self.r - self.t) ** 2)
+        return numpy.pi * (self.r**2 - (self.r - self.t) ** 2)
 
     def name(self) -> str:
         return "pipe"
@@ -62,10 +85,10 @@ class Bar(Shape):
         self.t = None
 
     def moi(self) -> float:
-        return (numpy.pi / 4.) * self.r ** 4
+        return (numpy.pi / 4.0) * self.r**4
 
     def area(self) -> float:
-        return numpy.pi * self.r ** 2
+        return numpy.pi * self.r**2
 
     def name(self) -> str:
         return "bar"
@@ -80,9 +103,9 @@ class Square(Shape):
 
     def moi(self) -> float:
         if self.h > self.w:
-            return (1. / 12.) * self.w * self.h ** 3
+            return (1.0 / 12.0) * self.w * self.h**3
         else:
-            return (1. / 12.) * self.h * self.w ** 3
+            return (1.0 / 12.0) * self.h * self.w**3
 
     def area(self) -> float:
         return self.w * self.h
@@ -100,9 +123,13 @@ class Box(Shape):
 
     def moi(self) -> float:
         if self.h > self.w:
-            return (1. / 12.) * (self.w * self.h ** 3) - (1. / 12.) * (self.w - 2 * self.t) * (self.h - 2 * self.t) ** 3
+            return (1.0 / 12.0) * (self.w * self.h**3) - (1.0 / 12.0) * (
+                self.w - 2 * self.t
+            ) * (self.h - 2 * self.t) ** 3
         else:
-            return (1. / 12.) * (self.h * self.w ** 3) - (1. / 12.) * (self.h - 2 * self.t) * (self.w - 2 * self.t) ** 3
+            return (1.0 / 12.0) * (self.h * self.w**3) - (1.0 / 12.0) * (
+                self.h - 2 * self.t
+            ) * (self.w - 2 * self.t) ** 3
 
     def area(self) -> float:
         return self.w * self.h - (self.h - 2 * self.t) * (self.w - 2 * self.t)
@@ -112,7 +139,6 @@ class Box(Shape):
 
 
 class Joint(object):
-
     def __init__(self, coordinates: list[float]):
         # Save the joint id
         self.idx: int = 0
@@ -145,7 +171,7 @@ class Joint(object):
         # Restrict all translation
         self.translation = [True, True, True]
 
-    def roller(self, axis: Literal["x", "y"] = 'y', d: int = 3):
+    def roller(self, axis: Literal["x", "y"] = "y", d: int = 3):
         # Only support reaction along denoted axis
         self.translation = [False, False, False]
         self.translation[ord(axis) - 120] = True
@@ -156,7 +182,6 @@ class Joint(object):
 
 
 class Member(object):
-
     def __init__(self, begin_joint: Joint, end_joint: Joint):
         # Save id number
         self.idx: int = 0
@@ -211,7 +236,10 @@ class Member(object):
 
     @property
     def length(self) -> float:
-        return numpy.linalg.norm(numpy.array(self.begin_joint.coordinates) - numpy.array(self.end_joint.coordinates))
+        return numpy.linalg.norm(
+            numpy.array(self.begin_joint.coordinates)
+            - numpy.array(self.end_joint.coordinates)
+        )
 
     @property
     def mass(self) -> float:
@@ -231,4 +259,12 @@ class Member(object):
 
     @property
     def fos_buckling(self) -> float:
-        return -((numpy.pi ** 2) * self.elastic_modulus * self.moment_of_inertia / (self.length ** 2)) / self.force
+        return (
+            -(
+                (numpy.pi**2)
+                * self.elastic_modulus
+                * self.moment_of_inertia
+                / (self.length**2)
+            )
+            / self.force
+        )
