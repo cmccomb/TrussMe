@@ -6,6 +6,14 @@ import trussme.visualize
 
 
 def generate_summary(the_truss) -> str:
+    """
+    Generate a summary of the analysis.
+
+    :param the_truss: The truss to be summarized
+    :type the_truss: Truss
+    :return: A string containing the summary
+    :rtype: str
+    """
     summary = "# SUMMARY OF ANALYSIS\n"
     summary += (
         "- The truss has a mass of "
@@ -140,6 +148,14 @@ def generate_summary(the_truss) -> str:
 
 
 def generate_instantiation_information(the_truss) -> str:
+    """
+    Generate a summary of the instantiation information.
+
+    :param the_truss: The truss to be reported on
+    :type the_truss: Truss
+    :return: A report of the instantiation information
+    :rtype: str
+    """
     instantiation = "# INSTANTIATION INFORMATION\n"
 
     instantiation += trussme.visualize.plot_truss(the_truss) + "\n"
