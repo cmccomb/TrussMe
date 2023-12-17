@@ -3,6 +3,7 @@ import os
 import unittest
 
 import trussme
+import trussme.visualize
 
 TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), "example.trs")
 

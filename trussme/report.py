@@ -2,6 +2,7 @@ import numpy
 import pandas
 
 import trussme.components as pp
+import trussme.visualize
 
 
 def generate_summary(the_truss) -> str:
@@ -140,6 +141,8 @@ def generate_summary(the_truss) -> str:
 
 def generate_instantiation_information(the_truss) -> str:
     instantiation = "# INSTANTIATION INFORMATION\n"
+
+    instantiation += trussme.visualize.plot_truss(the_truss) + "\n"
 
     # Print joint information
     instantiation += "## JOINTS\n"
@@ -314,6 +317,9 @@ def generate_stress_analysis(the_truss) -> str:
 
     # Print information about members
     analysis += "\n## DEFLECTIONS\n"
+
+    analysis += trussme.visualize.plot_truss(the_truss, deflected_shape=True) + "\n"
+
     data = []
     rows = []
     for j in the_truss.joints:
