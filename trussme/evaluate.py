@@ -6,12 +6,12 @@ from numpy.typing import NDArray
 TrussInfo = TypedDict(
     "TrussInfo",
     {
-        "coordinates": numpy.ndarray,
-        "connections": numpy.ndarray,
-        "loads": numpy.ndarray,
-        "reactions": numpy.ndarray,
-        "area": numpy.ndarray,
-        "elastic_modulus": numpy.ndarray,
+        "coordinates": NDArray[float],
+        "connections": NDArray[float],
+        "loads": NDArray[float],
+        "reactions": NDArray[float],
+        "area": NDArray[float],
+        "elastic_modulus": NDArray[float],
     },
 )
 
@@ -19,19 +19,19 @@ TrussInfo = TypedDict(
 def the_forces(
     truss_info: TrussInfo,
 ) -> tuple[NDArray[float], NDArray[float], NDArray[float], float]:
-    tj: numpy.ndarray = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
-    w: numpy.ndarray = numpy.array(
+    tj: NDArray[float] = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
+    w: NDArray[float] = numpy.array(
         [
             numpy.size(truss_info["reactions"], axis=0),
             numpy.size(truss_info["reactions"], axis=1),
         ]
     )
-    dof: numpy.ndarray = numpy.zeros([3 * w[1], 3 * w[1]])
-    deflections: numpy.ndarray = numpy.ones(w)
+    dof: NDArray[float] = numpy.zeros([3 * w[1], 3 * w[1]])
+    deflections: NDArray[float] = numpy.ones(w)
     deflections -= truss_info["reactions"]
 
     # This identifies joints that can be loaded
-    ff: numpy.ndarray = numpy.where(deflections.T.flat == 1)[0]
+    ff: NDArray[float] = numpy.where(deflections.T.flat == 1)[0]
 
     # Build the global stiffness matrix
     for i in range(numpy.size(truss_info["connections"], axis=1)):

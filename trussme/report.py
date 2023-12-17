@@ -82,6 +82,59 @@ def generate_summary(the_truss) -> str:
                 summary += st + ","
             summary += "and " + str(failure_string[-1]) + " were not satisfied.\n"
 
+    data = []
+    rows = [
+        "Minimum Total FOS",
+        "Minimum FOS for Buckling",
+        "Minimum FOS for Yielding",
+        "Maximum Mass",
+        "Maximum Deflection",
+    ]
+    data.append(
+        [
+            the_truss.minimum_fos_total,
+            the_truss.fos_total,
+            "Yes" if the_truss.fos_total > the_truss.minimum_fos_total else "No",
+        ]
+    )
+    data.append(
+        [
+            the_truss.minimum_fos_buckling,
+            the_truss.fos_buckling,
+            "Yes" if the_truss.fos_buckling > the_truss.minimum_fos_buckling else "No",
+        ]
+    )
+    data.append(
+        [
+            the_truss.minimum_fos_yielding,
+            the_truss.fos_yielding,
+            "Yes" if the_truss.fos_yielding > the_truss.minimum_fos_yielding else "No",
+        ]
+    )
+    data.append(
+        [
+            the_truss.maximum_mass,
+            the_truss.mass,
+            "Yes" if the_truss.mass < the_truss.maximum_mass else "No",
+        ]
+    )
+    data.append(
+        [
+            the_truss.maximum_deflection,
+            the_truss.deflection,
+            "Yes" if the_truss.deflection < the_truss.maximum_deflection else "No",
+        ]
+    )
+
+    summary += (
+        "\n"
+        + pandas.DataFrame(
+            data,
+            index=rows,
+            columns=["Target", "Actual", "Ok?"],
+        ).to_markdown()
+    )
+
     return summary
 
 
