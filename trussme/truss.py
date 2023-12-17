@@ -6,7 +6,18 @@ import numpy
 
 from trussme import evaluate
 from trussme import report
-from trussme.components import Joint, Member, g, Material, Pipe, Bar, Square, Shape, Box, default_material
+from trussme.components import (
+    Joint,
+    Member,
+    g,
+    Material,
+    Pipe,
+    Bar,
+    Square,
+    Shape,
+    Box,
+    default_material,
+)
 
 
 @dataclasses.dataclass
@@ -134,8 +145,13 @@ class Truss(object):
         self.joints[-1].free(d=d)
         self.joints[-1].idx = self.number_of_joints - 1
 
-    def add_member(self, joint_index_a: int, joint_index_b: int, material: Material = default_material, shape: Shape = Pipe(t=0.002, r=0.02)):
-
+    def add_member(
+        self,
+        joint_index_a: int,
+        joint_index_b: int,
+        material: Material = default_material,
+        shape: Shape = Pipe(t=0.002, r=0.02),
+    ):
         member = Member(self.joints[joint_index_a], self.joints[joint_index_b])
         member.set_shape(shape)
         member.set_material(material)
@@ -201,32 +217,19 @@ class Truss(object):
                 + ". Results may be inaccurate."
             )
 
-    def __report(self, file_name: str = "", verbose: bool = False):
+    @property
+    def report(self):
         self.calc_fos()
 
-        if file_name == "":
-            f = ""
-        else:
-            f = open(file_name, "w")
+        report_string = report.generate_summary(self) + "\n"
+        report_string += report.generate_instantiation_information(self) + "\n"
+        report_string += report.generate_stress_analysis(self) + "\n"
 
-        report.print_summary(f, self, verbose=verbose)
-
-        report.print_instantiation_information(f, self, verbose=verbose)
-
-        report.print_stress_analysis(f, self, verbose=verbose)
-
-        # Try to close, and except if
-        if file_name != "":
-            f.close()
-
-    def print_and_save_report(self, file_name: str):
-        self.__report(file_name=file_name, verbose=True)
-
-    def print_report(self):
-        self.__report(file_name="", verbose=True)
+        return report_string
 
     def save_report(self, file_name: str):
-        self.__report(file_name=file_name, verbose=False)
+        with open(file_name, "w") as f:
+            f.write(self.report)
 
     def save_truss(self, file_name: str):
         with open(file_name, "w") as f:
@@ -336,7 +339,14 @@ def read_trs(file_name: str) -> Truss:
                     kvpair = info[param].split("=")
                     ks.append(kvpair[0])
                     vs.append(float(kvpair[1]))
-                shape = eval(str(info[3]).title())(**dict(zip(ks, vs)))
+                if info[3] == "pipe":
+                    shape = Pipe(**dict(zip(ks, vs)))
+                elif info[3] == "bar":
+                    shape = Bar(**dict(zip(ks, vs)))
+                elif info[3] == "square":
+                    shape = Square(**dict(zip(ks, vs)))
+                elif info[3] == "box":
+                    shape = Box(**dict(zip(ks, vs)))
                 truss.members[-1].set_shape(shape)
 
             elif line[0] == "L":

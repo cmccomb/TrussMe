@@ -4,19 +4,16 @@ import pandas
 import trussme.components as pp
 
 
-def print_summary(f, the_truss, verbose: bool = False):
-    pw(f, "\n", v=verbose)
-    pw(f, "# SUMMARY OF ANALYSIS", v=verbose)
-    pw(
-        f,
+def generate_summary(the_truss) -> str:
+    summary = "# SUMMARY OF ANALYSIS\n"
+    summary += (
         "- The truss has a mass of "
         + format(the_truss.mass, ".2f")
         + " kg, and a total factor of safety of "
         + format(the_truss.fos_total, ".2f")
-        + ". ",
-        v=verbose,
+        + ".\n"
     )
-    pw(f, "- The limit state is " + the_truss.limit_state + ".", v=verbose)
+    summary += "- The limit state is " + the_truss.limit_state + ".\n"
 
     success_string = []
     failure_string = []
@@ -47,59 +44,52 @@ def print_summary(f, the_truss, verbose: bool = False):
 
     if len(success_string) is not 0:
         if len(success_string) is 1:
-            pw(
-                f,
-                " The design goal for " + str(success_string[0]) + " was satisfied.",
-                v=verbose,
+            summary += (
+                " The design goal for " + str(success_string[0]) + " was satisfied.\n"
             )
         elif len(success_string) is 2:
-            pw(
-                f,
+            summary += (
                 "- The design goals for "
                 + str(success_string[0])
                 + " and "
                 + str(success_string[1])
-                + " were satisfied.",
-                v=verbose,
+                + " were satisfied.\n"
             )
         else:
-            pw(f, "- The design goals for ", nl=False, v=verbose)
+            summary += "- The design goals for "
             for st in success_string[0:-1]:
-                pw(f, st + ", ", nl=False, v=verbose)
-            pw(f, "and " + str(success_string[-1]) + " were satisfied.", v=verbose)
+                summary += st + ", "
+            summary += "and " + str(success_string[-1]) + " were satisfied.\n"
 
     if len(failure_string) is not 0:
         if len(failure_string) is 1:
-            pw(
-                f,
+            summary += (
                 "- The design goal for "
                 + str(failure_string[0])
-                + " was not satisfied.",
-                v=verbose,
+                + " was not satisfied.\n"
             )
         elif len(failure_string) is 2:
-            pw(
-                f,
+            summary += (
                 "- The design goals for "
                 + str(failure_string[0])
                 + " and "
                 + str(failure_string[1])
-                + " were not satisfied.",
-                v=verbose,
+                + " were not satisfied.\n"
             )
         else:
-            pw(f, "- The design goals for", nl=False, v=verbose)
+            summary += "- The design goals for "
             for st in failure_string[0:-1]:
-                pw(f, st + ",", nl=False, v=verbose)
-            pw(f, "and " + str(failure_string[-1]) + " were not satisfied.", v=verbose)
+                summary += st + ","
+            summary += "and " + str(failure_string[-1]) + " were not satisfied.\n"
+
+    return summary
 
 
-def print_instantiation_information(f, the_truss, verbose=False):
-    pw(f, "\n", v=verbose)
-    pw(f, "# INSTANTIATION INFORMATION\n", v=verbose)
+def generate_instantiation_information(the_truss) -> str:
+    instantiation = "# INSTANTIATION INFORMATION\n"
 
     # Print joint information
-    pw(f, "## JOINTS", v=verbose)
+    instantiation += "## JOINTS\n"
     data = []
     rows = []
     for j in the_truss.joints:
@@ -115,18 +105,14 @@ def print_instantiation_information(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data,
-            index=rows,
-            columns=["X", "Y", "Z", "X Support?", "Y Support?", "Z Support?"],
-        ).to_markdown(),
-        v=verbose,
-    )
+    instantiation += pandas.DataFrame(
+        data,
+        index=rows,
+        columns=["X", "Y", "Z", "X Support?", "Y Support?", "Z Support?"],
+    ).to_markdown()
 
     # Print member information
-    pw(f, "\n## MEMBERS", v=verbose)
+    instantiation += "\n## MEMBERS\n"
     data = []
     rows = []
     for m in the_truss.members:
@@ -145,28 +131,24 @@ def print_instantiation_information(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data,
-            index=rows,
-            columns=[
-                "Joint-A",
-                "Joint-B",
-                "Material",
-                "Shape",
-                "Height (m)",
-                "Width (m)",
-                "Radius (m)",
-                "Thickness (m)",
-                "Mass (kg)",
-            ],
-        ).to_markdown(),
-        v=verbose,
-    )
+    instantiation += pandas.DataFrame(
+        data,
+        index=rows,
+        columns=[
+            "Joint-A",
+            "Joint-B",
+            "Material",
+            "Shape",
+            "Height (m)",
+            "Width (m)",
+            "Radius (m)",
+            "Thickness (m)",
+            "Mass (kg)",
+        ],
+    ).to_markdown()
 
     # Print material list
-    pw(f, "\n## MATERIALS", v=verbose)
+    instantiation += "\n## MATERIALS\n"
     data = []
     rows = []
     for mat in the_truss.materials:
@@ -179,27 +161,24 @@ def print_instantiation_information(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data,
-            index=rows,
-            columns=[
-                "Density (kg/m3)",
-                "Elastic Modulus (GPa)",
-                "Yield Strength (MPa)",
-            ],
-        ).to_markdown(),
-        v=verbose,
-    )
+    instantiation += pandas.DataFrame(
+        data,
+        index=rows,
+        columns=[
+            "Density (kg/m3)",
+            "Elastic Modulus (GPa)",
+            "Yield Strength (MPa)",
+        ],
+    ).to_markdown()
+
+    return instantiation
 
 
-def print_stress_analysis(f, the_truss, verbose=False):
-    pw(f, "\n", v=verbose)
-    pw(f, "# STRESS ANALYSIS INFORMATION\n", v=verbose)
+def generate_stress_analysis(the_truss) -> str:
+    analysis = "# STRESS ANALYSIS INFORMATION\n"
 
     # Print information about loads
-    pw(f, "## LOADING", v=verbose)
+    analysis += "## LOADING\n"
     data = []
     rows = []
     for j in the_truss.joints:
@@ -216,16 +195,12 @@ def print_stress_analysis(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data, index=rows, columns=["X Load", "Y Load", "Z Load"]
-        ).to_markdown(),
-        v=verbose,
-    )
+    analysis += pandas.DataFrame(
+        data, index=rows, columns=["X Load", "Y Load", "Z Load"]
+    ).to_markdown()
 
     # Print information about reactions
-    pw(f, "\n## REACTIONS", v=verbose)
+    analysis += "\n## REACTIONS\n"
     data = []
     rows = []
     for j in the_truss.joints:
@@ -244,18 +219,14 @@ def print_stress_analysis(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data,
-            index=rows,
-            columns=["X Reaction (kN)", "Y Reaction (kN)", "Z Reaction (kN)"],
-        ).to_markdown(),
-        v=verbose,
-    )
+    analysis += pandas.DataFrame(
+        data,
+        index=rows,
+        columns=["X Reaction (kN)", "Y Reaction (kN)", "Z Reaction (kN)"],
+    ).to_markdown()
 
     # Print information about members
-    pw(f, "\n## FORCES AND STRESSES", v=verbose)
+    analysis += "\n## FORCES AND STRESSES\n"
     data = []
     rows = []
     for m in the_truss.members:
@@ -274,26 +245,22 @@ def print_stress_analysis(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data,
-            index=rows,
-            columns=[
-                "Area (m^2)",
-                "Moment of Inertia (m^4)",
-                "Axial force(kN)",
-                "FOS yielding",
-                "OK yielding?",
-                "FOS buckling",
-                "OK buckling?",
-            ],
-        ).to_markdown(),
-        v=verbose,
-    )
+    analysis += pandas.DataFrame(
+        data,
+        index=rows,
+        columns=[
+            "Area (m^2)",
+            "Moment of Inertia (m^4)",
+            "Axial force(kN)",
+            "FOS yielding",
+            "OK yielding?",
+            "FOS buckling",
+            "OK buckling?",
+        ],
+    ).to_markdown()
 
     # Print information about members
-    pw(f, "\n## DEFLECTIONS", v=verbose)
+    analysis += "\n## DEFLECTIONS\n"
     data = []
     rows = []
     for j in the_truss.joints:
@@ -315,30 +282,15 @@ def print_stress_analysis(f, the_truss, verbose=False):
             ]
         )
 
-    pw(
-        f,
-        pandas.DataFrame(
-            data,
-            index=rows,
-            columns=[
-                "X Deflection(mm)",
-                "Y Deflection (mm)",
-                "Z Deflection (mm)",
-                "OK Deflection?",
-            ],
-        ).to_markdown(),
-        v=verbose,
-    )
+    analysis += pandas.DataFrame(
+        data,
+        index=rows,
+        columns=[
+            "X Deflection(mm)",
+            "Y Deflection (mm)",
+            "Z Deflection (mm)",
+            "OK Deflection?",
+        ],
+    ).to_markdown()
 
-
-def pw(f, string, nl=True, v=False):
-    if nl is False:
-        if v is True:
-            print(string),
-        if f is not "":
-            f.write(string)
-    elif nl is True:
-        if v is True:
-            print(string)
-        if f is not "":
-            f.write(string + "\n")
+    return analysis

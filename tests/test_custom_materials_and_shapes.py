@@ -24,7 +24,7 @@ class TestCustomStuff(unittest.TestCase):
         truss.add_member(1, 2, material=unobtanium)
         truss.add_member(2, 0, material=unobtanium)
 
-        truss.print_report()
+        print(truss.report)
 
     def test_custom_shape(self):
         # Build truss from scratch
@@ -56,4 +56,4 @@ class TestCustomStuff(unittest.TestCase):
         truss.add_member(1, 2, shape=MagicalRod())
         truss.add_member(2, 0, shape=MagicalRod())
 
-        truss.print_report()
+        print(truss.report)
