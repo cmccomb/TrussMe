@@ -166,7 +166,7 @@ class Joint(object):
     def free(self, d: int = 3):
         self.translation = [False, False, False]
         # If 2d, add out of plane support
-        if d is 2:
+        if d == 2:
             self.translation[2] = True
 
     def pinned(self):
@@ -179,7 +179,7 @@ class Joint(object):
         self.translation[ord(axis) - 120] = True
 
         # If 2d, add out of plane support
-        if d is 2:
+        if d == 2:
             self.translation[2] = True
 
 

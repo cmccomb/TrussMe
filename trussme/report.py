@@ -42,12 +42,12 @@ def generate_summary(the_truss) -> str:
     else:
         failure_string.append("deflection")
 
-    if len(success_string) is not 0:
-        if len(success_string) is 1:
+    if len(success_string) != 0:
+        if len(success_string) == 1:
             summary += (
                 " The design goal for " + str(success_string[0]) + " was satisfied.\n"
             )
-        elif len(success_string) is 2:
+        elif len(success_string) == 2:
             summary += (
                 "- The design goals for "
                 + str(success_string[0])
@@ -61,14 +61,14 @@ def generate_summary(the_truss) -> str:
                 summary += st + ", "
             summary += "and " + str(success_string[-1]) + " were satisfied.\n"
 
-    if len(failure_string) is not 0:
-        if len(failure_string) is 1:
+    if len(failure_string) != 0:
+        if len(failure_string) == 1:
             summary += (
                 "- The design goal for "
                 + str(failure_string[0])
                 + " was not satisfied.\n"
             )
-        elif len(failure_string) is 2:
+        elif len(failure_string) == 2:
             summary += (
                 "- The design goals for "
                 + str(failure_string[0])
