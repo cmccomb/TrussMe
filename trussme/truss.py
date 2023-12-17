@@ -1,6 +1,7 @@
 import dataclasses
 import warnings
 from typing import Literal
+import json
 
 import numpy
 
@@ -227,11 +228,54 @@ class Truss(object):
 
         return report_string
 
-    def save_report(self, file_name: str):
+    def report_to_md(self, file_name: str):
         with open(file_name, "w") as f:
             f.write(self.report)
 
-    def save_truss(self, file_name: str):
+    def to_json(self, file_name: str):
+        class JointEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, Joint):
+                    return {
+                        "coordinates": obj.coordinates,
+                        "loads": obj.loads,
+                        "translation": obj.translation,
+                    }
+                # Let the base class default method raise the TypeError
+                return json.JSONEncoder.default(self, obj)
+
+        class MemberEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, Member):
+                    return {
+                        "begin_joint": obj.begin_joint.idx,
+                        "end_joint": obj.end_joint.idx,
+                        "material": obj.material["name"],
+                        "shape": {
+                            "name": obj.shape.name(),
+                            "w": obj.shape.w,
+                            "h": obj.shape.h,
+                            "r": obj.shape.r,
+                            "t": obj.shape.t,
+                        },
+                    }
+                # Let the base class default method raise the TypeError
+                return json.JSONEncoder.default(self, obj)
+
+        materials = json.dumps(self.materials, indent=4)
+        joints = json.dumps(self.joints, indent=4, cls=JointEncoder)
+        members = json.dumps(self.members, indent=4, cls=MemberEncoder)
+
+        combined = {
+            "materials": json.loads(materials),
+            "joints": json.loads(joints),
+            "members": json.loads(members),
+        }
+
+        with open(file_name, "w") as f:
+            json.dump(combined, f, indent=4)
+
+    def to_trs(self, file_name: str):
         with open(file_name, "w") as f:
             # Do materials
             for material in self.materials:

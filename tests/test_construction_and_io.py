@@ -63,8 +63,8 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save reports
-        t1.save_report(os.path.join(os.path.dirname(__file__), "report_1.md"))
-        t2.save_report(os.path.join(os.path.dirname(__file__), "report_2.md"))
+        t1.report_to_md(os.path.join(os.path.dirname(__file__), "report_1.md"))
+        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"))
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
@@ -77,7 +77,7 @@ class TestSequenceFunctions(unittest.TestCase):
         os.remove(os.path.join(os.path.dirname(__file__), "report_1.md"))
         os.remove(os.path.join(os.path.dirname(__file__), "report_2.md"))
 
-    def test_save_and_rebuild(self):
+    def test_save_to_trs_and_rebuild(self):
         # Build truss from file
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
         t2.minimum_fos_buckling = 1.5
@@ -86,8 +86,8 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save
-        t2.save_report(os.path.join(os.path.dirname(__file__), "report_2.md"))
-        t2.save_truss(os.path.join(os.path.dirname(__file__), "asdf.trs"))
+        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"))
+        t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
 
         # Rebuild
         t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
@@ -96,7 +96,7 @@ class TestSequenceFunctions(unittest.TestCase):
         t3.max_mass = 5.0
         t3.maximum_deflection = 6e-3
 
-        t3.save_report(os.path.join(os.path.dirname(__file__), "report_3.md"))
+        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_3.md"))
 
         with open(os.path.join(os.path.dirname(__file__), "report_3.md")) as f:
             print(f.read())
@@ -110,6 +110,13 @@ class TestSequenceFunctions(unittest.TestCase):
         )
         self.assertTrue(file_are_the_same)
 
+    def test_save_to_json_and_rebuild(self):
+        # Build truss from file
+        t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
+        t2.minimum_fos_buckling = 1.5
+        t2.min_fos_yielding = 1.5
+        t2.max_mass = 5.0
+        t2.maximum_deflection = 6e-3
 
-if __name__ == "__main__":
-    unittest.main()
+        # Save
+        t2.to_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
