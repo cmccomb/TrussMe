@@ -38,6 +38,8 @@ MATERIALS: list[Material] = [
     },
 ]
 
+default_material: Material = MATERIALS[0]
+
 
 class Shape(abc.ABC):
     @abc.abstractmethod

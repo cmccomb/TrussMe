@@ -6,7 +6,7 @@ import numpy
 
 from trussme import evaluate
 from trussme import report
-from trussme.components import Joint, Member, g, Material, Pipe, Bar, Square, Shape, Box
+from trussme.components import Joint, Member, g, Material, Pipe, Bar, Square, Shape, Box, default_material
 
 
 @dataclasses.dataclass
@@ -134,13 +134,15 @@ class Truss(object):
         self.joints[-1].free(d=d)
         self.joints[-1].idx = self.number_of_joints - 1
 
-    def add_member(self, joint_index_a: int, joint_index_b: int):
-        # Make a member
-        self.members.append(
-            Member(self.joints[joint_index_a], self.joints[joint_index_b])
-        )
+    def add_member(self, joint_index_a: int, joint_index_b: int, material: Material = default_material, shape: Shape = Pipe(t=0.002, r=0.02)):
 
-        self.members[-1].idx = self.number_of_members - 1
+        member = Member(self.joints[joint_index_a], self.joints[joint_index_b])
+        member.set_shape(shape)
+        member.set_material(material)
+        member.idx = self.number_of_members
+
+        # Make a member
+        self.members.append(member)
 
         # Update joints
         self.joints[joint_index_a].members.append(self.members[-1])
@@ -186,11 +188,11 @@ class Truss(object):
         for i in range(self.number_of_joints):
             for j in range(3):
                 if self.joints[i].translation[j]:
-                    self.joints[i].reactions[j] = reactions[j, i]
+                    self.joints[i].reactions[j] = float(reactions[j, i])
                     self.joints[i].deflections[j] = 0.0
                 else:
                     self.joints[i].reactions[j] = 0.0
-                    self.joints[i].deflections[j] = deflections[j, i]
+                    self.joints[i].deflections[j] = float(deflections[j, i])
 
         if condition > pow(10, 5):
             warnings.warn(
