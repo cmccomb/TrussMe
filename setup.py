@@ -12,9 +12,11 @@ setup(
     name='trussme',
     version='0.0.1',
     description='Truss construction and analysis',
-    long_description="",
+    long_description=readme,
+    license=license,
     author='Christopher McComb',
-    author_email='chris.c.mccomb@gmail.com',
+    author_email='ccmcc2012@gmail.com',
     url='https://github.com/cmccomb/TrussMe',
+    install_requires=["numpy", "pandas", "tabulate"],
     packages=find_packages(exclude='tests')
 )

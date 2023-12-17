@@ -196,10 +196,6 @@ class Truss(object):
         else:
             f = open(file_name, 'w')
 
-        # Print date and time
-        report.pw(f, time.strftime('%x'), v=verbose)
-        report.pw(f, os.getcwd(), v=verbose)
-
         report.print_summary(f, self, verbose=verbose)
 
         report.print_instantiation_information(f, self, verbose=verbose)

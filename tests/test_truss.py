@@ -64,18 +64,18 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save reports
-        t1.save_report(os.path.join(os.path.dirname(__file__), 'report_1.txt'))
-        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        t1.save_report(os.path.join(os.path.dirname(__file__), 'report_1.md'))
+        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.md'))
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), 'report_1.txt'),
-            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+            os.path.join(os.path.dirname(__file__), 'report_1.md'),
+            os.path.join(os.path.dirname(__file__), 'report_2.md'))
         self.assertTrue(file_are_the_same)
 
         # Clean up
-        os.remove(os.path.join(os.path.dirname(__file__), 'report_1.txt'))
-        os.remove(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        os.remove(os.path.join(os.path.dirname(__file__), 'report_1.md'))
+        os.remove(os.path.join(os.path.dirname(__file__), 'report_2.md'))
 
     def test_save_and_rebuild(self):
         # Build truss from file
@@ -86,7 +86,7 @@ class TestSequenceFunctions(unittest.TestCase):
         t2.maximum_deflection = 6e-3
 
         # Save
-        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+        t2.save_report(os.path.join(os.path.dirname(__file__), 'report_2.md'))
         t2.save_truss(os.path.join(os.path.dirname(__file__), 'asdf.trs'))
 
         # Rebuild
@@ -96,17 +96,17 @@ class TestSequenceFunctions(unittest.TestCase):
         t3.max_mass = 5.0
         t3.maximum_deflection = 6e-3
 
-        t3.save_report(os.path.join(os.path.dirname(__file__), 'report_3.txt'))
+        t3.save_report(os.path.join(os.path.dirname(__file__), 'report_3.md'))
 
-        with open(os.path.join(os.path.dirname(__file__), 'report_3.txt')) as f:
+        with open(os.path.join(os.path.dirname(__file__), 'report_3.md')) as f:
             print(f.read())
-        with open(os.path.join(os.path.dirname(__file__), 'report_2.txt')) as f:
+        with open(os.path.join(os.path.dirname(__file__), 'report_2.md')) as f:
             print(f.read())
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), 'report_3.txt'),
-            os.path.join(os.path.dirname(__file__), 'report_2.txt'))
+            os.path.join(os.path.dirname(__file__), 'report_3.md'),
+            os.path.join(os.path.dirname(__file__), 'report_2.md'))
         self.assertTrue(file_are_the_same)
 
 

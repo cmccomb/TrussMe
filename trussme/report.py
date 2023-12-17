@@ -4,14 +4,13 @@ import trussme.components as pp
 
 def print_summary(f, the_truss, verbose: bool = False):
     pw(f, "\n", v=verbose)
-    pw(f, "(0) SUMMARY OF ANALYSIS", v=verbose)
-    pw(f, "=============================", v=verbose)
-    pw(f, "\t- The truss has a mass of "
+    pw(f, "# SUMMARY OF ANALYSIS", v=verbose)
+    pw(f, "- The truss has a mass of "
           + format(the_truss.mass, '.2f')
           + " kg, and a total factor of safety of "
           + format(the_truss.fos_total, '.2f')
           + ". ", v=verbose)
-    pw(f, "\t- The limit state is " + the_truss.limit_state + ".", v=verbose)
+    pw(f, "- The limit state is " + the_truss.limit_state + ".", v=verbose)
 
     success_string = []
     failure_string = []
@@ -42,32 +41,32 @@ def print_summary(f, the_truss, verbose: bool = False):
 
     if len(success_string) is not 0:
         if len(success_string) is 1:
-            pw(f, "\t- The design goal for " + str(success_string[0])
+            pw(f, " The design goal for " + str(success_string[0])
                   + " was satisfied.", v=verbose)
         elif len(success_string) is 2:
-            pw(f, "\t- The design goals for "
+            pw(f, "- The design goals for "
                   + str(success_string[0])
                   + " and "
                   + str(success_string[1])
                   + " were satisfied.", v=verbose)
         else:
-            pw(f, "\t- The design goals for ", nl=False, v=verbose)
+            pw(f, "- The design goals for ", nl=False, v=verbose)
             for st in success_string[0:-1]:
                 pw(f, st+", ", nl=False, v=verbose)
             pw(f, "and "+str(success_string[-1])+" were satisfied.", v=verbose)
 
     if len(failure_string) is not 0:
         if len(failure_string) is 1:
-            pw(f, "\t- The design goal for " + str(failure_string[0])
+            pw(f, "- The design goal for " + str(failure_string[0])
                   + " was not satisfied.", v=verbose)
         elif len(failure_string) is 2:
-            pw(f, "\t- The design goals for "
+            pw(f, "- The design goals for "
                   + str(failure_string[0])
                   + " and "
                   + str(failure_string[1])
                   + " were not satisfied.", v=verbose)
         else:
-            pw(f, "\t- The design goals for", nl=False, v=verbose)
+            pw(f, "- The design goals for", nl=False, v=verbose)
             for st in failure_string[0:-1]:
                 pw(f, st+",", nl=False, v=verbose)
             pw(f, "and "+str(failure_string[-1])+" were not satisfied.", v=verbose)
@@ -75,11 +74,10 @@ def print_summary(f, the_truss, verbose: bool = False):
 
 def print_instantiation_information(f, the_truss, verbose=False):
     pw(f, "\n", v=verbose)
-    pw(f, "(1) INSTANTIATION INFORMATION", v=verbose)
-    pw(f, "=============================", v=verbose)
+    pw(f, "# INSTANTIATION INFORMATION\n", v=verbose)
 
     # Print joint information
-    pw(f, "\n--- JOINTS ---", v=verbose)
+    pw(f, "## JOINTS", v=verbose)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -96,13 +94,13 @@ def print_instantiation_information(f, the_truss, verbose=False):
                            columns=["X",
                                     "Y",
                                     "Z",
-                                    "X-Support",
-                                    "Y-Support",
-                                    "Z-Support"])
-        .to_string(justify="left"), v=verbose)
+                                    "X Support?",
+                                    "Y Support?",
+                                    "Z Support?"])
+        .to_markdown(), v=verbose)
 
     # Print member information
-    pw(f, "\n--- MEMBERS ---", v=verbose)
+    pw(f, "\n## MEMBERS", v=verbose)
     data = []
     rows = []
     for m in the_truss.members:
@@ -114,7 +112,8 @@ def print_instantiation_information(f, the_truss, verbose=False):
                      m.shape.h,
                      m.shape.w,
                      m.shape.r,
-                     m.shape.t])
+                     m.shape.t,
+                     m.mass])
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
@@ -122,14 +121,15 @@ def print_instantiation_information(f, the_truss, verbose=False):
                                     "Joint-B",
                                     "Material",
                                     "Shape",
-                                    "Height(m)",
-                                    "Width(m)",
-                                    "Radius(m)",
-                                    "Thickness(m)"])
-        .to_string(justify="left"), v=verbose)
+                                    "Height (m)",
+                                    "Width (m)",
+                                    "Radius (m)",
+                                    "Thickness (m)",
+                                    "Mass (kg)"])
+        .to_markdown(), v=verbose)
 
     # Print material list
-    pw(f, "\n--- MATERIALS ---", v=verbose)
+    pw(f, "\n## MATERIALS", v=verbose)
     data = []
     rows = []
     for mat in the_truss.materials:
@@ -141,19 +141,18 @@ def print_instantiation_information(f, the_truss, verbose=False):
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
-                           columns=["Density(kg/m3)",
-                                    "Elastic Modulus(GPa)",
-                                    "Yield Strength(MPa)"])
-        .to_string(justify="left"), v=verbose)
+                           columns=["Density (kg/m3)",
+                                    "Elastic Modulus (GPa)",
+                                    "Yield Strength (MPa)"])
+        .to_markdown(), v=verbose)
 
 
 def print_stress_analysis(f, the_truss, verbose=False):
     pw(f, "\n", v=verbose)
-    pw(f, "(2) STRESS ANALYSIS INFORMATION", v=verbose)
-    pw(f, "===============================", v=verbose)
+    pw(f, "# STRESS ANALYSIS INFORMATION\n", v=verbose)
 
     # Print information about loads
-    pw(f, "\n--- LOADING ---", v=verbose)
+    pw(f, "## LOADING", v=verbose)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -166,13 +165,13 @@ def print_stress_analysis(f, the_truss, verbose=False):
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
-                           columns=["X-Load",
-                                    "Y-Load",
-                                    "Z-Load"])
-        .to_string(justify="left"), v=verbose)
+                           columns=["X Load",
+                                    "Y Load",
+                                    "Z Load"])
+        .to_markdown(), v=verbose)
 
     # Print information about reactions
-    pw(f, "\n--- REACTIONS ---", v=verbose)
+    pw(f, "\n## REACTIONS", v=verbose)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -186,13 +185,13 @@ def print_stress_analysis(f, the_truss, verbose=False):
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
-                           columns=["X-Reaction(kN)",
-                                    "Y-Reaction(kN)",
-                                    "Z-Reaction(kN)"])
-        .to_string(justify="left"), v=verbose)
+                           columns=["X Reaction (kN)",
+                                    "Y Reaction (kN)",
+                                    "Z Reaction (kN)"])
+        .to_markdown(), v=verbose)
 
     # Print information about members
-    pw(f, "\n--- FORCES AND STRESSES ---", v=verbose)
+    pw(f, "\n## FORCES AND STRESSES", v=verbose)
     data = []
     rows = []
     for m in the_truss.members:
@@ -207,17 +206,17 @@ def print_stress_analysis(f, the_truss, verbose=False):
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
-                           columns=["Area(m2)",
-                                    "Moment-of-Inertia(m4)",
-                                    "Axial-force(kN)",
+                           columns=["Area (m^2)",
+                                    "Moment of Inertia (m^4)",
+                                    "Axial force(kN)",
                                     "FOS yielding",
                                     "OK yielding?",
                                     "FOS buckling",
                                     "OK buckling?"])
-        .to_string(justify="left"), v=verbose)
+        .to_markdown(), v=verbose)
 
     # Print information about members
-    pw(f, "\n--- DEFLECTIONS ---", v=verbose)
+    pw(f, "\n## DEFLECTIONS", v=verbose)
     data = []
     rows = []
     for j in the_truss.joints:
@@ -229,11 +228,11 @@ def print_stress_analysis(f, the_truss, verbose=False):
 
     pw(f, pandas.DataFrame(data,
                            index=rows,
-                           columns=["X-Defl.(mm)",
-                                    "Y-Defl.(mm)",
-                                    "Z-Defl.(mm)",
-                                    "OK?"])
-        .to_string(justify="left"), v=verbose)
+                           columns=["X Deflection(mm)",
+                                    "Y Deflection (mm)",
+                                    "Z Deflection (mm)",
+                                    "OK Deflection?"])
+        .to_markdown(), v=verbose)
 
 
 def pw(f, string, nl=True, v=False):
