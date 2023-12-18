@@ -24,7 +24,7 @@ from trussme.components import (
 @dataclasses.dataclass
 class Goals:
     """
-    A simple class to represents goals for truss design.
+    Container of goals for truss design.
 
     :param min_fos_total: Minimum total FOS for the truss, defaults to 1.0
     :type min_fos_total: float

@@ -247,6 +247,14 @@ def generate_instantiation_information(the_truss) -> str:
 
 
 def generate_stress_analysis(the_truss) -> str:
+    """
+    Generate a summary of the stress analysis information.
+
+    :param the_truss: The truss to be reported on
+    :type the_truss: Truss
+    :return: A report of the stress analysis information
+    :rtype: str
+    """
     analysis = "# STRESS ANALYSIS INFORMATION\n"
 
     # Print information about loads
