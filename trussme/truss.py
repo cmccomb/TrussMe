@@ -23,19 +23,21 @@ from trussme.components import (
 
 @dataclasses.dataclass
 class Goals:
-    """
-    Container of goals for truss design.
+    """ Container of goals for truss design.
 
-    :param min_fos_total: Minimum total FOS for the truss, defaults to 1.0
-    :type min_fos_total: float
-    :param min_fos_buckling: Minimum buckling FOS for the truss, defaults to 1.0
-    :type min_fos_buckling: float
-    :param min_fos_yielding: Minimum yielding FOS for the truss, defaults to 1.0
-    :type min_fos_yielding: float
-    :param max_mass: Maximum mass for the truss, defaults to inf
-    :type max_mass: float
-    :param max_deflection: Maximum deflection for the truss, defaults to inf
-    :type max_deflection: float
+    Attributes
+    ----------
+    min_fos_total: float
+        Minimum total FOS for the truss, defaults to 1.0
+    min_fos_buckling: float
+        Minimum buckling FOS for the truss, defaults to 1.0
+    min_fos_yielding: float
+        Minimum yielding FOS for the truss, defaults to 1.0
+    max_mass: float
+        Maximum mass for the truss, defaults to inf
+    max_deflection: float
+        Maximum deflection for the truss, defaults to inf
+
     """
 
     min_fos_total: float = 1.0
@@ -46,8 +48,17 @@ class Goals:
 
 
 class Truss(object):
-    """
-    The truss class
+    """The truss class
+
+    Attributes
+    ----------
+    number_of_members
+    number_of_joints
+    mass
+    fos_yielding
+    fos_buckling
+    fos_total
+    deflection
     """
 
     def __init__(self):
@@ -62,31 +73,31 @@ class Truss(object):
 
     @property
     def number_of_members(self) -> int:
-        """
-        Number of members in the truss, updated automatically
+        """Number of members in the truss, updated automatically
 
-        :return: The number of members in the truss
-        :rtype: int
+        Returns
+        -------
+        int
         """
         return len(self.members)
 
     @property
     def number_of_joints(self) -> int:
-        """
-        Number of joints in the truss, updated automatically
+        """Number of joints in the truss, updated automatically
 
-        :return: The number of joints in the truss
-        :rtype: int
+        Returns
+        -------
+        int
         """
         return len(self.joints)
 
     @property
     def mass(self) -> float:
-        """
-        Total mass of the truss, updated automatically
+        """Total mass of the truss, updated automatically
 
-        :return: Mass of the truss
-        :rtype: float
+        Returns
+        -------
+        float
         """
         mass = 0
         for m in self.members:
@@ -95,21 +106,21 @@ class Truss(object):
 
     @property
     def fos_yielding(self) -> float:
-        """
-        Smallest yielding FOS in the truss
+        """Smallest yielding FOS in the truss
 
-        :return: Minimum FOS for yielding
-        :rtype: float
+        Returns
+        -------
+        float
         """
         return min([m.fos_yielding for m in self.members])
 
     @property
     def fos_buckling(self) -> float:
-        """
-        Smallest buckling FOS in the truss
+        """Smallest buckling FOS in the truss
 
-        :return: Minimum FOS for buckling
-        :rtype: float
+        Returns
+        -------
+        float
         """
         return min(
             [m.fos_buckling if m.fos_buckling > 0 else 10000 for m in self.members]
@@ -117,21 +128,21 @@ class Truss(object):
 
     @property
     def fos_total(self) -> float:
-        """
-        Smallest FOS in the truss
+        """Smallest FOS in the truss
 
-        :return: Minimum FOS
-        :rtype: float
+        Returns
+        -------
+        float
         """
         return min(self.fos_buckling, self.fos_yielding)
 
     @property
     def deflection(self) -> float:
-        """
-        Largest single joint deflection in the truss
+        """Largest single joint deflection in the truss
 
-        :return: Largest deflection in the truss
-        :rtype: float
+        Returns
+        -------
+        float
         """
         return max([numpy.linalg.norm(joint.deflections) for joint in self.joints])
 
