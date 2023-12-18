@@ -27,15 +27,15 @@ class Goals:
 
     Attributes
     ----------
-    min_fos_total: float
+    min_fos_total: float, default=1.0
         Minimum total FOS for the truss, defaults to 1.0
-    min_fos_buckling: float
+    min_fos_buckling: float, default=1.0
         Minimum buckling FOS for the truss, defaults to 1.0
-    min_fos_yielding: float
+    min_fos_yielding: float, default=1.0
         Minimum yielding FOS for the truss, defaults to 1.0
-    max_mass: float
+    max_mass: float, default=inf
         Maximum mass for the truss, defaults to inf
-    max_deflection: float
+    max_deflection: float, default=inf
         Maximum deflection for the truss, defaults to inf
 
     """
@@ -148,17 +148,23 @@ class Truss(object):
 
     @property
     def materials(self) -> list[Material]:
-        """
-        List of unique materials used in the truss
+        """List of unique materials used in the truss
 
-        :return: List of materials
-        :rtype: list[Material]
+        Returns
+        -------
+        list[Material]
         """
         material_library: list[Material] = [member.material for member in self.members]
         return list({v["name"]: v for v in material_library}.values())
 
     @property
-    def limit_state(self) -> str:
+    def limit_state(self) -> Literal["buckling", "yielding"]:
+        """The limit state of the truss, either "buckling" or "yielding"
+
+        Returns
+        -------
+        Literal["buckling", "yielding"]
+        """
         if self.fos_buckling < self.fos_yielding:
             return "buckling"
         else:
