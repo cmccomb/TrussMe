@@ -17,13 +17,13 @@ from trussme.components import (
     Square,
     Shape,
     Box,
-    MATERIALS,
+    material_library,
 )
 
 
 @dataclasses.dataclass
 class Goals:
-    """ Container of goals for truss design.
+    """Container of goals for truss design.
 
     Attributes
     ----------
@@ -234,7 +234,7 @@ class Truss(object):
         self,
         joint_index_a: int,
         joint_index_b: int,
-        material: Material = MATERIALS[0],
+        material: Material = material_library[0],
         shape: Shape = Pipe(t=0.002, r=0.02),
     ):
         member = Member(

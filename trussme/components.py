@@ -3,8 +3,9 @@ from typing import TypedDict, Literal
 
 import numpy
 
-# Gravitational constant for computing weight from mass
 g: float = 9.80665
+"""float: Gravitational constant for computing weight from mass
+"""
 
 Material = TypedDict(
     "Material",
@@ -15,9 +16,10 @@ Material = TypedDict(
         "yield_strength": float,
     },
 )
+"""TypedDict: New type to contain material properties
+"""
 
-# Material properties
-MATERIALS: list[Material] = [
+material_library: list[Material] = [
     {
         "name": "A36_Steel",
         "density": 7800.0,
@@ -37,9 +39,13 @@ MATERIALS: list[Material] = [
         "yield_strength": 276 * pow(10, 6),
     },
 ]
+"""list[Material]: List of built-in materials to choose from
+"""
 
 
 class Shape(abc.ABC):
+    """Abstract base class for shapes"""
+
     @abc.abstractmethod
     def __init__(self):
         self.w = None
