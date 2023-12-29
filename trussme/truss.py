@@ -1,5 +1,4 @@
 import dataclasses
-import warnings
 from typing import Literal
 import json
 
@@ -37,7 +36,6 @@ class Goals:
         Maximum mass for the truss, defaults to inf
     maximum_deflection: float, default=inf
         Maximum deflection for the truss, defaults to inf
-
     """
 
     minimum_fos_total: float = 1.0
@@ -120,6 +118,18 @@ class Truss(object):
             return "yielding"
 
     def add_pinned_support(self, coordinates: list[float]):
+        """Add a pinned support to the truss at the given coordinates
+
+        Parameters
+        ----------
+        coordinates: list[float]
+            The coordinates of the joint
+
+        Returns
+        -------
+        None
+        """
+
         # Make the joint
         self.joints.append(Joint(coordinates))
         self.joints[-1].pinned()
@@ -128,12 +138,44 @@ class Truss(object):
     def add_roller_support(
         self, coordinates: list[float], axis: Literal["x", "y"] = "y", d: int = 3
     ):
+        """
+        Add a roller support to the truss at the given coordinates
+
+        Parameters
+        ----------
+        coordinates: list[float]
+            The coordinates of the joint
+        axis: Literal["x", "y"], default="y"
+            The axis of the roller support TODO: Fix this
+        d: int, default=3
+            The number of degrees of freedom to constrain TODO: Fix this
+
+        Returns
+        -------
+        None
+        """
+
         # Make the joint
         self.joints.append(Joint(coordinates))
         self.joints[-1].roller(axis=axis, d=d)
         self.joints[-1].idx = self.number_of_joints - 1
 
     def add_joint(self, coordinates: list[float], d: int = 3):
+        """
+        Add a free joint to the truss at the given coordinates
+
+        Parameters
+        ----------
+        coordinates: list[float]
+            The coordinates of the joint
+        d: int, default=3
+            The number of degrees of freedom to constrain TODO: Fix this
+
+        Returns
+        -------
+        None
+        """
+
         # Make the joint
         self.joints.append(Joint(coordinates))
         self.joints[-1].free(d=d)
@@ -146,6 +188,25 @@ class Truss(object):
         material: Material = material_library[0],
         shape: Shape = Pipe(t=0.002, r=0.02),
     ):
+        """
+        Add a member to the truss
+
+        Parameters
+        ----------
+        joint_index_a: int
+            The index of the first joint
+        joint_index_b: int
+            The index of the second joint
+        material: Material, default=material_library[0]
+            The material of the member
+        shape: Shape, default=Pipe(t=0.002, r=0.02)
+            The shape of the member
+
+        Returns
+        -------
+        None
+        """
+
         member = Member(
             self.joints[joint_index_a], self.joints[joint_index_b], material, shape
         )
@@ -159,9 +220,35 @@ class Truss(object):
         self.joints[joint_index_b].members.append(self.members[-1])
 
     def move_joint(self, joint_index: int, coordinates: list[float]):
+        """
+        Move a joint to the given coordinates
+
+        Parameters
+        ----------
+        joint_index: int
+            The index of the joint to move
+        coordinates: list[float]
+            The coordinates to move the joint to
+
+        Returns
+        -------
+        None
+        """
         self.joints[joint_index].coordinates = coordinates
 
     def set_load(self, joint_index: int, load: list[float]):
+        """Apply loads to a given joint
+        Parameters
+        ----------
+        joint_index: int
+            The index of the joint to apply the load to
+        load: list[float]
+            The load to apply to the joint
+        Returns
+        -------
+        None
+        """
+
         self.joints[joint_index].loads = load
 
     def calc_fos(self):
@@ -204,15 +291,20 @@ class Truss(object):
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = float(deflections[j, i])
 
-        if condition > pow(10, 5):
-            warnings.warn(
-                "The condition number is "
-                + str(condition)
-                + ". Results may be inaccurate."
-            )
-
     def report(self, goals: Goals) -> str:
-        """str: A full report on the truss"""
+        """
+        Generates a report on the truss
+
+        Parameters
+        ----------
+        goals: Goals
+            The goals against which to evaluate the truss
+
+        Returns
+        -------
+        str
+            A full report on the truss
+        """
         self.calc_fos()
 
         report_string = report.generate_summary(self, goals) + "\n"
@@ -230,7 +322,7 @@ class Truss(object):
         file_name: str
             The name of the file
         goals: Goals
-            Goals against which to evaluate the truss
+            The goals against which to evaluate the truss
 
         Returns
         -------
