@@ -16,8 +16,7 @@ Material = TypedDict(
         "yield_strength": float,
     },
 )
-"""TypedDict: New type to contain material properties
-"""
+"""TypedDict: New type to contain material properties"""
 
 material_library: list[Material] = [
     {
@@ -41,6 +40,16 @@ material_library: list[Material] = [
 ]
 """list[Material]: List of built-in materials to choose from
 """
+
+NewShape = TypedDict(
+    "NewShape",
+    {
+        "name": str,
+        "moment_of_inertia": float,
+        "area": float,
+    },
+)
+"""TypedDict: New type to contain shape properties"""
 
 
 class Shape(abc.ABC):
