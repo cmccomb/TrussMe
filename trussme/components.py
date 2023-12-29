@@ -88,6 +88,14 @@ class Pipe(Shape):
         return "pipe"
 
 
+def pipe(r: float, t: float) -> NewShape:
+    return {
+        "name": "pipe",
+        "moment_of_inertia": (numpy.pi / 4.0) * (r**4 - (r - 2 * t) ** 4),
+        "area": numpy.pi * (r**2 - (r - t) ** 2),
+    }
+
+
 class Bar(Shape):
     def __init__(self, r: float = 0.0):
         self.r: float = r
@@ -103,6 +111,14 @@ class Bar(Shape):
 
     def name(self) -> str:
         return "bar"
+
+
+def bar(r: float) -> NewShape:
+    return {
+        "name": "bar",
+        "moment_of_inertia": (numpy.pi / 4.0) * r**4,
+        "area": numpy.pi * r**2,
+    }
 
 
 class Square(Shape):
@@ -123,6 +139,14 @@ class Square(Shape):
 
     def name(self) -> str:
         return "square"
+
+
+def square(w: float, h: float) -> NewShape:
+    return {
+        "name": "square",
+        "moment_of_inertia": (1.0 / 12.0) * w * h**3,
+        "area": w * h,
+    }
 
 
 class Box(Shape):
@@ -147,6 +171,15 @@ class Box(Shape):
 
     def name(self) -> str:
         return "box"
+
+
+def box(w: float, h: float, t: float) -> NewShape:
+    return {
+        "name": "box",
+        "moment_of_inertia": (1.0 / 12.0) * (w * h**3)
+        - (1.0 / 12.0) * (w - 2 * t) * (h - 2 * t) ** 3,
+        "area": w * h - (h - 2 * t) * (w - 2 * t),
+    }
 
 
 class Joint(object):
