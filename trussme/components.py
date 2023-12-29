@@ -3,10 +3,6 @@ from typing import TypedDict, Literal
 
 import numpy
 
-g: float = 9.80665
-"""float: Gravitational constant for computing weight from mass
-"""
-
 Material = TypedDict(
     "Material",
     {

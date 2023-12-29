@@ -3,13 +3,13 @@ from typing import Literal
 import json
 
 import numpy
+import scipy
 
 from trussme import evaluate
 from trussme import report
 from trussme.components import (
     Joint,
     Member,
-    g,
     Material,
     Pipe,
     Bar,
@@ -256,7 +256,10 @@ class Truss(object):
         for i in range(self.number_of_joints):
             loads[0, i] = self.joints[i].loads[0]
             loads[1, i] = self.joints[i].loads[1] - sum(
-                [member.mass / 2.0 * g for member in self.joints[i].members]
+                [
+                    member.mass / 2.0 * scipy.constants.g
+                    for member in self.joints[i].members
+                ]
             )
             loads[2, i] = self.joints[i].loads[2]
 

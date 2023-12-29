@@ -1,7 +1,7 @@
 import numpy
 import pandas
+import scipy
 
-import trussme.components as pp
 import trussme.visualize
 
 
@@ -286,7 +286,10 @@ def generate_stress_analysis(truss, goals) -> str:
             [
                 str(j.loads[0] / pow(10, 3)),
                 format(
-                    (j.loads[1] - sum([m.mass / 2.0 * pp.g for m in j.members]))
+                    (
+                        j.loads[1]
+                        - sum([m.mass / 2.0 * scipy.constants.g for m in j.members])
+                    )
                     / pow(10, 3),
                     ".2f",
                 ),
