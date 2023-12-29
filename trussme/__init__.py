@@ -9,4 +9,4 @@ Example
 """
 
 from .components import material_library, Shape, Material, Box, Pipe, Bar, Square
-from .truss import Truss, read_trs
+from .truss import Truss, read_trs, read_json, Goals

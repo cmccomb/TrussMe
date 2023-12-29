@@ -10,6 +10,14 @@ TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), "example.trs")
 
 class TestSequenceFunctions(unittest.TestCase):
     def test_build_methods(self):
+        goals = trussme.Goals(
+            minimum_fos_buckling=1.5,
+            minimum_fos_total=1.5,
+            minimum_fos_yielding=1.5,
+            maximum_mass=5.0,
+            maximum_deflection=6e-3,
+        )
+
         # Build truss from scratch
         t1 = trussme.Truss()
         t1.add_pinned_support([0.0, 0.0, 0.0])
@@ -51,21 +59,12 @@ class TestSequenceFunctions(unittest.TestCase):
         t1.add_member(4, 10)
         t1.add_member(10, 5)
 
-        t1.minimum_fos_buckling = 1.5
-        t1.min_fos_yielding = 1.5
-        t1.max_mass = 5.0
-        t1.maximum_deflection = 6e-3
-
         # Build truss from file
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
-        t2.minimum_fos_buckling = 1.5
-        t2.min_fos_yielding = 1.5
-        t2.max_mass = 5.0
-        t2.maximum_deflection = 6e-3
 
         # Save reports
-        t1.report_to_md(os.path.join(os.path.dirname(__file__), "report_1.md"))
-        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"))
+        t1.report_to_md(os.path.join(os.path.dirname(__file__), "report_1.md"), goals)
+        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"), goals)
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
@@ -79,25 +78,24 @@ class TestSequenceFunctions(unittest.TestCase):
         os.remove(os.path.join(os.path.dirname(__file__), "report_2.md"))
 
     def test_save_to_trs_and_rebuild(self):
+        goals = trussme.Goals(
+            minimum_fos_buckling=1.5,
+            minimum_fos_total=1.5,
+            minimum_fos_yielding=1.5,
+            maximum_mass=5.0,
+            maximum_deflection=6e-3,
+        )
+
         # Build truss from file
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
-        t2.minimum_fos_buckling = 1.5
-        t2.min_fos_yielding = 1.5
-        t2.max_mass = 5.0
-        t2.maximum_deflection = 6e-3
 
         # Save
-        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"))
+        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"), goals)
         t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
 
         # Rebuild
         t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
-        t3.minimum_fos_buckling = 1.5
-        t3.min_fos_yielding = 1.5
-        t3.max_mass = 5.0
-        t3.maximum_deflection = 6e-3
-
-        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_3.md"))
+        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_3.md"), goals)
 
         with open(os.path.join(os.path.dirname(__file__), "report_3.md")) as f:
             print(f.read())
@@ -112,15 +110,19 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertTrue(file_are_the_same)
 
     def test_save_to_json_and_rebuild(self):
+        goals = trussme.Goals(
+            minimum_fos_buckling=1.5,
+            minimum_fos_total=1.5,
+            minimum_fos_yielding=1.5,
+            maximum_mass=5.0,
+            maximum_deflection=6e-3,
+        )
+
         # Build truss from file
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
-        t2.minimum_fos_buckling = 1.5
-        t2.min_fos_yielding = 1.5
-        t2.max_mass = 5.0
-        t2.maximum_deflection = 6e-3
 
         # Save
-        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_4.md"))
+        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_4.md"), goals)
         t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.json"))
 
         # Rebuild
@@ -130,7 +132,7 @@ class TestSequenceFunctions(unittest.TestCase):
         t3.max_mass = 5.0
         t3.maximum_deflection = 6e-3
 
-        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_5.md"))
+        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_5.md"), goals)
 
         with open(os.path.join(os.path.dirname(__file__), "report_5.md")) as f:
             print(f.read())

@@ -5,7 +5,7 @@ import trussme.components as pp
 import trussme.visualize
 
 
-def generate_summary(truss) -> str:
+def generate_summary(truss, goals) -> str:
     """
     Generate a summary of the analysis.
 
@@ -13,6 +13,8 @@ def generate_summary(truss) -> str:
     ----------
     truss: Truss
         The truss to be summarized
+    goals: Goals
+        The goals against which to evaluate the truss
 
     Returns
     -------
@@ -31,27 +33,27 @@ def generate_summary(truss) -> str:
 
     success_string = []
     failure_string = []
-    if truss.minimum_fos_total < truss.fos_total:
+    if goals.minimum_fos_total < truss.fos_total:
         success_string.append("total FOS")
     else:
         failure_string.append("total FOS")
 
-    if truss.minimum_fos_buckling < truss.fos_buckling:
+    if goals.minimum_fos_buckling < truss.fos_buckling:
         success_string.append("buckling FOS")
     else:
         failure_string.append("buckling FOS")
 
-    if truss.minimum_fos_yielding < truss.fos_yielding:
+    if goals.minimum_fos_yielding < truss.fos_yielding:
         success_string.append("yielding FOS")
     else:
         failure_string.append("yielding FOS")
 
-    if truss.maximum_mass > truss.mass:
+    if goals.maximum_mass > truss.mass:
         success_string.append("mass")
     else:
         failure_string.append("mass")
 
-    if truss.maximum_deflection > truss.deflection:
+    if goals.maximum_deflection > truss.deflection:
         success_string.append("deflection")
     else:
         failure_string.append("deflection")
@@ -106,37 +108,37 @@ def generate_summary(truss) -> str:
     ]
     data.append(
         [
-            truss.minimum_fos_total,
+            goals.minimum_fos_total,
             truss.fos_total,
-            "Yes" if truss.fos_total > truss.minimum_fos_total else "No",
+            "Yes" if truss.fos_total > goals.minimum_fos_total else "No",
         ]
     )
     data.append(
         [
-            truss.minimum_fos_buckling,
+            goals.minimum_fos_buckling,
             truss.fos_buckling,
-            "Yes" if truss.fos_buckling > truss.minimum_fos_buckling else "No",
+            "Yes" if truss.fos_buckling > goals.minimum_fos_buckling else "No",
         ]
     )
     data.append(
         [
-            truss.minimum_fos_yielding,
+            goals.minimum_fos_yielding,
             truss.fos_yielding,
-            "Yes" if truss.fos_yielding > truss.minimum_fos_yielding else "No",
+            "Yes" if truss.fos_yielding > goals.minimum_fos_yielding else "No",
         ]
     )
     data.append(
         [
-            truss.maximum_mass,
+            goals.maximum_mass,
             truss.mass,
-            "Yes" if truss.mass < truss.maximum_mass else "No",
+            "Yes" if truss.mass < goals.maximum_mass else "No",
         ]
     )
     data.append(
         [
-            truss.maximum_deflection,
+            goals.maximum_deflection,
             truss.deflection,
-            "Yes" if truss.deflection < truss.maximum_deflection else "No",
+            "Yes" if truss.deflection < goals.maximum_deflection else "No",
         ]
     )
 
@@ -152,24 +154,29 @@ def generate_summary(truss) -> str:
     return summary
 
 
-def generate_instantiation_information(the_truss) -> str:
+def generate_instantiation_information(truss) -> str:
     """
     Generate a summary of the instantiation information.
 
-    :param the_truss: The truss to be reported on
-    :type the_truss: Truss
-    :return: A report of the instantiation information
-    :rtype: str
+    Parameters
+    ----------
+    truss: Truss
+        The truss to be reported on
+
+    Returns
+    -------
+    str
+        A report of the instantiation information
     """
     instantiation = "# INSTANTIATION INFORMATION\n"
 
-    instantiation += trussme.visualize.plot_truss(the_truss) + "\n"
+    instantiation += trussme.visualize.plot_truss(truss) + "\n"
 
     # Print joint information
     instantiation += "## JOINTS\n"
     data = []
     rows = []
-    for j in the_truss.joints:
+    for j in truss.joints:
         rows.append("Joint_" + "{0:02d}".format(j.idx))
         data.append(
             [
@@ -192,7 +199,7 @@ def generate_instantiation_information(the_truss) -> str:
     instantiation += "\n## MEMBERS\n"
     data = []
     rows = []
-    for m in the_truss.members:
+    for m in truss.members:
         rows.append("Member_" + "{0:02d}".format(m.idx))
         data.append(
             [
@@ -228,7 +235,7 @@ def generate_instantiation_information(the_truss) -> str:
     instantiation += "\n## MATERIALS\n"
     data = []
     rows = []
-    for mat in the_truss.materials:
+    for mat in truss.materials:
         rows.append(mat["name"])
         data.append(
             [
@@ -251,14 +258,21 @@ def generate_instantiation_information(the_truss) -> str:
     return instantiation
 
 
-def generate_stress_analysis(the_truss) -> str:
+def generate_stress_analysis(truss, goals) -> str:
     """
     Generate a summary of the stress analysis information.
 
-    :param the_truss: The truss to be reported on
-    :type the_truss: Truss
-    :return: A report of the stress analysis information
-    :rtype: str
+    Parameters
+    ----------
+    truss: Truss
+        The truss to be reported on
+    goals: Goals
+        The goals against which to evaluate the truss
+
+    Returns
+    -------
+    str
+        A report of the stress analysis information
     """
     analysis = "# STRESS ANALYSIS INFORMATION\n"
 
@@ -266,7 +280,7 @@ def generate_stress_analysis(the_truss) -> str:
     analysis += "## LOADING\n"
     data = []
     rows = []
-    for j in the_truss.joints:
+    for j in truss.joints:
         rows.append("Joint_" + "{0:02d}".format(j.idx))
         data.append(
             [
@@ -288,7 +302,7 @@ def generate_stress_analysis(the_truss) -> str:
     analysis += "\n## REACTIONS\n"
     data = []
     rows = []
-    for j in the_truss.joints:
+    for j in truss.joints:
         rows.append("Joint_" + "{0:02d}".format(j.idx))
         data.append(
             [
@@ -314,7 +328,7 @@ def generate_stress_analysis(the_truss) -> str:
     analysis += "\n## FORCES AND STRESSES\n"
     data = []
     rows = []
-    for m in the_truss.members:
+    for m in truss.members:
         rows.append("Member_" + "{0:02d}".format(m.idx))
         data.append(
             [
@@ -322,10 +336,10 @@ def generate_stress_analysis(the_truss) -> str:
                 format(m.moment_of_inertia, ".2e"),
                 format(m.force / pow(10, 3), ".2f"),
                 m.fos_yielding,
-                "Yes" if m.fos_yielding > the_truss.minimum_fos_yielding else "No",
+                "Yes" if m.fos_yielding > goals.minimum_fos_yielding else "No",
                 m.fos_buckling if m.fos_buckling > 0 else "N/A",
                 "Yes"
-                if m.fos_buckling > the_truss.minimum_fos_buckling or m.fos_buckling < 0
+                if m.fos_buckling > goals.minimum_fos_buckling or m.fos_buckling < 0
                 else "No",
             ]
         )
@@ -347,11 +361,11 @@ def generate_stress_analysis(the_truss) -> str:
     # Print information about members
     analysis += "\n## DEFLECTIONS\n"
 
-    analysis += trussme.visualize.plot_truss(the_truss, deflected_shape=True) + "\n"
+    analysis += trussme.visualize.plot_truss(truss, deflected_shape=True) + "\n"
 
     data = []
     rows = []
-    for j in the_truss.joints:
+    for j in truss.joints:
         rows.append("Joint_" + "{0:02d}".format(j.idx))
         data.append(
             [
@@ -365,7 +379,7 @@ def generate_stress_analysis(the_truss) -> str:
                 if j.translation[2] == 0.0
                 else "N/A",
                 "Yes"
-                if numpy.linalg.norm(j.deflections) < the_truss.maximum_deflection
+                if numpy.linalg.norm(j.deflections) < goals.maximum_deflection
                 else "No",
             ]
         )

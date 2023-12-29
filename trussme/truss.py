@@ -27,24 +27,24 @@ class Goals:
 
     Attributes
     ----------
-    min_fos_total: float, default=1.0
+    minimum_fos_total: float, default=1.0
         Minimum total FOS for the truss, defaults to 1.0
-    min_fos_buckling: float, default=1.0
+    minimum_fos_buckling: float, default=1.0
         Minimum buckling FOS for the truss, defaults to 1.0
-    min_fos_yielding: float, default=1.0
+    minimum_fos_yielding: float, default=1.0
         Minimum yielding FOS for the truss, defaults to 1.0
-    max_mass: float, default=inf
+    maximum_mass: float, default=inf
         Maximum mass for the truss, defaults to inf
-    max_deflection: float, default=inf
+    maximum_deflection: float, default=inf
         Maximum deflection for the truss, defaults to inf
 
     """
 
-    min_fos_total: float = 1.0
-    min_fos_buckling: float = 1.0
-    min_fos_yielding: float = 1.0
-    max_mass: float = numpy.inf
-    max_deflection: float = numpy.inf
+    minimum_fos_total: float = 1.0
+    minimum_fos_buckling: float = 1.0
+    minimum_fos_yielding: float = 1.0
+    maximum_mass: float = numpy.inf
+    maximum_deflection: float = numpy.inf
 
 
 class Truss(object):
@@ -56,8 +56,6 @@ class Truss(object):
         A list of all members in the truss
     joints: list[Joint]
         A list of all joints in the truss
-    goals: Goals
-        A container of goals for truss design
     """
 
     def __init__(self):
@@ -66,9 +64,6 @@ class Truss(object):
 
         # Make a list to store joints in
         self.joints: list[Joint] = []
-
-        # Design goals
-        self.goals: Goals = Goals()
 
     @property
     def number_of_members(self) -> int:
@@ -123,46 +118,6 @@ class Truss(object):
             return "buckling"
         else:
             return "yielding"
-
-    @property
-    def minimum_fos_total(self) -> float:
-        return self.goals.min_fos_total
-
-    @minimum_fos_total.setter
-    def minimum_fos_total(self, new_fos: float):
-        self.goals.min_fos_total = new_fos
-
-    @property
-    def minimum_fos_yielding(self) -> float:
-        return self.goals.min_fos_yielding
-
-    @minimum_fos_yielding.setter
-    def minimum_fos_yielding(self, new_fos: float):
-        self.goals.min_fos_yielding = new_fos
-
-    @property
-    def minimum_fos_buckling(self) -> float:
-        return self.goals.min_fos_buckling
-
-    @minimum_fos_buckling.setter
-    def minimum_fos_buckling(self, new_fos: float):
-        self.goals.min_fos_buckling = new_fos
-
-    @property
-    def maximum_mass(self) -> float:
-        return self.goals.max_mass
-
-    @maximum_mass.setter
-    def maximum_mass(self, new_mass: float):
-        self.goals.max_mass = new_mass
-
-    @property
-    def maximum_deflection(self) -> float:
-        return self.goals.max_deflection
-
-    @maximum_deflection.setter
-    def maximum_deflection(self, new_deflection: float):
-        self.goals.max_deflection = new_deflection
 
     def add_pinned_support(self, coordinates: list[float]):
         # Make the joint
@@ -256,18 +211,17 @@ class Truss(object):
                 + ". Results may be inaccurate."
             )
 
-    @property
-    def report(self) -> str:
+    def report(self, goals: Goals) -> str:
         """str: A full report on the truss"""
         self.calc_fos()
 
-        report_string = report.generate_summary(self) + "\n"
+        report_string = report.generate_summary(self, goals) + "\n"
         report_string += report.generate_instantiation_information(self) + "\n"
-        report_string += report.generate_stress_analysis(self) + "\n"
+        report_string += report.generate_stress_analysis(self, goals) + "\n"
 
         return report_string
 
-    def report_to_md(self, file_name: str) -> None:
+    def report_to_md(self, file_name: str, goals: Goals) -> None:
         """
         Writes a report in Markdown format
 
@@ -275,13 +229,15 @@ class Truss(object):
         ----------
         file_name: str
             The name of the file
+        goals: Goals
+            Goals against which to evaluate the truss
 
         Returns
         -------
         None
         """
         with open(file_name, "w") as f:
-            f.write(self.report)
+            f.write(self.report(goals))
 
     def to_json(self, file_name: str) -> None:
         """
