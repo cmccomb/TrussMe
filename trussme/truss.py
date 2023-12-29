@@ -52,13 +52,12 @@ class Truss(object):
 
     Attributes
     ----------
-    number_of_members
-    number_of_joints
-    mass
-    fos_yielding
-    fos_buckling
-    fos_total
-    deflection
+    members: list[Member]
+        A list of all members in the truss
+    joints: list[Joint]
+        A list of all joints in the truss
+    goals: Goals
+        A container of goals for truss design
     """
 
     def __init__(self):
@@ -73,32 +72,17 @@ class Truss(object):
 
     @property
     def number_of_members(self) -> int:
-        """Number of members in the truss, updated automatically
-
-        Returns
-        -------
-        int
-        """
+        """int: Number of members in the truss"""
         return len(self.members)
 
     @property
     def number_of_joints(self) -> int:
-        """Number of joints in the truss, updated automatically
-
-        Returns
-        -------
-        int
-        """
+        """int: Number of joints in the truss"""
         return len(self.joints)
 
     @property
     def mass(self) -> float:
-        """Total mass of the truss, updated automatically
-
-        Returns
-        -------
-        float
-        """
+        """float: Total mass of the truss"""
         mass = 0
         for m in self.members:
             mass += m.mass
@@ -106,65 +90,35 @@ class Truss(object):
 
     @property
     def fos_yielding(self) -> float:
-        """Smallest yielding FOS in the truss
-
-        Returns
-        -------
-        float
-        """
+        """float: Smallest yielding FOS of any member in the truss"""
         return min([m.fos_yielding for m in self.members])
 
     @property
     def fos_buckling(self) -> float:
-        """Smallest buckling FOS in the truss
-
-        Returns
-        -------
-        float
-        """
+        """float: Smallest buckling FOS of any member in the truss"""
         return min(
             [m.fos_buckling if m.fos_buckling > 0 else 10000 for m in self.members]
         )
 
     @property
     def fos_total(self) -> float:
-        """Smallest FOS in the truss
-
-        Returns
-        -------
-        float
-        """
+        """float: Smallest FOS of any member in the truss"""
         return min(self.fos_buckling, self.fos_yielding)
 
     @property
     def deflection(self) -> float:
-        """Largest single joint deflection in the truss
-
-        Returns
-        -------
-        float
-        """
+        """float: Largest single joint deflection in the truss"""
         return max([numpy.linalg.norm(joint.deflections) for joint in self.joints])
 
     @property
     def materials(self) -> list[Material]:
-        """List of unique materials used in the truss
-
-        Returns
-        -------
-        list[Material]
-        """
+        """list[Material]: List of unique materials used in the truss"""
         material_library: list[Material] = [member.material for member in self.members]
         return list({v["name"]: v for v in material_library}.values())
 
     @property
     def limit_state(self) -> Literal["buckling", "yielding"]:
-        """The limit state of the truss, either "buckling" or "yielding"
-
-        Returns
-        -------
-        Literal["buckling", "yielding"]
-        """
+        """Literal["buckling", "yielding"]: The limit state of the truss, either "buckling" or "yielding" """
         if self.fos_buckling < self.fos_yielding:
             return "buckling"
         else:
@@ -304,10 +258,7 @@ class Truss(object):
 
     @property
     def report(self) -> str:
-        """
-        :return: A string containing a full report on the truss
-        :rtype: str
-        """
+        """str: A full report on the truss"""
         self.calc_fos()
 
         report_string = report.generate_summary(self) + "\n"
@@ -319,9 +270,15 @@ class Truss(object):
     def report_to_md(self, file_name: str) -> None:
         """
         Writes a report in Markdown format
-        :param file_name: A string with the name of the file
-        :type file_name: str
-        :return: None
+
+        Parameters
+        ----------
+        file_name: str
+            The name of the file
+
+        Returns
+        -------
+        None
         """
         with open(file_name, "w") as f:
             f.write(self.report)
@@ -329,9 +286,15 @@ class Truss(object):
     def to_json(self, file_name: str) -> None:
         """
         Saves the truss to a JSON file
-        :param file_name: The filename to use for the truss file
-        :type file_name: str
-        :return: None
+
+        Parameters
+        ----------
+        file_name: str
+            The filename to use for the JSON file
+
+        Returns
+        -------
+        None
         """
 
         class JointEncoder(json.JSONEncoder):
@@ -379,10 +342,17 @@ class Truss(object):
     def to_trs(self, file_name: str) -> None:
         """
         Saves the truss to a .trs file
-        :param file_name: The filename to use for the truss file
-        :type file_name: str
-        :return: None
+
+        Parameters
+        ----------
+        file_name: str
+            The filename to use for the truss file
+
+        Returns
+        -------
+        None
         """
+
         with open(file_name, "w") as f:
             # Do materials
             for material in self.materials:
@@ -457,10 +427,16 @@ class Truss(object):
 def read_trs(file_name: str) -> Truss:
     """
     Read a .trs file and return a Truss object
-    :param file_name: The name of the .trs file to be read
-    :type file_name: str
-    :return: The object loaded from the .trs file
-    :rtype: Truss
+
+    Parameters
+    ----------
+    file_name: str
+        The name of the .trs file to be read
+
+    Returns
+    -------
+    Truss
+        The object loaded from the .trs file
     """
     truss = Truss()
     material_library: list[Material] = []
@@ -519,10 +495,16 @@ def read_trs(file_name: str) -> Truss:
 def read_json(file_name: str) -> Truss:
     """
     Read a JSON file and return a Truss object
-    :param file_name: The name of the JSON file to be read
-    :type file_name: str
-    :return: The object loaded from the JSON file
-    :rtype: Truss
+
+    Parameters
+    ----------
+    file_name: str
+        The name of the JSON file to be read
+
+    Returns
+    -------
+    Truss
+        The object loaded from the JSON file
     """
     json_truss = json.load(open(file_name))
 

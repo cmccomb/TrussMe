@@ -15,6 +15,6 @@ setup(
     author="Christopher McComb",
     author_email="ccmcc2012@gmail.com",
     url="https://github.com/cmccomb/TrussMe",
-    install_requires=["numpy", "pandas", "tabulate"],
+    install_requires=["numpy", "pandas", "tabulate", "matplotlib"],
     packages=find_packages(exclude="tests"),
 )

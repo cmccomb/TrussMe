@@ -44,7 +44,7 @@ material_library: list[Material] = [
 
 
 class Shape(abc.ABC):
-    """Abstract base class for shapes"""
+    """Abstract base class for shapes, only ever used for typehints."""
 
     @abc.abstractmethod
     def __init__(self):

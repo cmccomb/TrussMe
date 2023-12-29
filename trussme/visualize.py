@@ -5,12 +5,18 @@ import re
 
 def plot_truss(truss, deflected_shape: bool = False) -> str:
     """Plot the truss.
-    :param truss: The truss to plot.
-    :type truss: Truss
-    :param deflected_shape: Plot the deflected shape. Defaults to False.
-    :type deflected_shape: bool, optional
-    :return: An svg string of the truss
-    :rtype: str
+
+    Parameters
+    ----------
+    truss: Truss
+        The truss to plot.
+    deflected_shape: bool, default=False
+        Whether to plot the deflected shape.
+
+    Returns
+    -------
+    str
+        An svg string of the truss
     """
     fig = matplotlib.pyplot.figure()
     ax = fig.add_subplot(

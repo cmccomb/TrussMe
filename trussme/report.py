@@ -5,48 +5,53 @@ import trussme.components as pp
 import trussme.visualize
 
 
-def generate_summary(the_truss) -> str:
+def generate_summary(truss) -> str:
     """
     Generate a summary of the analysis.
 
-    :param the_truss: The truss to be summarized
-    :type the_truss: Truss
-    :return: A string containing the summary
-    :rtype: str
+    Parameters
+    ----------
+    truss: Truss
+        The truss to be summarized
+
+    Returns
+    -------
+    str
+        A string containing the summary
     """
     summary = "# SUMMARY OF ANALYSIS\n"
     summary += (
         "- The truss has a mass of "
-        + format(the_truss.mass, ".2f")
+        + format(truss.mass, ".2f")
         + " kg, and a total factor of safety of "
-        + format(the_truss.fos_total, ".2f")
+        + format(truss.fos_total, ".2f")
         + ".\n"
     )
-    summary += "- The limit state is " + the_truss.limit_state + ".\n"
+    summary += "- The limit state is " + truss.limit_state + ".\n"
 
     success_string = []
     failure_string = []
-    if the_truss.minimum_fos_total < the_truss.fos_total:
+    if truss.minimum_fos_total < truss.fos_total:
         success_string.append("total FOS")
     else:
         failure_string.append("total FOS")
 
-    if the_truss.minimum_fos_buckling < the_truss.fos_buckling:
+    if truss.minimum_fos_buckling < truss.fos_buckling:
         success_string.append("buckling FOS")
     else:
         failure_string.append("buckling FOS")
 
-    if the_truss.minimum_fos_yielding < the_truss.fos_yielding:
+    if truss.minimum_fos_yielding < truss.fos_yielding:
         success_string.append("yielding FOS")
     else:
         failure_string.append("yielding FOS")
 
-    if the_truss.maximum_mass > the_truss.mass:
+    if truss.maximum_mass > truss.mass:
         success_string.append("mass")
     else:
         failure_string.append("mass")
 
-    if the_truss.maximum_deflection > the_truss.deflection:
+    if truss.maximum_deflection > truss.deflection:
         success_string.append("deflection")
     else:
         failure_string.append("deflection")
@@ -101,37 +106,37 @@ def generate_summary(the_truss) -> str:
     ]
     data.append(
         [
-            the_truss.minimum_fos_total,
-            the_truss.fos_total,
-            "Yes" if the_truss.fos_total > the_truss.minimum_fos_total else "No",
+            truss.minimum_fos_total,
+            truss.fos_total,
+            "Yes" if truss.fos_total > truss.minimum_fos_total else "No",
         ]
     )
     data.append(
         [
-            the_truss.minimum_fos_buckling,
-            the_truss.fos_buckling,
-            "Yes" if the_truss.fos_buckling > the_truss.minimum_fos_buckling else "No",
+            truss.minimum_fos_buckling,
+            truss.fos_buckling,
+            "Yes" if truss.fos_buckling > truss.minimum_fos_buckling else "No",
         ]
     )
     data.append(
         [
-            the_truss.minimum_fos_yielding,
-            the_truss.fos_yielding,
-            "Yes" if the_truss.fos_yielding > the_truss.minimum_fos_yielding else "No",
+            truss.minimum_fos_yielding,
+            truss.fos_yielding,
+            "Yes" if truss.fos_yielding > truss.minimum_fos_yielding else "No",
         ]
     )
     data.append(
         [
-            the_truss.maximum_mass,
-            the_truss.mass,
-            "Yes" if the_truss.mass < the_truss.maximum_mass else "No",
+            truss.maximum_mass,
+            truss.mass,
+            "Yes" if truss.mass < truss.maximum_mass else "No",
         ]
     )
     data.append(
         [
-            the_truss.maximum_deflection,
-            the_truss.deflection,
-            "Yes" if the_truss.deflection < the_truss.maximum_deflection else "No",
+            truss.maximum_deflection,
+            truss.deflection,
+            "Yes" if truss.deflection < truss.maximum_deflection else "No",
         ]
     )
 
