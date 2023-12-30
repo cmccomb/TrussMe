@@ -219,10 +219,6 @@ class Joint(object):
         """
         Free translation in all directions
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         None
@@ -231,11 +227,7 @@ class Joint(object):
 
     def pinned(self):
         """
-        Restrict translation in all directions
-
-        Parameters
-        ----------
-        None
+        Restrict translation in all directions, creating a pinned joint
 
         Returns
         -------
