@@ -28,7 +28,6 @@ class TestCustomStuff(unittest.TestCase):
 
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
-            minimum_fos_total=1.5,
             minimum_fos_yielding=1.5,
             maximum_mass=5.0,
             maximum_deflection=6e-3,
@@ -69,7 +68,6 @@ class TestCustomStuff(unittest.TestCase):
 
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
-            minimum_fos_total=1.5,
             minimum_fos_yielding=1.5,
             maximum_mass=5.0,
             maximum_deflection=6e-3,

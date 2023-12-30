@@ -12,7 +12,6 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_build_methods(self):
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
-            minimum_fos_total=1.5,
             minimum_fos_yielding=1.5,
             maximum_mass=5.0,
             maximum_deflection=6e-3,
@@ -82,7 +81,6 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_save_to_trs_and_rebuild(self):
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
-            minimum_fos_total=1.5,
             minimum_fos_yielding=1.5,
             maximum_mass=5.0,
             maximum_deflection=6e-3,
@@ -114,7 +112,6 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_save_to_json_and_rebuild(self):
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
-            minimum_fos_total=1.5,
             minimum_fos_yielding=1.5,
             maximum_mass=5.0,
             maximum_deflection=6e-3,

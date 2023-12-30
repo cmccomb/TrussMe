@@ -33,10 +33,6 @@ def generate_summary(truss, goals) -> str:
 
     success_string = []
     failure_string = []
-    if goals.minimum_fos_total < truss.fos_total:
-        success_string.append("total FOS")
-    else:
-        failure_string.append("total FOS")
 
     if goals.minimum_fos_buckling < truss.fos_buckling:
         success_string.append("buckling FOS")
@@ -100,19 +96,11 @@ def generate_summary(truss, goals) -> str:
 
     data = []
     rows = [
-        "Minimum Total FOS",
         "Minimum FOS for Buckling",
         "Minimum FOS for Yielding",
         "Maximum Mass",
         "Maximum Deflection",
     ]
-    data.append(
-        [
-            goals.minimum_fos_total,
-            truss.fos_total,
-            "Yes" if truss.fos_total > goals.minimum_fos_total else "No",
-        ]
-    )
     data.append(
         [
             goals.minimum_fos_buckling,

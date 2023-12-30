@@ -26,8 +26,6 @@ class Goals:
 
     Attributes
     ----------
-    minimum_fos_total: float, default=1.0
-        Minimum total FOS for the truss, defaults to 1.0
     minimum_fos_buckling: float, default=1.0
         Minimum buckling FOS for the truss, defaults to 1.0
     minimum_fos_yielding: float, default=1.0
@@ -38,7 +36,6 @@ class Goals:
         Maximum deflection for the truss, defaults to inf
     """
 
-    minimum_fos_total: float = 1.0
     minimum_fos_buckling: float = 1.0
     minimum_fos_yielding: float = 1.0
     maximum_mass: float = numpy.inf
