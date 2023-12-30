@@ -20,18 +20,20 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Build truss from scratch
         t1 = trussme.Truss()
-        t1.add_pinned_support([0.0, 0.0, 0.0])
-        t1.add_joint([1.0, 0.0, 0.0], d=2)
-        t1.add_joint([2.0, 0.0, 0.0], d=2)
-        t1.add_joint([3.0, 0.0, 0.0], d=2)
-        t1.add_joint([4.0, 0.0, 0.0], d=2)
-        t1.add_pinned_support([5.0, 0.0, 0.0])
+        t1.add_pinned_joint([0.0, 0.0, 0.0])
+        t1.add_free_joint([1.0, 0.0, 0.0])
+        t1.add_free_joint([2.0, 0.0, 0.0])
+        t1.add_free_joint([3.0, 0.0, 0.0])
+        t1.add_free_joint([4.0, 0.0, 0.0])
+        t1.add_pinned_joint([5.0, 0.0, 0.0])
 
-        t1.add_joint([0.5, 1.0, 0.0], d=2)
-        t1.add_joint([1.5, 1.0, 0.0], d=2)
-        t1.add_joint([2.5, 1.0, 0.0], d=2)
-        t1.add_joint([3.5, 1.0, 0.0], d=2)
-        t1.add_joint([4.5, 1.0, 0.0], d=2)
+        t1.add_free_joint([0.5, 1.0, 0.0])
+        t1.add_free_joint([1.5, 1.0, 0.0])
+        t1.add_free_joint([2.5, 1.0, 0.0])
+        t1.add_free_joint([3.5, 1.0, 0.0])
+        t1.add_free_joint([4.5, 1.0, 0.0])
+
+        t1.add_out_of_plane_support("z")
 
         t1.joints[7].loads[1] = -20000
         t1.joints[8].loads[1] = -20000

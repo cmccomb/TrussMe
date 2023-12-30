@@ -147,7 +147,7 @@ class Joint(object):
         # Coordinates of the joint
         self.coordinates = coordinates
 
-        # Allowed translation in x, y, and z
+        # Restricted translation in x, y, and z
         self.translation: list[bool] = [True, True, True]
 
         # Loads
@@ -162,24 +162,32 @@ class Joint(object):
         # Loads
         self.deflections: list[float] = [0.0, 0.0, 0.0]
 
-    def free(self, d: int = 3):
+    def free(self):
         self.translation = [False, False, False]
-        # If 2d, add out of plane support
-        if d == 2:
-            self.translation[2] = True
 
     def pinned(self):
         # Restrict all translation
         self.translation = [True, True, True]
 
-    def roller(self, axis: Literal["x", "y"] = "y", d: int = 3):
+    def roller(self, constrained_axis: Literal["x", "y", "z"] = "y"):
         # Only support reaction along denoted axis
         self.translation = [False, False, False]
-        self.translation[ord(axis) - 120] = True
-
-        # If 2d, add out of plane support
-        if d == 2:
+        if constrained_axis == "x":
+            self.translation[0] = True
+        elif constrained_axis == "y":
+            self.translation[1] = True
+        elif constrained_axis == "z":
             self.translation[2] = True
+
+    def slot(self, free_axis: Literal["x", "y", "z"] = "x"):
+        # Only allow translation along denoted axis
+        self.translation = [True, True, True]
+        if free_axis == "x":
+            self.translation[0] = False
+        elif free_axis == "y":
+            self.translation[1] = False
+        elif free_axis == "z":
+            self.translation[2] = False
 
 
 class Member(object):

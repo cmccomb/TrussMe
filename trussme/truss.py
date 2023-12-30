@@ -117,8 +117,8 @@ class Truss(object):
         else:
             return "yielding"
 
-    def add_pinned_support(self, coordinates: list[float]):
-        """Add a pinned support to the truss at the given coordinates
+    def add_pinned_joint(self, coordinates: list[float]):
+        """Add a pinned joint to the truss at the given coordinates
 
         Parameters
         ----------
@@ -127,7 +127,8 @@ class Truss(object):
 
         Returns
         -------
-        None
+        int:
+            The index of the new joint
         """
 
         # Make the joint
@@ -135,32 +136,59 @@ class Truss(object):
         self.joints[-1].pinned()
         self.joints[-1].idx = self.number_of_joints - 1
 
-    def add_roller_support(
-        self, coordinates: list[float], axis: Literal["x", "y"] = "y", d: int = 3
+        return self.joints[-1].idx
+
+    def add_roller_joint(
+        self, coordinates: list[float], constrained_axis: Literal["x", "y", "z"] = "y"
     ):
         """
-        Add a roller support to the truss at the given coordinates
+        Add a roller joint to the truss at the given coordinates
 
         Parameters
         ----------
         coordinates: list[float]
             The coordinates of the joint
-        axis: Literal["x", "y"], default="y"
-            The axis of the roller support TODO: Fix this
-        d: int, default=3
-            The number of degrees of freedom to constrain TODO: Fix this
+        constrained_axis: Literal["x", "y", "z"], default="y"
+            The axis along which the joint is not allowed to translate
 
         Returns
         -------
-        None
+        int:
+            The index of the new joint
         """
 
-        # Make the joint
         self.joints.append(Joint(coordinates))
-        self.joints[-1].roller(axis=axis, d=d)
+        self.joints[-1].roller(constrained_axis=constrained_axis)
         self.joints[-1].idx = self.number_of_joints - 1
 
-    def add_joint(self, coordinates: list[float], d: int = 3):
+        return self.joints[-1].idx
+
+    def add_slotted_joint(
+        self, coordinates: list[float], free_axis: Literal["x", "y", "z"] = "y"
+    ):
+        """
+        Add a slotted joint to the truss at the given coordinates
+
+        Parameters
+        ----------
+        coordinates: list[float]
+            The coordinates of the joint
+        free_axis: Literal["x", "y", "z"], default="y"
+            The axis along which the joint is allowed to translate
+
+        Returns
+        -------
+        int:
+            The index of the new joint
+        """
+
+        self.joints.append(Joint(coordinates))
+        self.joints[-1].slot(free_axis=free_axis)
+        self.joints[-1].idx = self.number_of_joints - 1
+
+        return self.joints[-1].idx
+
+    def add_free_joint(self, coordinates: list[float]):
         """
         Add a free joint to the truss at the given coordinates
 
@@ -168,23 +196,33 @@ class Truss(object):
         ----------
         coordinates: list[float]
             The coordinates of the joint
-        d: int, default=3
-            The number of degrees of freedom to constrain TODO: Fix this
 
         Returns
         -------
-        None
+        int:
+            The index of the new joint
         """
 
         # Make the joint
         self.joints.append(Joint(coordinates))
-        self.joints[-1].free(d=d)
+        self.joints[-1].free()
         self.joints[-1].idx = self.number_of_joints - 1
+
+        return self.joints[-1].idx
+
+    def add_out_of_plane_support(self, constrained_axis: Literal["x", "y", "z"] = "z"):
+        for idx in range(self.number_of_joints):
+            if constrained_axis == "x":
+                self.joints[idx].translation[0] = True
+            elif constrained_axis == "y":
+                self.joints[idx].translation[1] = True
+            elif constrained_axis == "z":
+                self.joints[idx].translation[2] = True
 
     def add_member(
         self,
-        joint_index_a: int,
-        joint_index_b: int,
+        begin_joint_index: int,
+        end_joint_index: int,
         material: Material = material_library[0],
         shape: Shape = Pipe(t=0.002, r=0.02),
     ):
@@ -193,9 +231,9 @@ class Truss(object):
 
         Parameters
         ----------
-        joint_index_a: int
+        begin_joint_index: int
             The index of the first joint
-        joint_index_b: int
+        end_joint_index: int
             The index of the second joint
         material: Material, default=material_library[0]
             The material of the member
@@ -204,11 +242,15 @@ class Truss(object):
 
         Returns
         -------
-        None
+        int
+            The index of the new member
         """
 
         member = Member(
-            self.joints[joint_index_a], self.joints[joint_index_b], material, shape
+            self.joints[begin_joint_index],
+            self.joints[end_joint_index],
+            material,
+            shape,
         )
         member.idx = self.number_of_members
 
@@ -216,8 +258,10 @@ class Truss(object):
         self.members.append(member)
 
         # Update joints
-        self.joints[joint_index_a].members.append(self.members[-1])
-        self.joints[joint_index_b].members.append(self.members[-1])
+        self.joints[begin_joint_index].members.append(self.members[-1])
+        self.joints[end_joint_index].members.append(self.members[-1])
+
+        return self.members[-1].idx
 
     def move_joint(self, joint_index: int, coordinates: list[float]):
         """
@@ -507,7 +551,7 @@ def read_trs(file_name: str) -> Truss:
 
             elif line[0] == "J":
                 info = line.split()[1:]
-                truss.add_joint([float(x) for x in info[:3]])
+                truss.add_free_joint([float(x) for x in info[:3]])
                 truss.joints[-1].translation = [bool(int(x)) for x in info[3:]]
             elif line[0] == "M":
                 info = line.split()[1:]
@@ -563,7 +607,7 @@ def read_json(file_name: str) -> Truss:
     material_library: list[Material] = json_truss["materials"]
 
     for joint in json_truss["joints"]:
-        truss.add_joint(joint["coordinates"])
+        truss.add_free_joint(joint["coordinates"])
         truss.joints[-1].translation = joint["translation"]
         truss.joints[-1].translation = joint["loads"]
 

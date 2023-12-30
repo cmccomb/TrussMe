@@ -7,9 +7,11 @@ class TestCustomStuff(unittest.TestCase):
     def test_custom_material(self):
         # Build truss from scratch
         truss = trussme.Truss()
-        truss.add_pinned_support([0.0, 0.0, 0.0])
-        truss.add_joint([2.5, 2.5, 0.0], d=2)
-        truss.add_roller_support([5.0, 0.0, 0.0], d=2)
+        truss.add_pinned_joint([0.0, 0.0, 0.0])
+        truss.add_free_joint([2.5, 2.5, 0.0])
+        truss.add_roller_joint([5.0, 0.0, 0.0])
+
+        truss.add_out_of_plane_support("z")
 
         truss.joints[1].loads[1] = -20000
 
@@ -37,9 +39,11 @@ class TestCustomStuff(unittest.TestCase):
     def test_custom_shape(self):
         # Build truss from scratch
         truss = trussme.Truss()
-        truss.add_pinned_support([0.0, 0.0, 0.0])
-        truss.add_joint([2.5, 2.5, 0.0], d=2)
-        truss.add_roller_support([5.0, 0.0, 0.0], d=2)
+        truss.add_pinned_joint([0.0, 0.0, 0.0])
+        truss.add_free_joint([2.5, 2.5, 0.0])
+        truss.add_roller_joint([5.0, 0.0, 0.0])
+
+        truss.add_out_of_plane_support("z")
 
         truss.joints[1].loads[1] = -20000
 
