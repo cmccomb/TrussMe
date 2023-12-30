@@ -171,9 +171,9 @@ def generate_instantiation_information(truss) -> str:
                 str(j.coordinates[0]),
                 str(j.coordinates[1]),
                 str(j.coordinates[2]),
-                str(j.translation[0]),
-                str(j.translation[1]),
-                str(j.translation[2]),
+                str(j.translation_restricted[0]),
+                str(j.translation_restricted[1]),
+                str(j.translation_restricted[2]),
             ]
         )
 
@@ -298,13 +298,13 @@ def generate_stress_analysis(truss, goals) -> str:
         data.append(
             [
                 format(j.reactions[0] / pow(10, 3), ".2f")
-                if j.translation[0] != 0.0
+                if j.translation_restricted[0] != 0.0
                 else "N/A",
                 format(j.reactions[1] / pow(10, 3), ".2f")
-                if j.translation[1] != 0.0
+                if j.translation_restricted[1] != 0.0
                 else "N/A",
                 format(j.reactions[2] / pow(10, 3), ".2f")
-                if j.translation[2] != 0.0
+                if j.translation_restricted[2] != 0.0
                 else "N/A",
             ]
         )
@@ -361,13 +361,13 @@ def generate_stress_analysis(truss, goals) -> str:
         data.append(
             [
                 format(j.deflections[0] * pow(10, 3), ".5f")
-                if j.translation[0] == 0.0
+                if j.translation_restricted[0] == 0.0
                 else "N/A",
                 format(j.deflections[1] * pow(10, 3), ".5f")
-                if j.translation[1] == 0.0
+                if j.translation_restricted[1] == 0.0
                 else "N/A",
                 format(j.deflections[2] * pow(10, 3), ".5f")
-                if j.translation[2] == 0.0
+                if j.translation_restricted[2] == 0.0
                 else "N/A",
                 "Yes"
                 if numpy.linalg.norm(j.deflections) < goals.maximum_deflection

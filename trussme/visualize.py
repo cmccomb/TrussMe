@@ -3,7 +3,9 @@ import io
 import re
 
 
-def plot_truss(truss, deflected_shape: bool = False) -> str:
+def plot_truss(
+    truss, deflected_shape: bool = False, exaggeration_factor: float = 10
+) -> str:
     """Plot the truss.
 
     Parameters
@@ -12,6 +14,8 @@ def plot_truss(truss, deflected_shape: bool = False) -> str:
         The truss to plot.
     deflected_shape: bool, default=False
         Whether to plot the deflected shape.
+    exaggeration_factor: float, default=10
+        The factor by which to exaggerate the deflected shape.
 
     Returns
     -------
@@ -33,22 +37,20 @@ def plot_truss(truss, deflected_shape: bool = False) -> str:
             color="k",
         )
 
-    factor = 10
-
     if deflected_shape:
         for member in truss.members:
             ax.plot(
                 [
                     member.begin_joint.coordinates[0]
-                    + factor * member.begin_joint.deflections[0],
+                    + exaggeration_factor * member.begin_joint.deflections[0],
                     member.end_joint.coordinates[0]
-                    + factor * member.end_joint.deflections[0],
+                    + exaggeration_factor * member.end_joint.deflections[0],
                 ],
                 [
                     member.begin_joint.coordinates[1]
-                    + factor * member.begin_joint.deflections[1],
+                    + exaggeration_factor * member.begin_joint.deflections[1],
                     member.end_joint.coordinates[1]
-                    + factor * member.end_joint.deflections[1],
+                    + exaggeration_factor * member.end_joint.deflections[1],
                 ],
                 color="m",
             )

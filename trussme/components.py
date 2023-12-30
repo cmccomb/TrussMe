@@ -39,7 +39,9 @@ material_library: list[Material] = [
 
 
 class Shape(abc.ABC):
-    """Abstract base class for shapes, only ever used for typehints."""
+    """
+    Abstract base class for shapes, only ever used for typehints.
+    """
 
     @abc.abstractmethod
     def __init__(self):
@@ -140,6 +142,33 @@ class Box(Shape):
 
 
 class Joint(object):
+    """
+    A class to represent a joint in a truss
+
+    Parameters
+    ----------
+    coordinates: list[float]
+        The coordinates of the joint
+
+    Attributes
+    ----------
+    idx: int
+        The index of the joint
+    coordinates: list[float]
+        The coordinates of the joint
+    translation_restricted: list[bool]
+        The translation restrictions of the joint
+    loads: list[float]
+        The loads on the joint
+    members: list[Member]
+        The members connected to the joint
+    reactions: list[float]
+        The reactions at the joint
+    deflections: list[float]
+        The deflections of the joint
+
+    """
+
     def __init__(self, coordinates: list[float]):
         # Save the joint id
         self.idx: int = 0
@@ -148,7 +177,7 @@ class Joint(object):
         self.coordinates = coordinates
 
         # Restricted translation in x, y, and z
-        self.translation: list[bool] = [True, True, True]
+        self.translation_restricted: list[bool] = [True, True, True]
 
         # Loads
         self.loads: list[float] = [0.0, 0.0, 0.0]
@@ -163,31 +192,77 @@ class Joint(object):
         self.deflections: list[float] = [0.0, 0.0, 0.0]
 
     def free(self):
-        self.translation = [False, False, False]
+        """
+        Free translation in all directions
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.translation_restricted = [False, False, False]
 
     def pinned(self):
+        """
+        Restrict translation in all directions
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         # Restrict all translation
-        self.translation = [True, True, True]
+        self.translation_restricted = [True, True, True]
 
     def roller(self, constrained_axis: Literal["x", "y", "z"] = "y"):
+        """
+        Free translation in all directions except one, creating a roller joint
+
+        Parameters
+        ----------
+        constrained_axis: str, default="y"
+            The axis to restrict translation along
+
+        Returns
+        -------
+        None
+        """
         # Only support reaction along denoted axis
-        self.translation = [False, False, False]
+        self.translation_restricted = [False, False, False]
         if constrained_axis == "x":
-            self.translation[0] = True
+            self.translation_restricted[0] = True
         elif constrained_axis == "y":
-            self.translation[1] = True
+            self.translation_restricted[1] = True
         elif constrained_axis == "z":
-            self.translation[2] = True
+            self.translation_restricted[2] = True
 
     def slot(self, free_axis: Literal["x", "y", "z"] = "x"):
+        """
+        Restricted translation in all directions except one, creating a slot joint
+
+        Parameters
+        ----------
+        free_axis: str, default="x"
+            The axis to allow translation along
+
+        Returns
+        -------
+        None
+        """
         # Only allow translation along denoted axis
-        self.translation = [True, True, True]
+        self.translation_restricted = [True, True, True]
         if free_axis == "x":
-            self.translation[0] = False
+            self.translation_restricted[0] = False
         elif free_axis == "y":
-            self.translation[1] = False
+            self.translation_restricted[1] = False
         elif free_axis == "z":
-            self.translation[2] = False
+            self.translation_restricted[2] = False
 
 
 class Member(object):
@@ -204,7 +279,21 @@ class Member(object):
         The material used for the member
     shape: Shape
         The shape of the member
+
+    Attributes
+    ----------
+    idx: int
+        The index of the member
+    shape: Shape
+        The shape of the member
+    material: Material
+        The material used for the member
+    begin_joint: Joint
+        The joint at the beginning of the member
+    end_joint: Joint
+        The joint at the end of the member
     """
+
     def __init__(
         self, begin_joint: Joint, end_joint: Joint, material: Material, shape: Shape
     ):

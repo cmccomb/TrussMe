@@ -210,11 +210,11 @@ class Truss(object):
     def add_out_of_plane_support(self, constrained_axis: Literal["x", "y", "z"] = "z"):
         for idx in range(self.number_of_joints):
             if constrained_axis == "x":
-                self.joints[idx].translation[0] = True
+                self.joints[idx].translation_restricted[0] = True
             elif constrained_axis == "y":
-                self.joints[idx].translation[1] = True
+                self.joints[idx].translation_restricted[1] = True
             elif constrained_axis == "z":
-                self.joints[idx].translation[2] = True
+                self.joints[idx].translation_restricted[2] = True
 
     def add_member(
         self,
@@ -316,7 +316,9 @@ class Truss(object):
                     for member in self.members
                 ]
             ).T,
-            "reactions": numpy.array([joint.translation for joint in self.joints]).T,
+            "reactions": numpy.array(
+                [joint.translation_restricted for joint in self.joints]
+            ).T,
             "loads": loads,
             "area": numpy.array([member.area for member in self.members]),
         }
@@ -328,7 +330,7 @@ class Truss(object):
 
         for i in range(self.number_of_joints):
             for j in range(3):
-                if self.joints[i].translation[j]:
+                if self.joints[i].translation_restricted[j]:
                     self.joints[i].reactions[j] = float(reactions[j, i])
                     self.joints[i].deflections[j] = 0.0
                 else:
@@ -395,7 +397,7 @@ class Truss(object):
                     return {
                         "coordinates": obj.coordinates,
                         "loads": obj.loads,
-                        "translation": obj.translation,
+                        "translation": obj.translation_restricted,
                     }
                 # Let the base class default method raise the TypeError
                 return json.JSONEncoder.default(self, obj)
@@ -473,11 +475,11 @@ class Truss(object):
                     + "\t"
                     + str(j.coordinates[2])
                     + "\t"
-                    + str(int(j.translation[0]))
+                    + str(int(j.translation_restricted[0]))
                     + "\t"
-                    + str(int(j.translation[1]))
+                    + str(int(j.translation_restricted[1]))
                     + "\t"
-                    + str(int(j.translation[2]))
+                    + str(int(j.translation_restricted[2]))
                     + "\n"
                 )
                 if numpy.sum(j.loads) != 0:
@@ -549,7 +551,9 @@ def read_trs(file_name: str) -> Truss:
             elif line[0] == "J":
                 info = line.split()[1:]
                 truss.add_free_joint([float(x) for x in info[:3]])
-                truss.joints[-1].translation = [bool(int(x)) for x in info[3:]]
+                truss.joints[-1].translation_restricted = [
+                    bool(int(x)) for x in info[3:]
+                ]
             elif line[0] == "M":
                 info = line.split()[1:]
                 material = next(
@@ -605,8 +609,8 @@ def read_json(file_name: str) -> Truss:
 
     for joint in json_truss["joints"]:
         truss.add_free_joint(joint["coordinates"])
-        truss.joints[-1].translation = joint["translation"]
-        truss.joints[-1].translation = joint["loads"]
+        truss.joints[-1].translation_restricted = joint["translation"]
+        truss.joints[-1].translation_restricted = joint["loads"]
 
     for member in json_truss["members"]:
         material: Material = next(
