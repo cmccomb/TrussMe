@@ -411,10 +411,11 @@ class Truss(object):
                         "material": obj.material["name"],
                         "shape": {
                             "name": obj.shape.name(),
-                            "w": obj.shape.w,
-                            "h": obj.shape.h,
-                            "r": obj.shape.r,
-                            "t": obj.shape.t,
+                            "parameters": obj.shape._params,
+                            # "w": obj.shape.w,
+                            # "h": obj.shape.h,
+                            # "r": obj.shape.r,
+                            # "t": obj.shape.t,
                         },
                     }
                 # Let the base class default method raise the TypeError
@@ -504,14 +505,8 @@ class Truss(object):
                     + m.shape.name()
                     + "\t"
                 )
-                if m.shape.t:
-                    f.write("t=" + str(m.shape.t) + "\t")
-                if m.shape.r:
-                    f.write("r=" + str(m.shape.r) + "\t")
-                if m.shape.w:
-                    f.write("w=" + str(m.shape.w) + "\t")
-                if m.shape.h:
-                    f.write("h=" + str(m.shape.h) + "\t")
+                for key in m.shape._params.keys():
+                    f.write(key + "=" + str(m.shape._params[key]) + "\t")
                 f.write("\n")
 
             # Do the loads
@@ -569,12 +564,12 @@ def read_trs(file_name: str) -> Truss:
                     vs.append(float(kvpair[1]))
                 if info[3] == "pipe":
                     shape = Pipe(**dict(zip(ks, vs)))
-                elif info[3] == "bar":
-                    shape = Bar(**dict(zip(ks, vs)))
-                elif info[3] == "square":
-                    shape = Square(**dict(zip(ks, vs)))
-                elif info[3] == "box":
-                    shape = Box(**dict(zip(ks, vs)))
+                # elif info[3] == "bar":
+                #     shape = Bar(**dict(zip(ks, vs)))
+                # elif info[3] == "square":
+                #     shape = Square(**dict(zip(ks, vs)))
+                # elif info[3] == "box":
+                #     shape = Box(**dict(zip(ks, vs)))
                 truss.add_member(int(info[0]), int(info[1]), material, shape)
 
             elif line[0] == "L":
@@ -610,14 +605,13 @@ def read_json(file_name: str) -> Truss:
     for joint in json_truss["joints"]:
         truss.add_free_joint(joint["coordinates"])
         truss.joints[-1].translation_restricted = joint["translation"]
-        truss.joints[-1].translation_restricted = joint["loads"]
+        truss.joints[-1].loads = joint["loads"]
 
     for member in json_truss["members"]:
         material: Material = next(
             item for item in material_library if item["name"] == member["material"]
         )
-        shape_params = member["shape"]
-        del shape_params["name"]
+        shape_params = member["shape"]["parameters"]
         if member["shape"]["name"] == "pipe":
             shape = Pipe(**dict(shape_params))
         elif member["shape"]["name"] == "bar":

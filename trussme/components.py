@@ -45,10 +45,7 @@ class Shape(abc.ABC):
 
     @abc.abstractmethod
     def __init__(self):
-        self.w = None
-        self.h = None
-        self.t = None
-        self.r = None
+        self._params = {}
 
     @abc.abstractmethod
     def moi(self) -> float:
@@ -88,78 +85,120 @@ class Shape(abc.ABC):
 
 
 class Pipe(Shape):
-    def __init__(self, r: float = 0.0, t: float = 0.0):
-        self.r: float = r
-        self.t: float = t
-        self.w = None
-        self.h = None
+    """
+    A class to represent a pipe, defined by an outer radius, `r`, and a thickness, `t`.
+
+    Parameters
+    ----------
+    r: float
+        The outer radius of the pipe
+    t: float
+        The thickness of the pipe
+    """
+
+    def __init__(self, r: float, t: float):
+        self._params = {"r": r, "t": t}
 
     def moi(self) -> float:
-        return (numpy.pi / 4.0) * (self.r**4 - (self.r - 2 * self.t) ** 4)
+        return (numpy.pi / 4.0) * (
+            self._params["r"] ** 4 - (self._params["r"] - 2 * self._params["t"]) ** 4
+        )
 
     def area(self) -> float:
-        return numpy.pi * (self.r**2 - (self.r - self.t) ** 2)
+        return numpy.pi * (
+            self._params["r"] ** 2 - (self._params["r"] - self._params["t"]) ** 2
+        )
 
     def name(self) -> str:
         return "pipe"
 
 
 class Bar(Shape):
-    def __init__(self, r: float = 0.0):
-        self.r: float = r
-        self.w = None
-        self.h = None
-        self.t = None
+    """
+    A class to represent a solid round bar, defined by a radius, `r`.
+
+    Parameters
+    ----------
+    r: float
+        The radius of the bar
+    """
+
+    def __init__(self, r: float):
+        self._params = {"r": r}
 
     def moi(self) -> float:
-        return (numpy.pi / 4.0) * self.r**4
+        return (numpy.pi / 4.0) * self._params["r"] ** 4
 
     def area(self) -> float:
-        return numpy.pi * self.r**2
+        return numpy.pi * self._params["r"] ** 2
 
     def name(self) -> str:
         return "bar"
 
 
 class Square(Shape):
+    """
+    A class to represent a square bar, defined by a width, `w`, and a height, `h`.
+
+    Parameters
+    ----------
+    w: float
+        The width of the bar
+    h: float
+        The height of the bar
+    """
+
     def __init__(self, w: float = 0.0, h: float = 0.0):
-        self.w: float = w
-        self.h: float = h
-        self.t = None
-        self.r = None
+        self._params = {"w": w, "h": h}
 
     def moi(self) -> float:
-        if self.h > self.w:
-            return (1.0 / 12.0) * self.w * self.h**3
+        if self._params["h"] > self._params["w"]:
+            return (1.0 / 12.0) * self._params["w"] * self._params["h"] ** 3
         else:
-            return (1.0 / 12.0) * self.h * self.w**3
+            return (1.0 / 12.0) * self._params["h"] * self._params["w"] ** 3
 
     def area(self) -> float:
-        return self.w * self.h
+        return self._params["w"] * self._params["h"]
 
     def name(self) -> str:
         return "square"
 
 
 class Box(Shape):
-    def __init__(self, w: float = 0.0, h: float = 0.0, t: float = 0.0):
-        self.w: float = w
-        self.h: float = h
-        self.t: float = t
-        self.r = None
+    """
+    A class to represent a box, defined by a width, `w`, a height, `h`, and a thickness, `t`.
+
+    Parameters
+    ----------
+    w: float
+        The width of the box
+    h: float
+        The height of the box
+    t: float
+        The thickness of the box
+    """
+
+    def __init__(self, w: float, h: float, t: float):
+        self._params = {"w": w, "h": h, "t": t}
 
     def moi(self) -> float:
-        if self.h > self.w:
-            return (1.0 / 12.0) * (self.w * self.h**3) - (1.0 / 12.0) * (
-                self.w - 2 * self.t
-            ) * (self.h - 2 * self.t) ** 3
+        if self._params["h"] > self._params["w"]:
+            return (1.0 / 12.0) * (self._params["w"] * self._params["h"] ** 3) - (
+                1.0 / 12.0
+            ) * (self._params["w"] - 2 * self._params["t"]) * (
+                self._params["h"] - 2 * self._params["t"]
+            ) ** 3
         else:
-            return (1.0 / 12.0) * (self.h * self.w**3) - (1.0 / 12.0) * (
-                self.h - 2 * self.t
-            ) * (self.w - 2 * self.t) ** 3
+            return (1.0 / 12.0) * (self._params["h"] * self._params["w"] ** 3) - (
+                1.0 / 12.0
+            ) * (self._params["h"] - 2 * self._params["t"]) * (
+                self._params["w"] - 2 * self._params["t"]
+            ) ** 3
 
     def area(self) -> float:
-        return self.w * self.h - (self.h - 2 * self.t) * (self.w - 2 * self.t)
+        return self._params["w"] * self._params["h"] - (
+            self._params["h"] - 2 * self._params["t"]
+        ) * (self._params["w"] - 2 * self._params["t"])
 
     def name(self) -> str:
         return "box"

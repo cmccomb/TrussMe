@@ -97,11 +97,6 @@ class TestSequenceFunctions(unittest.TestCase):
         t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
         t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_3.md"), goals)
 
-        with open(os.path.join(os.path.dirname(__file__), "report_3.md")) as f:
-            print(f.read())
-        with open(os.path.join(os.path.dirname(__file__), "report_2.md")) as f:
-            print(f.read())
-
         # Test for sameness
         file_are_the_same = filecmp.cmp(
             os.path.join(os.path.dirname(__file__), "report_3.md"),
@@ -122,21 +117,12 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Save
         t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_4.md"), goals)
-        t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.json"))
+        t2.to_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
 
         # Rebuild
-        t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.json"))
-        t3.minimum_fos_buckling = 1.5
-        t3.min_fos_yielding = 1.5
-        t3.max_mass = 5.0
-        t3.maximum_deflection = 6e-3
+        t3 = trussme.read_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
 
         t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_5.md"), goals)
-
-        with open(os.path.join(os.path.dirname(__file__), "report_5.md")) as f:
-            print(f.read())
-        with open(os.path.join(os.path.dirname(__file__), "report_4.md")) as f:
-            print(f.read())
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(

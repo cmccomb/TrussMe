@@ -1,3 +1,5 @@
+import json
+
 import numpy
 import pandas
 import scipy
@@ -195,10 +197,11 @@ def generate_instantiation_information(truss) -> str:
                 str(m.end_joint.idx),
                 m.material_name,
                 m.shape.name(),
-                m.shape.h,
-                m.shape.w,
-                m.shape.r,
-                m.shape.t,
+                json.dumps(m.shape._params)
+                .replace('"', "")
+                .replace(": ", "=")
+                .replace("{", "")
+                .replace("}", ""),
                 m.mass,
             ]
         )
@@ -207,14 +210,11 @@ def generate_instantiation_information(truss) -> str:
         data,
         index=rows,
         columns=[
-            "Joint-A",
-            "Joint-B",
+            "Beginning Joint",
+            "Ending Joint",
             "Material",
             "Shape",
-            "Height (m)",
-            "Width (m)",
-            "Radius (m)",
-            "Thickness (m)",
+            "Parameters (m)",
             "Mass (kg)",
         ],
     ).to_markdown()

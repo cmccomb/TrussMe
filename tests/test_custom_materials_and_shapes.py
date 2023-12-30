@@ -48,10 +48,7 @@ class TestCustomStuff(unittest.TestCase):
 
         class MagicalRod(trussme.Shape):
             def __init__(self):
-                self.h = None
-                self.w = None
-                self.r = None
-                self.t = None
+                self._params = {}
 
             def moi(self) -> float:
                 return 200_000_000_000
