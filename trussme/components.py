@@ -52,14 +52,38 @@ class Shape(abc.ABC):
 
     @abc.abstractmethod
     def moi(self) -> float:
+        """
+        The moment of inertia of the shape
+
+        Returns
+        -------
+        float
+            The moment of inertia of the shape
+        """
         pass
 
     @abc.abstractmethod
     def area(self) -> float:
+        """
+        The cross-sectional area of the shape
+
+        Returns
+        -------
+        float
+            The cross-sectional area of the shape
+        """
         pass
 
     @abc.abstractmethod
     def name(self) -> str:
+        """
+        The name of the shape
+
+        Returns
+        -------
+        str
+            The name of the shape
+        """
         pass
 
 
