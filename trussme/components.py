@@ -191,6 +191,20 @@ class Joint(object):
 
 
 class Member(object):
+    """
+    A class to represent a member in a truss
+
+    Parameters
+    ----------
+    begin_joint: Joint
+        The joint at the beginning of the member
+    end_joint: Joint
+        The joint at the end of the member
+    material: Material
+        The material used for the member
+    shape: Shape
+        The shape of the member
+    """
     def __init__(
         self, begin_joint: Joint, end_joint: Joint, material: Material, shape: Shape
     ):
@@ -212,34 +226,42 @@ class Member(object):
 
     @property
     def yield_strength(self) -> float:
+        """float: The yield strength of the material used in the member"""
         return self.material["yield_strength"]
 
     @property
     def density(self) -> float:
+        """float: The density of the material used in the member"""
         return self.material["density"]
 
     @property
     def elastic_modulus(self) -> float:
+        """float: The elastic modulus of the material used in the member"""
         return self.material["elastic_modulus"]
 
     @property
     def material_name(self) -> str:
+        """float: The name of the material used in the member"""
         return self.material["name"]
 
     @property
     def moment_of_inertia(self) -> float:
+        """float: The moment of inertia of the shape used for the member"""
         return self.shape.moi()
 
     @property
     def area(self) -> float:
+        """float: The cross-sectional area of the shape used for the member"""
         return self.shape.area()
 
     @property
-    def linear_weight(self) -> float:
+    def linear_mass(self) -> float:
+        """float: The linear mass of the member"""
         return self.area * self.density
 
     @property
     def length(self) -> float:
+        """float: The length of the member"""
         return numpy.linalg.norm(
             numpy.array(self.begin_joint.coordinates)
             - numpy.array(self.end_joint.coordinates)
@@ -247,10 +269,12 @@ class Member(object):
 
     @property
     def mass(self) -> float:
-        return self.length * self.linear_weight
+        """float: The total mass of the member"""
+        return self.length * self.linear_mass
 
     @property
     def force(self) -> float:
+        """float: The force in the member"""
         return self._force
 
     @force.setter
@@ -259,10 +283,12 @@ class Member(object):
 
     @property
     def fos_yielding(self) -> float:
+        """float: The factor of safety against yielding"""
         return self.yield_strength / abs(self.force / self.area)
 
     @property
     def fos_buckling(self) -> float:
+        """float: The factor of safety against buckling"""
         return (
             -(
                 (numpy.pi**2)
