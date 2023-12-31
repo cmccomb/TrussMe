@@ -291,7 +291,7 @@ class Truss(object):
 
         self.joints[joint_index].loads = load
 
-    def calc_fos(self):
+    def analyze(self):
         loads = numpy.zeros([3, self.number_of_joints])
         for i in range(self.number_of_joints):
             loads[0, i] = self.joints[i].loads[0]
