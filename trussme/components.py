@@ -251,7 +251,7 @@ class Joint(object):
         # Loads
         self.reactions: list[float] = [0.0, 0.0, 0.0]
 
-        # Loads
+        # Deflections
         self.deflections: list[float] = [0.0, 0.0, 0.0]
 
     def free(self):

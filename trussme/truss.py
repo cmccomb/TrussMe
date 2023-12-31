@@ -523,12 +523,12 @@ def read_trs(file_name: str) -> Truss:
                     vs.append(float(kvpair[1]))
                 if info[3] == "pipe":
                     shape = Pipe(**dict(zip(ks, vs)))
-                # elif info[3] == "bar":
-                #     shape = Bar(**dict(zip(ks, vs)))
-                # elif info[3] == "square":
-                #     shape = Square(**dict(zip(ks, vs)))
-                # elif info[3] == "box":
-                #     shape = Box(**dict(zip(ks, vs)))
+                elif info[3] == "bar":
+                    shape = Bar(**dict(zip(ks, vs)))
+                elif info[3] == "square":
+                    shape = Square(**dict(zip(ks, vs)))
+                elif info[3] == "box":
+                    shape = Box(**dict(zip(ks, vs)))
                 truss.add_member(int(info[0]), int(info[1]), material, shape)
 
             elif line[0] == "L":
