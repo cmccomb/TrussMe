@@ -3,9 +3,9 @@ from typing import Literal
 import json
 
 import numpy
+from numpy.typing import NDArray
 import scipy
 
-from trussme import evaluate
 from trussme.components import (
     Joint,
     Member,
@@ -292,6 +292,18 @@ class Truss(object):
         self.joints[joint_index].loads = load
 
     def analyze(self):
+        """
+        Analyze the truss
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        """
         loads = numpy.zeros([3, self.number_of_joints])
         for i in range(self.number_of_joints):
             loads[0, i] = self.joints[i].loads[0]
@@ -303,30 +315,84 @@ class Truss(object):
             )
             loads[2, i] = self.joints[i].loads[2]
 
-        # Pull everything into a dict
-        truss_info = {
-            "elastic_modulus": numpy.array(
-                [member.elastic_modulus for member in self.members]
+        coordinates = numpy.array([joint.coordinates for joint in self.joints]).T
+        connections = numpy.array(
+            [[member.begin_joint.idx, member.end_joint.idx] for member in self.members]
+        ).T
+        reactions = numpy.array(
+            [joint.translation_restricted for joint in self.joints]
+        ).T
+        elastic_modulus = numpy.array(
+            [member.elastic_modulus for member in self.members]
+        )
+        area = numpy.array([member.area for member in self.members])
+
+        tj: NDArray[float] = numpy.zeros([3, numpy.size(connections, axis=1)])
+        w: NDArray[float] = numpy.array(
+            [
+                numpy.size(reactions, axis=0),
+                numpy.size(reactions, axis=1),
+            ]
+        )
+        dof: NDArray[float] = numpy.zeros([3 * w[1], 3 * w[1]])
+        deflections: NDArray[float] = numpy.ones(w)
+        deflections -= reactions
+
+        # This identifies joints that can be loaded
+        ff: NDArray[float] = numpy.where(deflections.T.flat == 1)[0]
+
+        # Build the global stiffness matrix
+        for i in range(numpy.size(connections, axis=1)):
+            ends = connections[:, i]
+            length_vector = coordinates[:, ends[1]] - coordinates[:, ends[0]]
+            length = numpy.linalg.norm(length_vector)
+            direction = length_vector / length
+            d2 = numpy.outer(direction, direction)
+            ea_over_l = elastic_modulus[i] * area[i] / length
+            ss = ea_over_l * numpy.concatenate(
+                (
+                    numpy.concatenate((d2, -d2), axis=1),
+                    numpy.concatenate((-d2, d2), axis=1),
+                ),
+                axis=0,
+            )
+            tj[:, i] = ea_over_l * direction
+            e = list(range((3 * ends[0]), (3 * ends[0] + 3))) + list(
+                range((3 * ends[1]), (3 * ends[1] + 3))
+            )
+            for ii in range(6):
+                for j in range(6):
+                    dof[e[ii], e[j]] += ss[ii, j]
+
+        ssff = numpy.zeros([len(ff), len(ff)])
+        for i in range(len(ff)):
+            for j in range(len(ff)):
+                ssff[i, j] = dof[ff[i], ff[j]]
+
+        flat_loads = loads.T.flat[ff]
+        flat_deflections = numpy.linalg.solve(ssff, flat_loads)
+
+        ff = numpy.where(deflections.T == 1)
+        for i in range(len(ff[0])):
+            deflections[ff[1][i], ff[0][i]] = flat_deflections[i]
+        forces = numpy.sum(
+            numpy.multiply(
+                tj,
+                deflections[:, connections[1, :]] - deflections[:, connections[0, :]],
             ),
-            "coordinates": numpy.array([joint.coordinates for joint in self.joints]).T,
-            "connections": numpy.array(
-                [
-                    [member.begin_joint.idx, member.end_joint.idx]
-                    for member in self.members
-                ]
-            ).T,
-            "reactions": numpy.array(
-                [joint.translation_restricted for joint in self.joints]
-            ).T,
-            "loads": loads,
-            "area": numpy.array([member.area for member in self.members]),
-        }
+            axis=0,
+        )
 
-        forces, deflections, reactions = evaluate.the_forces(truss_info)
+        # Compute the reactions
+        reactions = (
+            numpy.sum(dof * deflections.T.flat[:], axis=1).reshape([w[1], w[0]]).T
+        )
 
+        # Store the results
         for i in range(self.number_of_members):
             self.members[i].force = forces[i]
 
+        # Store the results
         for i in range(self.number_of_joints):
             for j in range(3):
                 if self.joints[i].translation_restricted[j]:
