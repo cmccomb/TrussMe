@@ -76,7 +76,7 @@ def generate_summary(truss, goals) -> str:
         "- The truss has a mass of "
         + format(truss.mass, ".2f")
         + " kg, and a total factor of safety of "
-        + format(truss.fos_total, ".2f")
+        + format(truss.fos, ".2f")
         + ".\n"
     )
     summary += "- The limit state is " + truss.limit_state + ".\n"

@@ -90,7 +90,7 @@ class Truss(object):
         )
 
     @property
-    def fos_total(self) -> float:
+    def fos(self) -> float:
         """float: Smallest FOS of any member in the truss"""
         return min(self.fos_buckling, self.fos_yielding)
 
