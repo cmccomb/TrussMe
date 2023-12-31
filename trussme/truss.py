@@ -6,7 +6,6 @@ import numpy
 import scipy
 
 from trussme import evaluate
-from trussme import report
 from trussme.components import (
     Joint,
     Member,
@@ -336,46 +335,6 @@ class Truss(object):
                 else:
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = float(deflections[j, i])
-
-    def report(self, goals: Goals) -> str:
-        """
-        Generates a report on the truss
-
-        Parameters
-        ----------
-        goals: Goals
-            The goals against which to evaluate the truss
-
-        Returns
-        -------
-        str
-            A full report on the truss
-        """
-        self.calc_fos()
-
-        report_string = report.generate_summary(self, goals) + "\n"
-        report_string += report.generate_instantiation_information(self) + "\n"
-        report_string += report.generate_stress_analysis(self, goals) + "\n"
-
-        return report_string
-
-    def report_to_md(self, file_name: str, goals: Goals) -> None:
-        """
-        Writes a report in Markdown format
-
-        Parameters
-        ----------
-        file_name: str
-            The name of the file
-        goals: Goals
-            The goals against which to evaluate the truss
-
-        Returns
-        -------
-        None
-        """
-        with open(file_name, "w") as f:
-            f.write(self.report(goals))
 
     def to_json(self, file_name: str) -> None:
         """

@@ -6,6 +6,54 @@ import scipy
 
 import trussme.visualize
 
+from .truss import Truss, Goals
+
+
+def report_to_str(truss: Truss, goals: Goals) -> str:
+    """
+    Generates a report on the truss
+
+    Parameters
+    ----------
+    truss: Truss
+        The truss to be reported on
+    goals: Goals
+        The goals against which to evaluate the truss
+
+    Returns
+    -------
+    str
+        A full report on the truss
+    """
+    truss.calc_fos()
+
+    report_string = generate_summary(truss, goals) + "\n"
+    report_string += generate_instantiation_information(truss) + "\n"
+    report_string += generate_stress_analysis(truss, goals) + "\n"
+
+    return report_string
+
+
+def report_to_md(file_name: str, truss: Truss, goals: Goals) -> None:
+    """
+    Writes a report in Markdown format
+
+    Parameters
+    ----------
+    file_name: str
+        The name of the file
+    truss: Truss
+        The truss to be reported on
+    goals: Goals
+        The goals against which to evaluate the truss
+
+    Returns
+    -------
+    None
+    """
+    with open(file_name, "w") as f:
+        f.write(report_to_str(truss, goals))
+
 
 def generate_summary(truss, goals) -> str:
     """

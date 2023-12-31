@@ -64,8 +64,12 @@ class TestSequenceFunctions(unittest.TestCase):
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
 
         # Save reports
-        t1.report_to_md(os.path.join(os.path.dirname(__file__), "report_1.md"), goals)
-        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"), goals)
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "report_1.md"), t1, goals
+        )
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "report_2.md"), t2, goals
+        )
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
@@ -90,12 +94,16 @@ class TestSequenceFunctions(unittest.TestCase):
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
 
         # Save
-        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_2.md"), goals)
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "report_2.md"), t2, goals
+        )
         t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
 
         # Rebuild
         t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
-        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_3.md"), goals)
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "report_3.md"), t3, goals
+        )
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(
@@ -116,13 +124,17 @@ class TestSequenceFunctions(unittest.TestCase):
         t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
 
         # Save
-        t2.report_to_md(os.path.join(os.path.dirname(__file__), "report_4.md"), goals)
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "report_4.md"), t2, goals
+        )
         t2.to_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
 
         # Rebuild
         t3 = trussme.read_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
 
-        t3.report_to_md(os.path.join(os.path.dirname(__file__), "report_5.md"), goals)
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "report_5.md"), t3, goals
+        )
 
         # Test for sameness
         file_are_the_same = filecmp.cmp(

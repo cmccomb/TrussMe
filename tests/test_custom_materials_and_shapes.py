@@ -33,7 +33,7 @@ class TestCustomStuff(unittest.TestCase):
             maximum_deflection=6e-3,
         )
 
-        print(truss.report(goals))
+        print(trussme.report_to_str(truss, goals))
 
     def test_custom_shape(self):
         # Build truss from scratch
@@ -70,4 +70,4 @@ class TestCustomStuff(unittest.TestCase):
             maximum_deflection=6e-3,
         )
 
-        print(truss.report(goals))
+        print(trussme.report_to_str(truss, goals))
