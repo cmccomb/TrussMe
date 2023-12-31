@@ -322,7 +322,7 @@ class Truss(object):
             "area": numpy.array([member.area for member in self.members]),
         }
 
-        forces, deflections, reactions, condition = evaluate.the_forces(truss_info)
+        forces, deflections, reactions = evaluate.the_forces(truss_info)
 
         for i in range(self.number_of_members):
             self.members[i].force = forces[i]

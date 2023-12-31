@@ -18,7 +18,7 @@ TrussInfo = TypedDict(
 
 def the_forces(
     truss_info: TrussInfo,
-) -> tuple[NDArray[float], NDArray[float], NDArray[float], float]:
+) -> tuple[NDArray[float], NDArray[float], NDArray[float]]:
     tj: NDArray[float] = numpy.zeros([3, numpy.size(truss_info["connections"], axis=1)])
     w: NDArray[float] = numpy.array(
         [
@@ -79,10 +79,7 @@ def the_forces(
         axis=0,
     )
 
-    # Check the condition number, and warn the user if it is out of range
-    cond = numpy.linalg.cond(ssff)
-
     # Compute the reactions
     reactions = numpy.sum(dof * deflections.T.flat[:], axis=1).reshape([w[1], w[0]]).T
 
-    return forces, deflections, reactions, cond
+    return forces, deflections, reactions
