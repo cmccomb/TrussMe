@@ -421,6 +421,22 @@ class Member(object):
         return vector_length / numpy.linalg.norm(vector_length)
 
     @property
+    def stiffness(self) -> float:
+        """float: The axial stiffness of the member"""
+        return self.elastic_modulus * self.area / self.length
+
+    @property
+    def stiffness_vector(self) -> NDArray[float]:
+        """NDArray[float]: The vector stiffness vector of the member"""
+        return self.stiffness * self.direction
+
+    @property
+    def stiffness_matrix(self) -> NDArray[float]:
+        """NDArray[float]: The local stiffness matrix of the member"""
+        d2 = numpy.outer(self.direction, self.direction)
+        return self.stiffness * numpy.block([[d2, -d2], [-d2, d2]])
+
+    @property
     def mass(self) -> float:
         """float: The total mass of the member"""
         return self.length * self.linear_mass

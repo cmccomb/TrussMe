@@ -307,22 +307,10 @@ class Truss(object):
         return loads
 
     @property
-    def __coordinate_matrix(self) -> NDArray[float]:
-        return numpy.array([joint.coordinates for joint in self.joints]).T
-
-    @property
     def __connection_matrix(self) -> NDArray[float]:
         return numpy.array(
             [[member.begin_joint.idx, member.end_joint.idx] for member in self.members]
         ).T
-
-    @property
-    def __areas(self) -> NDArray[float]:
-        return numpy.array([member.area for member in self.members])
-
-    @property
-    def __elastic_moduli(self) -> NDArray[float]:
-        return numpy.array([member.elastic_modulus for member in self.members])
 
     def analyze(self):
         """
@@ -338,13 +326,10 @@ class Truss(object):
 
         """
         loads = self.__load_matrix
-        coordinates = self.__coordinate_matrix
         connections = self.__connection_matrix
         reactions = numpy.array(
             [joint.translation_restricted for joint in self.joints]
         ).T
-        elastic_modulus = self.__elastic_moduli
-        area = self.__areas
 
         tj: NDArray[float] = numpy.zeros([3, self.number_of_members])
         dof: NDArray[float] = numpy.zeros(
@@ -357,17 +342,9 @@ class Truss(object):
         ff: NDArray[float] = numpy.where(deflections.T.flat == 1)[0]
 
         for idx, member in enumerate(self.members):
-            d2 = numpy.outer(member.direction, member.direction)
-            ss = (
-                member.elastic_modulus
-                * member.area
-                / member.length
-                * numpy.block([[d2, -d2], [-d2, d2]])
-            )
+            ss = member.stiffness_matrix
+            tj[:, idx] = member.stiffness_vector
 
-            tj[:, idx] = (
-                member.elastic_modulus * member.area / member.length * member.direction
-            )
             e = list(
                 range((3 * member.begin_joint.idx), (3 * member.begin_joint.idx + 3))
             ) + list(range((3 * member.end_joint.idx), (3 * member.end_joint.idx + 3)))
@@ -386,13 +363,6 @@ class Truss(object):
         ff = numpy.where(deflections.T == 1)
         for i in range(len(ff[0])):
             deflections[ff[1][i], ff[0][i]] = flat_deflections[i]
-        forces = numpy.sum(
-            numpy.multiply(
-                tj,
-                deflections[:, connections[1, :]] - deflections[:, connections[0, :]],
-            ),
-            axis=0,
-        )
 
         # Compute the reactions
         reactions = (
@@ -400,10 +370,6 @@ class Truss(object):
             .reshape([self.number_of_joints, 3])
             .T
         )
-
-        # Store the results
-        for i in range(self.number_of_members):
-            self.members[i].force = forces[i]
 
         # Store the results
         for i in range(self.number_of_joints):
@@ -414,6 +380,17 @@ class Truss(object):
                 else:
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = float(deflections[j, i])
+
+        forces = numpy.sum(
+            numpy.multiply(
+                tj,
+                deflections[:, connections[1, :]] - deflections[:, connections[0, :]],
+            ),
+            axis=0,
+        )
+        # Store the results
+        for i in range(self.number_of_members):
+            self.members[i].force = forces[i]
 
     def to_json(self, file_name: str) -> None:
         """
