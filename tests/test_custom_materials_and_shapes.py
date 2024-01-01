@@ -29,7 +29,6 @@ class TestCustomStuff(unittest.TestCase):
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
             minimum_fos_yielding=1.5,
-            maximum_mass=5.0,
             maximum_deflection=6e-3,
         )
 
@@ -54,7 +53,7 @@ class TestCustomStuff(unittest.TestCase):
                 return 200_000_000_000
 
             def area(self) -> float:
-                return 200_000_000_000
+                return 100_000
 
             def name(self) -> str:
                 return "magical rod"
@@ -66,7 +65,6 @@ class TestCustomStuff(unittest.TestCase):
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
             minimum_fos_yielding=1.5,
-            maximum_mass=5.0,
             maximum_deflection=6e-3,
         )
 

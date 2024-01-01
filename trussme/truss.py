@@ -291,6 +291,39 @@ class Truss(object):
 
         self.joints[joint_index].loads = load
 
+    @property
+    def __load_matrix(self) -> NDArray[float]:
+        loads = numpy.zeros([3, self.number_of_joints])
+        for i in range(self.number_of_joints):
+            loads[0, i] = self.joints[i].loads[0]
+            loads[1, i] = self.joints[i].loads[1] - sum(
+                [
+                    member.mass / 2.0 * scipy.constants.g
+                    for member in self.joints[i].members
+                ]
+            )
+            loads[2, i] = self.joints[i].loads[2]
+
+        return loads
+
+    @property
+    def __coordinate_matrix(self) -> NDArray[float]:
+        return numpy.array([joint.coordinates for joint in self.joints]).T
+
+    @property
+    def __connection_matrix(self) -> NDArray[float]:
+        return numpy.array(
+            [[member.begin_joint.idx, member.end_joint.idx] for member in self.members]
+        ).T
+
+    @property
+    def __areas(self) -> NDArray[float]:
+        return numpy.array([member.area for member in self.members])
+
+    @property
+    def __elastic_moduli(self) -> NDArray[float]:
+        return numpy.array([member.elastic_modulus for member in self.members])
+
     def analyze(self):
         """
         Analyze the truss
@@ -304,62 +337,40 @@ class Truss(object):
         None
 
         """
-        loads = numpy.zeros([3, self.number_of_joints])
-        for i in range(self.number_of_joints):
-            loads[0, i] = self.joints[i].loads[0]
-            loads[1, i] = self.joints[i].loads[1] - sum(
-                [
-                    member.mass / 2.0 * scipy.constants.g
-                    for member in self.joints[i].members
-                ]
-            )
-            loads[2, i] = self.joints[i].loads[2]
-
-        coordinates = numpy.array([joint.coordinates for joint in self.joints]).T
-        connections = numpy.array(
-            [[member.begin_joint.idx, member.end_joint.idx] for member in self.members]
-        ).T
+        loads = self.__load_matrix
+        coordinates = self.__coordinate_matrix
+        connections = self.__connection_matrix
         reactions = numpy.array(
             [joint.translation_restricted for joint in self.joints]
         ).T
-        elastic_modulus = numpy.array(
-            [member.elastic_modulus for member in self.members]
-        )
-        area = numpy.array([member.area for member in self.members])
+        elastic_modulus = self.__elastic_moduli
+        area = self.__areas
 
-        tj: NDArray[float] = numpy.zeros([3, numpy.size(connections, axis=1)])
-        w: NDArray[float] = numpy.array(
-            [
-                numpy.size(reactions, axis=0),
-                numpy.size(reactions, axis=1),
-            ]
+        tj: NDArray[float] = numpy.zeros([3, self.number_of_members])
+        dof: NDArray[float] = numpy.zeros(
+            [3 * self.number_of_joints, 3 * self.number_of_joints]
         )
-        dof: NDArray[float] = numpy.zeros([3 * w[1], 3 * w[1]])
-        deflections: NDArray[float] = numpy.ones(w)
+        deflections: NDArray[float] = numpy.ones([3, self.number_of_joints])
         deflections -= reactions
 
         # This identifies joints that can be loaded
         ff: NDArray[float] = numpy.where(deflections.T.flat == 1)[0]
 
-        # Build the global stiffness matrix
-        for i in range(numpy.size(connections, axis=1)):
-            ends = connections[:, i]
-            length_vector = coordinates[:, ends[1]] - coordinates[:, ends[0]]
-            length = numpy.linalg.norm(length_vector)
-            direction = length_vector / length
-            d2 = numpy.outer(direction, direction)
-            ea_over_l = elastic_modulus[i] * area[i] / length
-            ss = ea_over_l * numpy.concatenate(
-                (
-                    numpy.concatenate((d2, -d2), axis=1),
-                    numpy.concatenate((-d2, d2), axis=1),
-                ),
-                axis=0,
+        for idx, member in enumerate(self.members):
+            d2 = numpy.outer(member.direction, member.direction)
+            ss = (
+                member.elastic_modulus
+                * member.area
+                / member.length
+                * numpy.block([[d2, -d2], [-d2, d2]])
             )
-            tj[:, i] = ea_over_l * direction
-            e = list(range((3 * ends[0]), (3 * ends[0] + 3))) + list(
-                range((3 * ends[1]), (3 * ends[1] + 3))
+
+            tj[:, idx] = (
+                member.elastic_modulus * member.area / member.length * member.direction
             )
+            e = list(
+                range((3 * member.begin_joint.idx), (3 * member.begin_joint.idx + 3))
+            ) + list(range((3 * member.end_joint.idx), (3 * member.end_joint.idx + 3)))
             for ii in range(6):
                 for j in range(6):
                     dof[e[ii], e[j]] += ss[ii, j]
@@ -385,7 +396,9 @@ class Truss(object):
 
         # Compute the reactions
         reactions = (
-            numpy.sum(dof * deflections.T.flat[:], axis=1).reshape([w[1], w[0]]).T
+            numpy.sum(dof * deflections.T.flat[:], axis=1)
+            .reshape([self.number_of_joints, 3])
+            .T
         )
 
         # Store the results
@@ -437,10 +450,6 @@ class Truss(object):
                         "shape": {
                             "name": obj.shape.name(),
                             "parameters": obj.shape._params,
-                            # "w": obj.shape.w,
-                            # "h": obj.shape.h,
-                            # "r": obj.shape.r,
-                            # "t": obj.shape.t,
                         },
                     }
                 # Let the base class default method raise the TypeError

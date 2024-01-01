@@ -2,6 +2,7 @@ import abc
 from typing import TypedDict, Literal
 
 import numpy
+from numpy.typing import NDArray
 
 Material = TypedDict(
     "Material",
@@ -410,6 +411,14 @@ class Member(object):
             numpy.array(self.begin_joint.coordinates)
             - numpy.array(self.end_joint.coordinates)
         )
+
+    @property
+    def direction(self) -> NDArray[float]:
+        """NDArray[float]: The direction of the member as a unit vector"""
+        vector_length = numpy.array(self.end_joint.coordinates) - numpy.array(
+            self.begin_joint.coordinates
+        )
+        return vector_length / numpy.linalg.norm(vector_length)
 
     @property
     def mass(self) -> float:
