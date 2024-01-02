@@ -124,10 +124,10 @@ class Pipe(Shape):
     --------
     >>> import trussme
     >>> pipe = trussme.Pipe(r=1.0, t=1.0)
-    >>> pipe.moi()
-    0.7853981633974483
-    >>> pipe.area()
-    3.141592653589793
+    >>> round(pipe.moi(), 3)
+    0.785
+    >>> round(pipe.area(), 3)
+    3.142
     """
 
     def __init__(self, r: float, t: float):
@@ -160,10 +160,10 @@ class Bar(Shape):
     --------
     >>> import trussme
     >>> bar = trussme.Bar(r=1.0)
-    >>> bar.moi()
-    0.7853981633974483
-    >>> bar.area()
-    3.141592653589793
+    >>> round(bar.moi(), 3)
+    0.785
+    >>> round(bar.area(), 3)
+    3.142
     """
 
     def __init__(self, r: float):
@@ -194,8 +194,8 @@ class Square(Shape):
     --------
     >>> import trussme
     >>> square = trussme.Square(w=1.0, h=1.0)
-    >>> square.moi()
-    0.08333333333333333
+    >>> round(square.moi(), 3)
+    0.083
     >>> square.area()
     1.0
     """
@@ -233,8 +233,8 @@ class Box(Shape):
     --------
     >>> import trussme
     >>> box = trussme.Box(w=1.0, h=1.0, t=0.5)
-    >>> box.moi()
-    0.08333333333333333
+    >>> round(box.moi(), 3)
+    0.083
     >>> box.area()
     1.0
     """

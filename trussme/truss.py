@@ -391,6 +391,7 @@ class Truss(object):
                     self.joints[i].reactions[j] = 0.0
                     self.joints[i].deflections[j] = float(deflections[j, i])
 
+        # Calculate member forces and store the results
         forces = numpy.sum(
             numpy.multiply(
                 tj,

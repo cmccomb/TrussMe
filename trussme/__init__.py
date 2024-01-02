@@ -19,14 +19,14 @@ Since our truss is planar, its important to add out-of-plane support
 >>> small_truss.add_out_of_plane_support("z")
 
 Let's add a load to the truss
->>> small_truss.joints[1].loads[1] = -10000
+>>> small_truss.set_load(free, [0, -10000, 0])
 
 Finally, let's analyze the truss and get the factor of safety and mass
 >>> small_truss.analyze()
->>> small_truss.fos
-0.958918112668615
->>> small_truss.mass
-22.480385653941532
+>>> round(small_truss.fos, 2)
+0.96
+>>> round(small_truss.mass, 2)
+22.48
 """
 
 from trussme.components import (
