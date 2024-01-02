@@ -9,7 +9,7 @@ import trussme.visualize
 from .truss import Truss, Goals
 
 
-def report_to_str(truss: Truss, goals: Goals) -> str:
+def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
     """
     Generates a report on the truss
 
@@ -28,8 +28,8 @@ def report_to_str(truss: Truss, goals: Goals) -> str:
     truss.analyze()
 
     report_string = generate_summary(truss, goals) + "\n"
-    report_string += generate_instantiation_information(truss) + "\n"
-    report_string += generate_stress_analysis(truss, goals) + "\n"
+    report_string += generate_instantiation_information(truss, with_figures) + "\n"
+    report_string += generate_stress_analysis(truss, goals, with_figures) + "\n"
 
     return report_string
 
@@ -210,7 +210,7 @@ def generate_summary(truss, goals) -> str:
     return summary
 
 
-def generate_instantiation_information(truss) -> str:
+def generate_instantiation_information(truss, with_figures: bool = True) -> str:
     """
     Generate a summary of the instantiation information.
 
@@ -218,6 +218,8 @@ def generate_instantiation_information(truss) -> str:
     ----------
     truss: Truss
         The truss to be reported on
+    with_figures: bool, default=True
+        Whether or not to include figures in the report
 
     Returns
     -------
@@ -226,7 +228,8 @@ def generate_instantiation_information(truss) -> str:
     """
     instantiation = "# INSTANTIATION INFORMATION\n"
 
-    instantiation += trussme.visualize.plot_truss(truss) + "\n"
+    if with_figures:
+        instantiation += trussme.visualize.plot_truss(truss) + "\n"
 
     # Print joint information
     instantiation += "## JOINTS\n"
@@ -312,7 +315,7 @@ def generate_instantiation_information(truss) -> str:
     return instantiation
 
 
-def generate_stress_analysis(truss, goals) -> str:
+def generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
     """
     Generate a summary of the stress analysis information.
 
@@ -322,6 +325,8 @@ def generate_stress_analysis(truss, goals) -> str:
         The truss to be reported on
     goals: Goals
         The goals against which to evaluate the truss
+    with_figures: bool, default=True
+        Whether or not to include figures in the report
 
     Returns
     -------
@@ -418,7 +423,8 @@ def generate_stress_analysis(truss, goals) -> str:
     # Print information about members
     analysis += "\n## DEFLECTIONS\n"
 
-    analysis += trussme.visualize.plot_truss(truss, deflected_shape=True) + "\n"
+    if with_figures:
+        analysis += trussme.visualize.plot_truss(truss, deflected_shape=True) + "\n"
 
     data = []
     rows = []
