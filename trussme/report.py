@@ -6,7 +6,7 @@ import scipy
 
 import trussme.visualize
 
-from .truss import Truss, Goals
+from trussme.truss import Truss, Goals
 
 
 def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
@@ -20,7 +20,7 @@ def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
     goals: Goals
         The goals against which to evaluate the truss
     with_figures: bool, default=True
-        Whether or not to include figures in the report
+        Whether to include figures in the report
 
     Returns
     -------

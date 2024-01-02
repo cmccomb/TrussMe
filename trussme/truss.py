@@ -326,10 +326,6 @@ class Truss(object):
         """
         Analyze the truss
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         None
@@ -623,7 +619,7 @@ def read_json(file_name: str) -> Truss:
         json_truss = json.load(file)
 
     truss = Truss()
-    material_library: list[Material] = json_truss["materials"]
+    current_material_library: list[Material] = json_truss["materials"]
 
     for joint in json_truss["joints"]:
         truss.add_free_joint(joint["coordinates"])
@@ -632,7 +628,9 @@ def read_json(file_name: str) -> Truss:
 
     for member in json_truss["members"]:
         material: Material = next(
-            item for item in material_library if item["name"] == member["material"]
+            item
+            for item in current_material_library
+            if item["name"] == member["material"]
         )
         shape_params = member["shape"]["parameters"]
         if member["shape"]["name"] == "pipe":
@@ -643,6 +641,12 @@ def read_json(file_name: str) -> Truss:
             shape = Square(**dict(shape_params))
         elif member["shape"]["name"] == "box":
             shape = Box(**dict(shape_params))
+        else:
+            raise ValueError(
+                "Shape type '"
+                + member["shape"]["name"]
+                + "' is a custom type and not supported."
+            )
         truss.add_member(
             member["begin_joint"], member["end_joint"], material=material, shape=shape
         )
