@@ -33,6 +33,18 @@ class Goals:
         Maximum mass for the truss, defaults to inf
     maximum_deflection: float, default=inf
         Maximum deflection for the truss, defaults to inf
+
+    Examples
+    --------
+    This is a goal container with the default values
+    >>> import trussme
+    >>> import numpy
+    >>> goals = trussme.Goals(
+    ...    minimum_fos_buckling=1.0,
+    ...    minimum_fos_yielding=1.0,
+    ...    maximum_mass=numpy.inf,
+    ...    maximum_deflection=numpy.inf,
+    ... )
     """
 
     minimum_fos_buckling: float = 1.0
@@ -113,7 +125,7 @@ class Truss(object):
         else:
             return "yielding"
 
-    def add_pinned_joint(self, coordinates: list[float]):
+    def add_pinned_joint(self, coordinates: list[float]) -> int:
         """Add a pinned joint to the truss at the given coordinates
 
         Parameters
@@ -136,7 +148,7 @@ class Truss(object):
 
     def add_roller_joint(
         self, coordinates: list[float], constrained_axis: Literal["x", "y", "z"] = "y"
-    ):
+    ) -> int:
         """
         Add a roller joint to the truss at the given coordinates
 
@@ -161,7 +173,7 @@ class Truss(object):
 
     def add_slotted_joint(
         self, coordinates: list[float], free_axis: Literal["x", "y", "z"] = "y"
-    ):
+    ) -> int:
         """
         Add a slotted joint to the truss at the given coordinates
 
@@ -184,7 +196,7 @@ class Truss(object):
 
         return self.joints[-1].idx
 
-    def add_free_joint(self, coordinates: list[float]):
+    def add_free_joint(self, coordinates: list[float]) -> int:
         """
         Add a free joint to the truss at the given coordinates
 
@@ -256,8 +268,6 @@ class Truss(object):
         # Update joints
         self.joints[begin_joint_index].members.append(self.members[-1])
         self.joints[end_joint_index].members.append(self.members[-1])
-
-        return self.members[-1].idx
 
     def move_joint(self, joint_index: int, coordinates: list[float]):
         """

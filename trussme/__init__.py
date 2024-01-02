@@ -5,35 +5,39 @@ This library includes some utilities and tools for analyzing and designing truss
 
 Examples
 --------
-```
-import trussme
+First, let's construct a small truss
+>>> import trussme
+>>> small_truss = trussme.Truss()
+>>> pin = small_truss.add_pinned_joint([0.0, 0.0, 0.0])
+>>> free = small_truss.add_free_joint([2.5, 2.5, 0.0])
+>>> roller = small_truss.add_roller_joint([5.0, 0.0, 0.0])
+>>> small_truss.add_member(pin, free)
+>>> small_truss.add_member(pin, roller)
+>>> small_truss.add_member(roller, free)
 
-# Build a small, simple truss
-truss = trussme.Truss()
-pin = truss.add_pinned_joint([0.0, 0.0, 0.0])
-free = truss.add_free_joint([2.5, 2.5, 0.0])
-roller = truss.add_roller_joint([5.0, 0.0, 0.0])
-truss.add_member(pin, free)
-truss.add_member(pin, roller)
-truss.add_member(roller, free)
+Since our truss is planar, its important to add out-of-plane support
+>>> small_truss.add_out_of_plane_support("z")
 
-# Add out of plane support and a load
-truss.add_out_of_plane_support("z")
-truss.joints[1].loads[1] = -10000
+Let's add a load to the truss
+>>> small_truss.joints[1].loads[1] = -10000
 
-# Define goals
-goals = trussme.Goals(
-    minimum_fos_buckling=1.5,
-    minimum_fos_yielding=1.5,
-    maximum_mass=5.0,
-    maximum_deflection=6e-3,
-)
-
-# Print results
-trussme.print_report(truss, goals)
-```
+Finally, let's analyze the truss and get the factor of safety and mass
+>>> small_truss.analyze()
+>>> small_truss.fos
+0.958918112668615
+>>> small_truss.mass
+22.480385653941532
 """
 
-from .components import material_library, Shape, Material, Pipe, Box, Pipe, Bar, Square
-from .truss import Truss, read_trs, read_json, Goals
-from .report import report_to_str, report_to_md
+from trussme.components import (
+    material_library,
+    Shape,
+    Material,
+    Pipe,
+    Box,
+    Pipe,
+    Bar,
+    Square,
+)
+from trussme.truss import Truss, read_trs, read_json, Goals
+from trussme.report import report_to_str, report_to_md, print_report

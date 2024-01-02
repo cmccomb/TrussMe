@@ -1,11 +1,18 @@
+import doctest
 import filecmp
 import os
 import unittest
 
 import trussme
-import trussme.visualize
 
 TEST_TRUSS_FILENAME = os.path.join(os.path.dirname(__file__), "example.trs")
+
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(trussme))
+    tests.addTests(doctest.DocTestSuite(trussme.truss))
+    tests.addTests(doctest.DocTestSuite(trussme.components))
+    return tests
 
 
 class TestSequenceFunctions(unittest.TestCase):

@@ -41,7 +41,31 @@ material_library: list[Material] = [
 
 class Shape(abc.ABC):
     """
-    Abstract base class for shapes, only ever used for typehints.
+    Abstract base class for shapes, useful for typehints and creating new shapes
+
+    Examples
+    --------
+    >>> import trussme
+    >>> class MagicalRod(trussme.Shape):
+    ...     def __init__(self):
+    ...         self._params = {}
+    ...
+    ...     def moi(self) -> float:
+    ...         return 200_000_000_000
+    ...
+    ...     def area(self) -> float:
+    ...         return 100_000
+    ...
+    ...     def name(self) -> str:
+    ...         return "magical rod"
+    ...
+    >>> magical_rod = MagicalRod()
+    >>> magical_rod.moi()
+    200000000000
+    >>> magical_rod.area()
+    100000
+    >>> magical_rod.name()
+    'magical rod'
     """
 
     @abc.abstractmethod
@@ -95,6 +119,15 @@ class Pipe(Shape):
         The outer radius of the pipe
     t: float
         The thickness of the pipe
+
+    Examples
+    --------
+    >>> import trussme
+    >>> pipe = trussme.Pipe(r=1.0, t=1.0)
+    >>> pipe.moi()
+    0.7853981633974483
+    >>> pipe.area()
+    3.141592653589793
     """
 
     def __init__(self, r: float, t: float):
@@ -102,7 +135,7 @@ class Pipe(Shape):
 
     def moi(self) -> float:
         return (numpy.pi / 4.0) * (
-            self._params["r"] ** 4 - (self._params["r"] - 2 * self._params["t"]) ** 4
+            self._params["r"] ** 4 - (self._params["r"] - self._params["t"]) ** 4
         )
 
     def area(self) -> float:
@@ -122,6 +155,15 @@ class Bar(Shape):
     ----------
     r: float
         The radius of the bar
+
+    Examples
+    --------
+    >>> import trussme
+    >>> bar = trussme.Bar(r=1.0)
+    >>> bar.moi()
+    0.7853981633974483
+    >>> bar.area()
+    3.141592653589793
     """
 
     def __init__(self, r: float):
@@ -147,6 +189,15 @@ class Square(Shape):
         The width of the bar
     h: float
         The height of the bar
+
+    Examples
+    --------
+    >>> import trussme
+    >>> square = trussme.Square(w=1.0, h=1.0)
+    >>> square.moi()
+    0.08333333333333333
+    >>> square.area()
+    1.0
     """
 
     def __init__(self, w: float = 0.0, h: float = 0.0):
@@ -177,6 +228,15 @@ class Box(Shape):
         The height of the box
     t: float
         The thickness of the box
+
+    Examples
+    --------
+    >>> import trussme
+    >>> box = trussme.Box(w=1.0, h=1.0, t=0.5)
+    >>> box.moi()
+    0.08333333333333333
+    >>> box.area()
+    1.0
     """
 
     def __init__(self, w: float, h: float, t: float):
