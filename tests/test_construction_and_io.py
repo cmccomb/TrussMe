@@ -26,69 +26,55 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
         # Build truss from scratch
-        t1 = trussme.Truss()
-        t1.add_pinned_joint([0.0, 0.0, 0.0])
-        t1.add_free_joint([1.0, 0.0, 0.0])
-        t1.add_free_joint([2.0, 0.0, 0.0])
-        t1.add_free_joint([3.0, 0.0, 0.0])
-        t1.add_free_joint([4.0, 0.0, 0.0])
-        t1.add_pinned_joint([5.0, 0.0, 0.0])
+        truss_from_commands = trussme.Truss()
+        truss_from_commands.add_pinned_joint([0.0, 0.0, 0.0])
+        truss_from_commands.add_free_joint([1.0, 0.0, 0.0])
+        truss_from_commands.add_free_joint([2.0, 0.0, 0.0])
+        truss_from_commands.add_free_joint([3.0, 0.0, 0.0])
+        truss_from_commands.add_free_joint([4.0, 0.0, 0.0])
+        truss_from_commands.add_pinned_joint([5.0, 0.0, 0.0])
 
-        t1.add_free_joint([0.5, 1.0, 0.0])
-        t1.add_free_joint([1.5, 1.0, 0.0])
-        t1.add_free_joint([2.5, 1.0, 0.0])
-        t1.add_free_joint([3.5, 1.0, 0.0])
-        t1.add_free_joint([4.5, 1.0, 0.0])
+        truss_from_commands.add_free_joint([0.5, 1.0, 0.0])
+        truss_from_commands.add_free_joint([1.5, 1.0, 0.0])
+        truss_from_commands.add_free_joint([2.5, 1.0, 0.0])
+        truss_from_commands.add_free_joint([3.5, 1.0, 0.0])
+        truss_from_commands.add_free_joint([4.5, 1.0, 0.0])
 
-        t1.add_out_of_plane_support("z")
+        truss_from_commands.add_out_of_plane_support("z")
 
-        t1.joints[7].loads[1] = -20000
-        t1.joints[8].loads[1] = -20000
-        t1.joints[9].loads[1] = -20000
+        truss_from_commands.joints[7].loads[1] = -20000
+        truss_from_commands.joints[8].loads[1] = -20000
+        truss_from_commands.joints[9].loads[1] = -20000
 
-        t1.add_member(0, 1)
-        t1.add_member(1, 2)
-        t1.add_member(2, 3)
-        t1.add_member(3, 4)
-        t1.add_member(4, 5)
+        truss_from_commands.add_member(0, 1)
+        truss_from_commands.add_member(1, 2)
+        truss_from_commands.add_member(2, 3)
+        truss_from_commands.add_member(3, 4)
+        truss_from_commands.add_member(4, 5)
 
-        t1.add_member(6, 7)
-        t1.add_member(7, 8)
-        t1.add_member(8, 9)
-        t1.add_member(9, 10)
+        truss_from_commands.add_member(6, 7)
+        truss_from_commands.add_member(7, 8)
+        truss_from_commands.add_member(8, 9)
+        truss_from_commands.add_member(9, 10)
 
-        t1.add_member(0, 6)
-        t1.add_member(6, 1)
-        t1.add_member(1, 7)
-        t1.add_member(7, 2)
-        t1.add_member(2, 8)
-        t1.add_member(8, 3)
-        t1.add_member(3, 9)
-        t1.add_member(9, 4)
-        t1.add_member(4, 10)
-        t1.add_member(10, 5)
+        truss_from_commands.add_member(0, 6)
+        truss_from_commands.add_member(6, 1)
+        truss_from_commands.add_member(1, 7)
+        truss_from_commands.add_member(7, 2)
+        truss_from_commands.add_member(2, 8)
+        truss_from_commands.add_member(8, 3)
+        truss_from_commands.add_member(3, 9)
+        truss_from_commands.add_member(9, 4)
+        truss_from_commands.add_member(4, 10)
+        truss_from_commands.add_member(10, 5)
 
         # Build truss from file
-        t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
+        truss_from_file = trussme.read_trs(TEST_TRUSS_FILENAME)
 
-        # Save reports
-        trussme.report_to_md(
-            os.path.join(os.path.dirname(__file__), "report_1.md"), t1, goals
+        self.assertEqual(
+            trussme.report_to_str(truss_from_file, goals),
+            trussme.report_to_str(truss_from_commands, goals),
         )
-        trussme.report_to_md(
-            os.path.join(os.path.dirname(__file__), "report_2.md"), t2, goals
-        )
-
-        # Test for sameness
-        file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), "report_1.md"),
-            os.path.join(os.path.dirname(__file__), "report_2.md"),
-        )
-        self.assertTrue(file_are_the_same)
-
-        # Clean up
-        os.remove(os.path.join(os.path.dirname(__file__), "report_1.md"))
-        os.remove(os.path.join(os.path.dirname(__file__), "report_2.md"))
 
     def test_save_to_trs_and_rebuild(self):
         goals = trussme.Goals(
@@ -99,26 +85,23 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
         # Build truss from file
-        t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
+        truss_from_file = trussme.read_trs(TEST_TRUSS_FILENAME)
 
-        # Save
-        trussme.report_to_md(
-            os.path.join(os.path.dirname(__file__), "report_2.md"), t2, goals
-        )
-        t2.to_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
+        # Save the truss
+        truss_from_file.to_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
 
         # Rebuild
-        t3 = trussme.read_trs(os.path.join(os.path.dirname(__file__), "asdf.trs"))
-        trussme.report_to_md(
-            os.path.join(os.path.dirname(__file__), "report_3.md"), t3, goals
+        truss_rebuilt_from_file = trussme.read_trs(
+            os.path.join(os.path.dirname(__file__), "asdf.trs")
         )
 
-        # Test for sameness
-        file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), "report_3.md"),
-            os.path.join(os.path.dirname(__file__), "report_2.md"),
+        self.assertEqual(
+            trussme.report_to_str(truss_from_file, goals),
+            trussme.report_to_str(truss_rebuilt_from_file, goals),
         )
-        self.assertTrue(file_are_the_same)
+
+        # Cleanup
+        os.remove(os.path.join(os.path.dirname(__file__), "asdf.trs"))
 
     def test_save_to_json_and_rebuild(self):
         goals = trussme.Goals(
@@ -129,24 +112,20 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
         # Build truss from file
-        t2 = trussme.read_trs(TEST_TRUSS_FILENAME)
+        truss_from_file = trussme.read_trs(TEST_TRUSS_FILENAME)
 
-        # Save
-        trussme.report_to_md(
-            os.path.join(os.path.dirname(__file__), "report_4.md"), t2, goals
-        )
-        t2.to_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
+        # Save the truss
+        truss_from_file.to_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
 
         # Rebuild
-        t3 = trussme.read_json(os.path.join(os.path.dirname(__file__), "asdf.json"))
-
-        trussme.report_to_md(
-            os.path.join(os.path.dirname(__file__), "report_5.md"), t3, goals
+        truss_rebuilt_from_file = trussme.read_json(
+            os.path.join(os.path.dirname(__file__), "asdf.json")
         )
 
-        # Test for sameness
-        file_are_the_same = filecmp.cmp(
-            os.path.join(os.path.dirname(__file__), "report_5.md"),
-            os.path.join(os.path.dirname(__file__), "report_4.md"),
+        self.assertEqual(
+            trussme.report_to_str(truss_from_file, goals),
+            trussme.report_to_str(truss_rebuilt_from_file, goals),
         )
-        self.assertTrue(file_are_the_same)
+
+        # Cleanup
+        os.remove(os.path.join(os.path.dirname(__file__), "asdf.json"))

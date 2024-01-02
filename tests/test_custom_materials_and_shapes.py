@@ -26,13 +26,9 @@ class TestCustomStuff(unittest.TestCase):
         truss.add_member(1, 2, material=unobtanium)
         truss.add_member(2, 0, material=unobtanium)
 
-        goals = trussme.Goals(
-            minimum_fos_buckling=1.5,
-            minimum_fos_yielding=1.5,
-            maximum_deflection=6e-3,
-        )
+        truss.analyze()
 
-        print(trussme.report_to_str(truss, goals))
+        self.assertIsNotNone(truss.fos)
 
     def test_custom_shape(self):
         # Build truss from scratch
@@ -62,10 +58,6 @@ class TestCustomStuff(unittest.TestCase):
         truss.add_member(1, 2, shape=MagicalRod())
         truss.add_member(2, 0, shape=MagicalRod())
 
-        goals = trussme.Goals(
-            minimum_fos_buckling=1.5,
-            minimum_fos_yielding=1.5,
-            maximum_deflection=6e-3,
-        )
+        truss.analyze()
 
-        print(trussme.report_to_str(truss, goals))
+        self.assertIsNotNone(truss.fos)
