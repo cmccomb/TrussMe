@@ -12,6 +12,7 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(trussme))
     tests.addTests(doctest.DocTestSuite(trussme.truss))
     tests.addTests(doctest.DocTestSuite(trussme.components))
+    tests.addTests(doctest.DocTestSuite(trussme.report))
     return tests
 
 
