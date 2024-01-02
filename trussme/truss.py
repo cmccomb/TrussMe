@@ -619,7 +619,8 @@ def read_json(file_name: str) -> Truss:
     Truss
         The object loaded from the JSON file
     """
-    json_truss = json.load(open(file_name))
+    with open(file_name, "r") as file:
+        json_truss = json.load(file)
 
     truss = Truss()
     material_library: list[Material] = json_truss["materials"]
