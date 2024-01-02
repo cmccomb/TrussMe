@@ -19,6 +19,8 @@ def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
         The truss to be reported on
     goals: Goals
         The goals against which to evaluate the truss
+    with_figures: bool, default=True
+        Whether or not to include figures in the report
 
     Returns
     -------
@@ -27,9 +29,9 @@ def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
     """
     truss.analyze()
 
-    report_string = generate_summary(truss, goals) + "\n"
-    report_string += generate_instantiation_information(truss, with_figures) + "\n"
-    report_string += generate_stress_analysis(truss, goals, with_figures) + "\n"
+    report_string = __generate_summary(truss, goals) + "\n"
+    report_string += __generate_instantiation_information(truss, with_figures) + "\n"
+    report_string += __generate_stress_analysis(truss, goals, with_figures) + "\n"
 
     return report_string
 
@@ -49,10 +51,10 @@ def print_report(truss: Truss, goals: Goals) -> None:
     -------
     None
     """
-    print(report_to_str(truss, goals))
+    print(report_to_str(truss, goals, with_figures=False))
 
 
-def report_to_md(file_name: str, truss: Truss, goals: Goals) -> None:
+def report_to_md(file_name: str, truss: Truss, goals: Goals, with_figures: bool = True) -> None:
     """
     Writes a report in Markdown format
 
@@ -64,16 +66,18 @@ def report_to_md(file_name: str, truss: Truss, goals: Goals) -> None:
         The truss to be reported on
     goals: Goals
         The goals against which to evaluate the truss
+    with_figures: bool, default=True
+        Whether or not to include figures in the report
 
     Returns
     -------
     None
     """
     with open(file_name, "w") as f:
-        f.write(report_to_str(truss, goals))
+        f.write(report_to_str(truss, goals, with_figures=with_figures))
 
 
-def generate_summary(truss, goals) -> str:
+def __generate_summary(truss, goals) -> str:
     """
     Generate a summary of the analysis.
 
@@ -210,7 +214,7 @@ def generate_summary(truss, goals) -> str:
     return summary
 
 
-def generate_instantiation_information(truss, with_figures: bool = True) -> str:
+def __generate_instantiation_information(truss, with_figures: bool = True) -> str:
     """
     Generate a summary of the instantiation information.
 
@@ -315,7 +319,7 @@ def generate_instantiation_information(truss, with_figures: bool = True) -> str:
     return instantiation
 
 
-def generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
+def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
     """
     Generate a summary of the stress analysis information.
 
