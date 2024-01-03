@@ -97,9 +97,7 @@ class Truss(object):
     @property
     def fos_buckling(self) -> float:
         """float: Smallest buckling FOS of any member in the truss"""
-        return min(
-            [m.fos_buckling if m.fos_buckling > 0 else numpy.inf for m in self.members]
-        )
+        return min([m.fos_buckling for m in self.members])
 
     @property
     def fos(self) -> float:

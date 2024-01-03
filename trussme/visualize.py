@@ -51,7 +51,7 @@ def plot_truss(
 
     force_colormap = matplotlib.colors.LinearSegmentedColormap.from_list(
         "force",
-        numpy.array([[1.0, 0.0, 0.0], [0.7, 0.7, 0.7], [0.0, 0.0, 1.0]]),
+        numpy.array([[1.0, 0.0, 0.0], [0.8, 0.8, 0.8], [0.0, 0.0, 1.0]]),
     )
 
     for member in truss.members:
@@ -81,7 +81,7 @@ def plot_truss(
                 else "r"
             )
         elif deflected_shape == "force":
-            color = matplotlib.pyplot.cm.bwr(member.force / (2 * scaler) + 0.5)
+            color = force_colormap(member.force / (2 * scaler) + 0.5)
         elif deflected_shape is None:
             break
         else:
