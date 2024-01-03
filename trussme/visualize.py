@@ -65,31 +65,30 @@ def plot_truss(
             color=color,
         )
 
-    if deflected_shape:
-        for member in truss.members:
-            if starting_shape == "fos":
-                color = "g" if member.fos > fos_threshold else "r"
-            elif starting_shape == "force":
-                color = matplotlib.pyplot.cm.bwr(member.force / (2 * scaler) + 0.5)
-            elif starting_shape is None:
-                break
-            else:
-                color = starting_shape
-            ax.plot(
-                [
-                    member.begin_joint.coordinates[0]
-                    + exaggeration_factor * member.begin_joint.deflections[0],
-                    member.end_joint.coordinates[0]
-                    + exaggeration_factor * member.end_joint.deflections[0],
-                ],
-                [
-                    member.begin_joint.coordinates[1]
-                    + exaggeration_factor * member.begin_joint.deflections[1],
-                    member.end_joint.coordinates[1]
-                    + exaggeration_factor * member.end_joint.deflections[1],
-                ],
-                color=color,
-            )
+    for member in truss.members:
+        if deflected_shape == "fos":
+            color = "g" if member.fos > fos_threshold else "r"
+        elif deflected_shape == "force":
+            color = matplotlib.pyplot.cm.bwr(member.force / (2 * scaler) + 0.5)
+        elif deflected_shape is None:
+            break
+        else:
+            color = deflected_shape
+        ax.plot(
+            [
+                member.begin_joint.coordinates[0]
+                + exaggeration_factor * member.begin_joint.deflections[0],
+                member.end_joint.coordinates[0]
+                + exaggeration_factor * member.end_joint.deflections[0],
+            ],
+            [
+                member.begin_joint.coordinates[1]
+                + exaggeration_factor * member.begin_joint.deflections[1],
+                member.end_joint.coordinates[1]
+                + exaggeration_factor * member.end_joint.deflections[1],
+            ],
+            color=color,
+        )
 
     imgdata = io.StringIO()
     fig.savefig(imgdata, format="svg")
