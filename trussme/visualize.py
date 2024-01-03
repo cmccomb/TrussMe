@@ -59,7 +59,7 @@ def plot_truss(
     force_colormap = matplotlib.colors.LinearSegmentedColormap(
         "force",
         segmentdata=_make_segment_data(
-            [(1.0, 0.0, 0.0), (0.8, 0.8, 0.8), (0.0, 0.0, 1.0)],
+            [(1.0, 0.0, 0.0), (0.7, 0.7, 0.7), (0.0, 0.0, 1.0)],
             [0.00, 0.50, 1.00],
         ),
         N=256,
@@ -67,7 +67,11 @@ def plot_truss(
 
     for member in truss.members:
         if starting_shape == "fos":
-            color = "g" if numpy.min(member.fos_buckling, member.fos_yieling) > fos_threshold else "r"
+            color = (
+                "g"
+                if numpy.min(member.fos_buckling, member.fos_yielding) > fos_threshold
+                else "r"
+            )
         elif starting_shape == "force":
             color = force_colormap(member.force / (2 * scaler) + 0.5)
         elif starting_shape is None:
@@ -82,7 +86,11 @@ def plot_truss(
 
     for member in truss.members:
         if deflected_shape == "fos":
-            color = "g" if numpy.min(member.fos_buckling, member.fos_yieling) > fos_threshold else "r"
+            color = (
+                "g"
+                if numpy.min(member.fos_buckling, member.fos_yieling) > fos_threshold
+                else "r"
+            )
         elif deflected_shape == "force":
             color = matplotlib.pyplot.cm.bwr(member.force / (2 * scaler) + 0.5)
         elif deflected_shape is None:
