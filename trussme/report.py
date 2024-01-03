@@ -394,6 +394,10 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
 
     # Print information about members
     analysis += "\n## FORCES AND STRESSES\n"
+
+    if with_figures:
+        analysis += trussme.visualize.plot_truss(truss, starting_shape="force") + "\n"
+
     data = []
     rows = []
     for m in truss.members:
@@ -430,7 +434,10 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
     analysis += "\n## DEFLECTIONS\n"
 
     if with_figures:
-        analysis += trussme.visualize.plot_truss(truss, deflected_shape=True) + "\n"
+        analysis += (
+            trussme.visualize.plot_truss(truss, starting_shape="k", deflected_shape="m")
+            + "\n"
+        )
 
     data = []
     rows = []

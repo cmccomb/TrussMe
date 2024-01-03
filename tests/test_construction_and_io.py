@@ -21,7 +21,11 @@ class TestSequenceFunctions(unittest.TestCase):
         # Build truss from file
         truss_from_file = trussme.read_trs(TEST_TRUSS_FILENAME)
 
-        trussme.report_to_md("asdf.md", truss_from_file, trussme.Goals())
+        trussme.report_to_md(
+            os.path.join(os.path.dirname(__file__), "asdf.md"),
+            truss_from_file,
+            trussme.Goals(),
+        )
 
     def test_build_methods(self):
         goals = trussme.Goals(
