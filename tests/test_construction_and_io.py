@@ -17,6 +17,12 @@ def load_tests(loader, tests, ignore):
 
 
 class TestSequenceFunctions(unittest.TestCase):
+    def test_demo_report(self):
+        # Build truss from file
+        truss_from_file = trussme.read_trs(TEST_TRUSS_FILENAME)
+
+        trussme.report_to_md("asdf.md", truss_from_file, trussme.Goals())
+
     def test_build_methods(self):
         goals = trussme.Goals(
             minimum_fos_buckling=1.5,
