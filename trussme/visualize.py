@@ -20,11 +20,11 @@ def plot_truss(
     ----------
     truss: Truss
         The truss to plot.
-    starting_shape: : Union[None, Literal["fos", "force"], MatplotlibColor]], default="k"
+    starting_shape: : Union[None, Literal["fos", "force"], MatplotlibColor], default="k"
         How to show the starting shape. If None, the starting shape is not shown. If "fos", the members are colored
         green if the factor of safety is above the threshold and red if it is below. If "force", the members are colored
         according to the force in the member. If a color, the members are colored that color.
-    deflected_shape: : Union[None, Literal["fos", "force"], MatplotlibColor]], default = None
+    deflected_shape: : Union[None, Literal["fos", "force"], MatplotlibColor], default = None
         How to show the deflected shape. If None, the starting shape is not shown. If "fos", the members are colored
         green if the factor of safety is above the threshold and red if it is below. If "force", the members are colored
         according to the force in the member. If a color, the members are colored that color.
@@ -38,6 +38,7 @@ def plot_truss(
     str
         An svg string of the truss
     """
+
     fig = matplotlib.pyplot.figure()
     ax = fig.add_subplot(
         111,
@@ -46,13 +47,29 @@ def plot_truss(
     ax.axis("equal")
     ax.set_axis_off()
 
+    def _make_segment_data(colors, fractions):
+        return {
+            "red": [[fractions[idx], c[0], c[0]] for idx, c in enumerate(colors)],
+            "green": [[fractions[idx], c[1], c[1]] for idx, c in enumerate(colors)],
+            "blue": [[fractions[idx], c[2], c[2]] for idx, c in enumerate(colors)],
+        }
+
     scaler: float = numpy.max(numpy.abs([member.force for member in truss.members]))
+
+    force_colormap = matplotlib.colors.LinearSegmentedColormap(
+        "force",
+        segmentdata=_make_segment_data(
+            [[1.0, 0.0, 0.0], [0.9, 0.9, 0.9], [0.0, 0.0, 1.0]],
+            [0.00, 0.50, 1.00],
+        ),
+        N=256,
+    )
 
     for member in truss.members:
         if starting_shape == "fos":
             color = "g" if member.fos > fos_threshold else "r"
         elif starting_shape == "force":
-            color = matplotlib.pyplot.cm.bwr(member.force / (2 * scaler) + 0.5)
+            color = force_colormap(member.force / (2 * scaler) + 0.5)
         elif starting_shape is None:
             break
         else:
