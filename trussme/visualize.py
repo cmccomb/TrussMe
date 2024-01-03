@@ -51,7 +51,7 @@ def plot_truss(
 
     force_colormap = matplotlib.colors.LinearSegmentedColormap.from_list(
         "force",
-        [(1.0, 0.0, 0.0), (0.7, 0.7, 0.7), (0.0, 0.0, 1.0)],
+        numpy.array([[1.0, 0.0, 0.0], [0.7, 0.7, 0.7], [0.0, 0.0, 1.0]]),
     )
 
     for member in truss.members:

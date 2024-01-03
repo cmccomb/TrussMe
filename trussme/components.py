@@ -518,7 +518,7 @@ class Member(object):
     @property
     def fos_buckling(self) -> float:
         """float: The factor of safety against buckling"""
-        return (
+        fos = (
             -(
                 (numpy.pi**2)
                 * self.elastic_modulus
@@ -527,3 +527,5 @@ class Member(object):
             )
             / self.force
         )
+
+        return fos if fos > 0 else numpy.inf
