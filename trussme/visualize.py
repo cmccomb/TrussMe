@@ -49,9 +49,9 @@ def plot_truss(
 
     def _make_segment_data(colors, fractions):
         return {
-            "red": [[fractions[idx], c[0], c[0]] for idx, c in enumerate(colors)],
-            "green": [[fractions[idx], c[1], c[1]] for idx, c in enumerate(colors)],
-            "blue": [[fractions[idx], c[2], c[2]] for idx, c in enumerate(colors)],
+            "red": ([fractions[idx], c[0], c[0]] for idx, c in enumerate(colors)),
+            "green": ([fractions[idx], c[1], c[1]] for idx, c in enumerate(colors)),
+            "blue": ([fractions[idx], c[2], c[2]] for idx, c in enumerate(colors)),
         }
 
     scaler: float = numpy.max(numpy.abs([member.force for member in truss.members]))
@@ -59,7 +59,7 @@ def plot_truss(
     force_colormap = matplotlib.colors.LinearSegmentedColormap(
         "force",
         segmentdata=_make_segment_data(
-            [[1.0, 0.0, 0.0], [0.9, 0.9, 0.9], [0.0, 0.0, 1.0]],
+            [(1.0, 0.0, 0.0), (0.8, 0.8, 0.8), (0.0, 0.0, 1.0)],
             [0.00, 0.50, 1.00],
         ),
         N=256,
@@ -67,7 +67,7 @@ def plot_truss(
 
     for member in truss.members:
         if starting_shape == "fos":
-            color = "g" if member.fos > fos_threshold else "r"
+            color = "g" if numpy.min(member.fos_buckling, member.fos_yieling) > fos_threshold else "r"
         elif starting_shape == "force":
             color = force_colormap(member.force / (2 * scaler) + 0.5)
         elif starting_shape is None:
@@ -82,7 +82,7 @@ def plot_truss(
 
     for member in truss.members:
         if deflected_shape == "fos":
-            color = "g" if member.fos > fos_threshold else "r"
+            color = "g" if numpy.min(member.fos_buckling, member.fos_yieling) > fos_threshold else "r"
         elif deflected_shape == "force":
             color = matplotlib.pyplot.cm.bwr(member.force / (2 * scaler) + 0.5)
         elif deflected_shape is None:
