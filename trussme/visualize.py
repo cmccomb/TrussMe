@@ -58,7 +58,7 @@ def plot_truss(
         if starting_shape == "fos":
             color = (
                 "g"
-                if numpy.min(member.fos_buckling, member.fos_yielding) > fos_threshold
+                if numpy.min([member.fos_buckling, member.fos_yielding]) > fos_threshold
                 else "r"
             )
         elif starting_shape == "force":
@@ -77,7 +77,7 @@ def plot_truss(
         if deflected_shape == "fos":
             color = (
                 "g"
-                if numpy.min(member.fos_buckling, member.fos_yielding) > fos_threshold
+                if numpy.min([member.fos_buckling, member.fos_yielding]) > fos_threshold
                 else "r"
             )
         elif deflected_shape == "force":
