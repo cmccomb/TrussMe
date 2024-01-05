@@ -15,7 +15,7 @@ from trussme.components import (
     Square,
     Shape,
     Box,
-    material_library,
+    MATERIAL_LIBRARY,
 )
 
 
@@ -229,7 +229,7 @@ class Truss(object):
         self,
         begin_joint_index: int,
         end_joint_index: int,
-        material: Material = material_library[0],
+        material: Material = MATERIAL_LIBRARY[0],
         shape: Shape = Pipe(t=0.002, r=0.02),
     ):
         """

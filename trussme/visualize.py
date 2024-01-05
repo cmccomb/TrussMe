@@ -1,10 +1,10 @@
+from typing import Union, Literal, Any
+
 import matplotlib.pyplot
 import numpy
-from typing import Union, Literal, Any, Type
 
-
-MatplotlibColor = Type[Any]
-"""Type: New type to represent a matplotlib color"""
+MatplotlibColor = Any
+"""Type: New type to represent a matplotlib color, simply an alias of Any"""
 
 
 def plot_truss(
@@ -35,8 +35,8 @@ def plot_truss(
 
     Returns
     -------
-    str
-        An svg string of the truss
+    Figure
+        A matplotlib figure containing the truss
     """
 
     fig = matplotlib.pyplot.figure()

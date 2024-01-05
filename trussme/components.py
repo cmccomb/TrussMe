@@ -15,7 +15,7 @@ Material = TypedDict(
 )
 """TypedDict: New type to contain material properties"""
 
-material_library: list[Material] = [
+MATERIAL_LIBRARY: list[Material] = [
     {
         "name": "A36_Steel",
         "density": 7800.0,

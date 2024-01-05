@@ -30,7 +30,7 @@ Finally, let's analyze the truss and get the factor of safety and mass
 """
 
 from trussme.components import (
-    material_library,
+    MATERIAL_LIBRARY,
     Shape,
     Material,
     Pipe,
