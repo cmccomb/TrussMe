@@ -1,5 +1,8 @@
 import json
+import io
+import re
 
+import matplotlib.pyplot
 import numpy
 import pandas
 import scipy
@@ -8,6 +11,18 @@ import trussme.visualize
 
 from trussme.truss import Truss, Goals
 
+
+def _fig_to_svg(fig: matplotlib.pyplot.Figure) -> str:
+    imgdata = io.StringIO()
+    fig.savefig(imgdata, format="svg")
+    imgdata.seek(0)  # rewind the data
+
+    svg = imgdata.getvalue()
+    svg = re.sub("<dc:date>(.*?)</dc:date>", "<dc:date></dc:date>", svg)
+    svg = re.sub("url\(#(.*?)\)", "url(#truss)", svg)
+    svg = re.sub('<clipPath id="(.*?)">', '<clipPath id="truss">', svg)
+
+    return svg
 
 def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
     """
@@ -235,7 +250,7 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
     instantiation = "# INSTANTIATION INFORMATION\n"
 
     if with_figures:
-        instantiation += trussme.visualize.plot_truss(truss) + "\n"
+        instantiation += _fig_to_svg(trussme.visualize.plot_truss(truss)) + "\n"
 
     # Print joint information
     instantiation += "## JOINTS\n"
@@ -396,7 +411,7 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
     analysis += "\n## FORCES AND STRESSES\n"
 
     if with_figures:
-        analysis += trussme.visualize.plot_truss(truss, starting_shape="force") + "\n"
+        analysis += _fig_to_svg(trussme.visualize.plot_truss(truss, starting_shape="force")) + "\n"
 
     data = []
     rows = []
@@ -435,7 +450,7 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
 
     if with_figures:
         analysis += (
-            trussme.visualize.plot_truss(truss, starting_shape="k", deflected_shape="m")
+            _fig_to_svg(trussme.visualize.plot_truss(truss, starting_shape="k", deflected_shape="m"))
             + "\n"
         )
 

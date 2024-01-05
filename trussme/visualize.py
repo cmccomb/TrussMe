@@ -1,19 +1,19 @@
 import matplotlib.pyplot
-import io
-import re
 import numpy
-from typing import Union, Literal
+from typing import Union, Literal, Any, Type
 
-from .matplotlib_color_type import MatplotlibColor
+
+MatplotlibColor = Type[Any]
+"""Type: New type to represent a matplotlib color"""
 
 
 def plot_truss(
-    truss,
-    starting_shape: Union[None, Literal["fos", "force"], MatplotlibColor] = "k",
-    deflected_shape: Union[None, Literal["fos", "force"], MatplotlibColor] = None,
-    exaggeration_factor: float = 10,
-    fos_threshold: float = 1.0,
-) -> str:
+        truss,
+        starting_shape: Union[None, Literal["fos", "force"], MatplotlibColor] = "k",
+        deflected_shape: Union[None, Literal["fos", "force"], MatplotlibColor] = None,
+        exaggeration_factor: float = 10,
+        fos_threshold: float = 1.0,
+) -> matplotlib.pyplot.Figure:
     """Plot the truss.
 
     Parameters
@@ -102,13 +102,4 @@ def plot_truss(
             color=color,
         )
 
-    imgdata = io.StringIO()
-    fig.savefig(imgdata, format="svg")
-    imgdata.seek(0)  # rewind the data
-
-    svg = imgdata.getvalue()
-    svg = re.sub("<dc:date>(.*?)</dc:date>", "<dc:date></dc:date>", svg)
-    svg = re.sub("url\(#(.*?)\)", "url(#truss)", svg)
-    svg = re.sub('<clipPath id="(.*?)">', '<clipPath id="truss">', svg)
-
-    return svg
+    return fig
