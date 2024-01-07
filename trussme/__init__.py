@@ -41,3 +41,4 @@ from trussme.components import (
 )
 from trussme.truss import Truss, read_trs, read_json, Goals
 from trussme.report import report_to_str, report_to_md, print_report
+from trussme.optimize import make_truss_generator_function, make_optimization_functions

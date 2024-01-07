@@ -1,5 +1,6 @@
 .idea/*
 tests/report*
 tests/asdf*
+tests/optim*
 tests/__pychache__/*
 trussme/__pycache__/*
