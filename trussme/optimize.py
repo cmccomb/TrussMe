@@ -146,8 +146,8 @@ def make_truss_generator_function(
 
     Returns
     -------
-    Callable[[list[float]]
-        A tuple containing a vector that describes the input truss and a function that takes a list of floats and returns a truss.
+    Callable[list[float], Truss]
+        A function that takes a list of floats and returns a truss.
     """
 
     planar_direction: str = truss.is_planar()
