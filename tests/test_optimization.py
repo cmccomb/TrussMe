@@ -175,6 +175,7 @@ class TestCustomStuff(unittest.TestCase):
             goals,
             joint_coordinates=True,
             shape_parameters=True,
+            shape_parameter_treatment="full"
         )
 
         results = scipy.optimize.minimize(

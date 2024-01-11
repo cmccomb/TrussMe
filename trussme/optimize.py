@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Literal
 
 import numpy
 
@@ -9,6 +9,7 @@ def make_x0(
     truss: Truss,
     joint_coordinates: bool = True,
     shape_parameters: bool = True,
+    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
 ) -> list[float]:
     """
     Returns a vector that encodes the current truss design
@@ -47,7 +48,7 @@ def make_x0(
                 if planar_direction != "z":
                     x0.append(configured_truss.joints[i].coordinates[2])
 
-    if shape_parameters:
+    if shape_parameters and shape_parameter_treatment == "scaled":
         for i in range(len(configured_truss.members)):
             shape_name: str = configured_truss.members[i].shape.name()
             if shape_name == "pipe":
@@ -59,6 +60,22 @@ def make_x0(
             elif shape_name == "square":
                 x0.append(configured_truss.members[i].shape._params["w"])
 
+    if shape_parameters and shape_parameter_treatment == "full":
+        for i in range(len(configured_truss.members)):
+            shape_name: str = configured_truss.members[i].shape.name()
+            if shape_name == "pipe":
+                x0.append(configured_truss.members[i].shape._params["r"])
+                x0.append(configured_truss.members[i].shape._params["t"])
+            elif shape_name == "box":
+                x0.append(configured_truss.members[i].shape._params["w"])
+                x0.append(configured_truss.members[i].shape._params["h"])
+                x0.append(configured_truss.members[i].shape._params["t"])
+            elif shape_name == "bar":
+                x0.append(configured_truss.members[i].shape._params["r"])
+            elif shape_name == "square":
+                x0.append(configured_truss.members[i].shape._params["w"])
+                x0.append(configured_truss.members[i].shape._params["h"])
+
     return x0
 
 
@@ -66,6 +83,7 @@ def make_bounds(
     truss: Truss,
     joint_coordinates: bool = True,
     shape_parameters: bool = True,
+    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
 ) -> tuple[list[float], list[float]]:
     """
     Returns a vector that encodes the current truss design
@@ -108,7 +126,7 @@ def make_bounds(
                     lb.append(-numpy.inf)
                     ub.append(numpy.inf)
 
-    if shape_parameters:
+    if shape_parameters and shape_parameter_treatment == "scaled":
         for i in range(len(configured_truss.members)):
             shape_name: str = configured_truss.members[i].shape.name()
             if shape_name == "pipe":
@@ -124,6 +142,25 @@ def make_bounds(
                 lb.append(0.0)
                 ub.append(numpy.inf)
 
+    if shape_parameters and shape_parameter_treatment == "full":
+        for i in range(len(configured_truss.members)):
+            shape_name: str = configured_truss.members[i].shape.name()
+            if shape_name == "pipe":
+                for _ in range(2):
+                    lb.append(0.0)
+                    ub.append(numpy.inf)
+            elif shape_name == "box":
+                for _ in range(3):
+                    lb.append(0.0)
+                    ub.append(numpy.inf)
+            elif shape_name == "bar":
+                lb.append(0.0)
+                ub.append(numpy.inf)
+            elif shape_name == "square":
+                for _ in range(2):
+                    lb.append(0.0)
+                    ub.append(numpy.inf)
+
     return lb, ub
 
 
@@ -131,6 +168,7 @@ def make_truss_generator_function(
     truss: Truss,
     joint_coordinates: bool = True,
     shape_parameters: bool = True,
+    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
 ) -> Callable[[list[float]], Truss]:
     """
     Returns a function that takes a list of floats and returns a truss.
@@ -173,7 +211,7 @@ def make_truss_generator_function(
                         configured_truss.joints[i].coordinates[2] = x[idx]
                         idx += 1
 
-        if shape_parameters:
+        if shape_parameters and shape_parameter_treatment == "scaled":
             for i in range(len(configured_truss.members)):
                 shape_name: str = configured_truss.members[i].shape.name()
                 p = configured_truss.members[i].shape._params
@@ -196,9 +234,69 @@ def make_truss_generator_function(
                     )
                     idx += 1
 
+        if shape_parameters and shape_parameter_treatment == "full":
+            for i in range(len(configured_truss.members)):
+                shape_name: str = configured_truss.members[i].shape.name()
+                if shape_name == "pipe":
+                    configured_truss.members[i].shape = Pipe(r=x[idx], t=x[idx + 1])
+                    idx += 2
+                elif shape_name == "box":
+                    configured_truss.members[i].shape = Box(
+                        w=x[idx], h=x[idx + 1], t=x[idx + 2]
+                    )
+                    idx += 3
+                elif shape_name == "bar":
+                    configured_truss.members[i].shape = Bar(r=x[idx])
+                    idx += 1
+                elif shape_name == "square":
+                    configured_truss.members[i].shape = Square(w=x[idx], h=x[idx + 1])
+                    idx += 2
+
         return configured_truss
 
     return truss_generator
+
+
+def make_inequality_constraints(
+    truss: Truss,
+    goals: Goals,
+    joint_coordinates: bool = True,
+    shape_parameters: bool = True,
+    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
+) -> Callable[[list[float]], list[float]]:
+    truss_generator = make_truss_generator_function(
+        truss, joint_coordinates, shape_parameters, shape_parameter_treatment
+    )
+
+    def inequality_constraints(x: list[float]) -> list[float]:
+        truss = truss_generator(x)
+        truss.analyze()
+        constraints = [
+            goals.minimum_fos_buckling - truss.fos_buckling,
+            goals.minimum_fos_yielding - truss.fos_yielding,
+            truss.deflection - numpy.min([goals.maximum_deflection, 10000.0]),
+        ]
+        if shape_parameters and shape_parameter_treatment == "full":
+            for i in range(len(truss.members)):
+                shape_name: str = truss.members[i].shape.name()
+                if shape_name == "pipe":
+                    constraints.append(
+                        truss.members[i].shape._params["t"]
+                        - truss.members[i].shape._params["r"]
+                    )
+                elif shape_name == "box":
+                    constraints.append(
+                        truss.members[i].shape._params["t"]
+                        - truss.members[i].shape._params["w"]
+                    )
+                    constraints.append(
+                        truss.members[i].shape._params["t"]
+                        - truss.members[i].shape._params["h"]
+                    )
+
+        return constraints
+
+    return inequality_constraints
 
 
 def make_optimization_functions(
@@ -206,6 +304,7 @@ def make_optimization_functions(
     goals: Goals,
     joint_coordinates: bool = True,
     shape_parameters: bool = True,
+    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
 ) -> tuple[
     list[float],
     Callable[[list[float]], float],
@@ -239,26 +338,23 @@ def make_optimization_functions(
         :param goals:
     """
 
-    x0 = make_x0(truss, joint_coordinates, shape_parameters)
+    x0 = make_x0(truss, joint_coordinates, shape_parameters, shape_parameter_treatment)
 
     truss_generator = make_truss_generator_function(
-        truss, joint_coordinates, shape_parameters
+        truss, joint_coordinates, shape_parameters, shape_parameter_treatment
+    )
+
+    bounds = make_bounds(
+        truss, joint_coordinates, shape_parameters, shape_parameter_treatment
+    )
+
+    inequality_constraints = make_inequality_constraints(
+        truss, goals, joint_coordinates, shape_parameters, shape_parameter_treatment
     )
 
     def objective_function(x: list[float]) -> float:
         truss = truss_generator(x)
         return truss.mass
-
-    def inequality_constraints(x: list[float]) -> list[float]:
-        truss = truss_generator(x)
-        truss.analyze()
-        return [
-            goals.minimum_fos_buckling - truss.fos_buckling,
-            goals.minimum_fos_yielding - truss.fos_yielding,
-            truss.deflection - numpy.min([goals.maximum_deflection, 10000.0]),
-        ]
-
-    bounds = make_bounds(truss, joint_coordinates, shape_parameters)
 
     return (
         x0,
