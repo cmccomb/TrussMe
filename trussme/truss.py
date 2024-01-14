@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Literal
+from typing import Literal, Union
 import json
 
 import numpy
@@ -122,6 +122,33 @@ class Truss(object):
             return "buckling"
         else:
             return "yielding"
+
+    def is_planar(self) -> Literal["x", "y", "z", "none"]:
+        """
+        Check if the truss is planar
+
+        Returns
+        -------
+        Literal["x", "y", "z", "none"]
+            The axis along which the truss is planar, or None if it is not planar
+        """
+
+        restriction = numpy.prod(
+            numpy.array([joint.translation_restricted for joint in self.joints]),
+            axis=0,
+        )
+
+        # Check if the truss is planar
+        if (restriction == [False, False, False]).all():
+            return "none"
+        elif (restriction == [True, False, False]).all():
+            return "x"
+        elif (restriction == [False, True, False]).all():
+            return "y"
+        elif (restriction == [False, False, True]).all():
+            return "z"
+        else:
+            return "none"
 
     def add_pinned_joint(self, coordinates: list[float]) -> int:
         """Add a pinned joint to the truss at the given coordinates
@@ -397,18 +424,18 @@ class Truss(object):
         for i in range(self.number_of_members):
             self.members[i].force = forces[i]
 
-    def to_json(self, file_name: str) -> None:
+    def to_json(self, file_name: Union[None, str] = None) -> Union[str, None]:
         """
         Saves the truss to a JSON file
 
         Parameters
         ----------
-        file_name: str
-            The filename to use for the JSON file
+        file_name: Union[None, str]
+            The filename to use for the JSON file. If None, the json is returned as a string
 
         Returns
         -------
-        None
+        Union[str, None]
         """
 
         class JointEncoder(json.JSONEncoder):
@@ -447,8 +474,11 @@ class Truss(object):
             "members": json.loads(members),
         }
 
-        with open(file_name, "w") as f:
-            json.dump(combined, f, indent=4)
+        if file_name is None:
+            return json.dumps(combined)
+        else:
+            with open(file_name, "w") as f:
+                json.dump(combined, f, indent=4)
 
     def to_trs(self, file_name: str) -> None:
         """
@@ -606,15 +636,18 @@ def read_json(file_name: str) -> Truss:
     Parameters
     ----------
     file_name: str
-        The name of the JSON file to be read
+        The name of the JSON file to be read, or a valid JSON string
 
     Returns
     -------
     Truss
         The object loaded from the JSON file
     """
-    with open(file_name, "r") as file:
-        json_truss = json.load(file)
+    try:
+        json_truss = json.loads(file_name)
+    except ValueError:
+        with open(file_name, "r") as file:
+            json_truss = json.load(file)
 
     truss = Truss()
     current_material_library: list[Material] = json_truss["materials"]
