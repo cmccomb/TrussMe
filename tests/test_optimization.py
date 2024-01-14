@@ -104,7 +104,10 @@ class TestCustomStuff(unittest.TestCase):
         goals = trussme.Goals()
 
         x0, obj, con, gen, bnds = trussme.make_optimization_functions(
-            truss_from_commands, goals, joint_coordinates=True, shape_parameters=False
+            truss_from_commands,
+            goals,
+            joint_optimization="full",
+            member_optimization=None,
         )
 
         results = scipy.optimize.minimize(
@@ -173,9 +176,8 @@ class TestCustomStuff(unittest.TestCase):
         x0, obj, con, gen, bnds = trussme.make_optimization_functions(
             truss_from_commands,
             goals,
-            joint_coordinates=True,
-            shape_parameters=True,
-            shape_parameter_treatment="full",
+            joint_optimization="full",
+            member_optimization="full",
         )
 
         results = scipy.optimize.minimize(

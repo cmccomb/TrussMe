@@ -7,9 +7,8 @@ from trussme import Truss, Goals, read_json, Pipe, Box, Square, Bar
 
 def make_x0(
     truss: Truss,
-    joint_coordinates: bool = True,
-    shape_parameters: bool = True,
-    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
+    joint_optimization: Literal[None, "full"] = "full",
+    member_optimization: Literal[None, "scaled", "full"] = "full",
 ) -> list[float]:
     """
     Returns a vector that encodes the current truss design
@@ -18,10 +17,12 @@ def make_x0(
     ----------
     truss: Truss
         The truss to configure.
-    joint_coordinates: bool, default=True
-        Whether to include joint location parameters.
-    shape_parameters: bool, default=True
-        Whether to include shape parameters.
+    joint_optimization: Literal[None, "full"], default = "full"
+        If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
+    member_optimization: Literal[None, "scaled", "full"], default = "full"
+        If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
+        optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
+        optimized.
 
     Returns
     -------
@@ -34,7 +35,7 @@ def make_x0(
 
     configured_truss = read_json(truss.to_json())
 
-    if joint_coordinates:
+    if joint_optimization:
         for i in range(len(configured_truss.joints)):
             if (
                 numpy.sum(configured_truss.joints[i].translation_restricted)
@@ -48,7 +49,7 @@ def make_x0(
                 if planar_direction != "z":
                     x0.append(configured_truss.joints[i].coordinates[2])
 
-    if shape_parameters and shape_parameter_treatment == "scaled":
+    if member_optimization == "scaled":
         for i in range(len(configured_truss.members)):
             shape_name: str = configured_truss.members[i].shape.name()
             if shape_name == "pipe":
@@ -60,7 +61,7 @@ def make_x0(
             elif shape_name == "square":
                 x0.append(configured_truss.members[i].shape._params["w"])
 
-    if shape_parameters and shape_parameter_treatment == "full":
+    if member_optimization == "full":
         for i in range(len(configured_truss.members)):
             shape_name: str = configured_truss.members[i].shape.name()
             if shape_name == "pipe":
@@ -81,9 +82,8 @@ def make_x0(
 
 def make_bounds(
     truss: Truss,
-    joint_coordinates: bool = True,
-    shape_parameters: bool = True,
-    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
+    joint_optimization: Literal[None, "full"] = "full",
+    member_optimization: Literal[None, "scaled", "full"] = "full",
 ) -> tuple[list[float], list[float]]:
     """
     Returns a vector that encodes the current truss design
@@ -92,10 +92,12 @@ def make_bounds(
     ----------
     truss: Truss
         The truss to configure.
-    joint_coordinates: bool, default=True
-        Whether to include joint location parameters.
-    shape_parameters: bool, default=True
-        Whether to include shape parameters.
+    joint_optimization: Literal[None, "full"], default = "full"
+        If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
+    member_optimization: Literal[None, "scaled", "full"], default = "full"
+        If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
+        optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
+        optimized.
 
     Returns
     -------
@@ -109,7 +111,7 @@ def make_bounds(
 
     configured_truss = read_json(truss.to_json())
 
-    if joint_coordinates:
+    if joint_optimization:
         for i in range(len(configured_truss.joints)):
             if (
                 numpy.sum(configured_truss.joints[i].translation_restricted)
@@ -126,7 +128,7 @@ def make_bounds(
                     lb.append(-numpy.inf)
                     ub.append(numpy.inf)
 
-    if shape_parameters and shape_parameter_treatment == "scaled":
+    if member_optimization == "scaled":
         for i in range(len(configured_truss.members)):
             shape_name: str = configured_truss.members[i].shape.name()
             if shape_name == "pipe":
@@ -142,7 +144,7 @@ def make_bounds(
                 lb.append(0.0)
                 ub.append(numpy.inf)
 
-    if shape_parameters and shape_parameter_treatment == "full":
+    if member_optimization == "full":
         for i in range(len(configured_truss.members)):
             shape_name: str = configured_truss.members[i].shape.name()
             if shape_name == "pipe":
@@ -166,9 +168,8 @@ def make_bounds(
 
 def make_truss_generator_function(
     truss: Truss,
-    joint_coordinates: bool = True,
-    shape_parameters: bool = True,
-    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
+    joint_optimization: Literal[None, "full"] = "full",
+    member_optimization: Literal[None, "scaled", "full"] = "full",
 ) -> Callable[[list[float]], Truss]:
     """
     Returns a function that takes a list of floats and returns a truss.
@@ -177,10 +178,12 @@ def make_truss_generator_function(
     ----------
     truss: Truss
         The truss to configure.
-    joint_coordinates: bool, default=True
-        Whether to include joint location parameters.
-    shape_parameters: bool, default=True
-        Whether to include shape parameters.
+    joint_optimization: Literal[None, "full"], default = "full"
+        If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
+    member_optimization: Literal[None, "scaled", "full"], default = "full"
+        If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
+        optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
+        optimized.
 
     Returns
     -------
@@ -194,7 +197,7 @@ def make_truss_generator_function(
         configured_truss = read_json(truss.to_json())
         idx = 0
 
-        if joint_coordinates:
+        if joint_optimization:
             for i in range(len(configured_truss.joints)):
                 if (
                     numpy.sum(configured_truss.joints[i].translation_restricted)
@@ -211,7 +214,7 @@ def make_truss_generator_function(
                         configured_truss.joints[i].coordinates[2] = x[idx]
                         idx += 1
 
-        if shape_parameters and shape_parameter_treatment == "scaled":
+        if member_optimization == "scaled":
             for i in range(len(configured_truss.members)):
                 shape_name: str = configured_truss.members[i].shape.name()
                 p = configured_truss.members[i].shape._params
@@ -234,7 +237,7 @@ def make_truss_generator_function(
                     )
                     idx += 1
 
-        if shape_parameters and shape_parameter_treatment == "full":
+        if member_optimization == "full":
             for i in range(len(configured_truss.members)):
                 shape_name: str = configured_truss.members[i].shape.name()
                 if shape_name == "pipe":
@@ -260,38 +263,58 @@ def make_truss_generator_function(
 def make_inequality_constraints(
     truss: Truss,
     goals: Goals,
-    joint_coordinates: bool = True,
-    shape_parameters: bool = True,
-    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
+    joint_optimization: Literal[None, "full"] = "full",
+    member_optimization: Literal[None, "scaled", "full"] = "full",
 ) -> Callable[[list[float]], list[float]]:
+    """
+    Returns a function that evaluates the inequality constraints.
+
+    Parameters
+    ----------
+    truss: Truss
+        The truss to configure.
+    goals: Goals
+        This informs constraints on yielding FOS, buckling FOS, and deflection.
+    joint_optimization: Literal[None, "full"], default = "full"
+        If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
+    member_optimization: Literal[None, "scaled", "full"], default = "full"
+        If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
+        optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
+        optimized.
+
+    Returns
+    -------
+    Callable[[list[float]], list[float]]
+        A function that evaluates constraints for the truss
+    """
     truss_generator = make_truss_generator_function(
-        truss, joint_coordinates, shape_parameters, shape_parameter_treatment
+        truss, joint_optimization, member_optimization
     )
 
     def inequality_constraints(x: list[float]) -> list[float]:
-        truss = truss_generator(x)
-        truss.analyze()
+        recon_truss = truss_generator(x)
+        recon_truss.analyze()
         constraints = [
-            goals.minimum_fos_buckling - truss.fos_buckling,
-            goals.minimum_fos_yielding - truss.fos_yielding,
-            truss.deflection - numpy.min([goals.maximum_deflection, 10000.0]),
+            goals.minimum_fos_buckling - recon_truss.fos_buckling,
+            goals.minimum_fos_yielding - recon_truss.fos_yielding,
+            recon_truss.deflection - numpy.min([goals.maximum_deflection, 10000.0]),
         ]
-        if shape_parameters and shape_parameter_treatment == "full":
-            for i in range(len(truss.members)):
-                shape_name: str = truss.members[i].shape.name()
+        if member_optimization == "full":
+            for i in range(len(recon_truss.members)):
+                shape_name: str = recon_truss.members[i].shape.name()
                 if shape_name == "pipe":
                     constraints.append(
-                        truss.members[i].shape._params["t"]
-                        - truss.members[i].shape._params["r"]
+                        recon_truss.members[i].shape._params["t"]
+                        - recon_truss.members[i].shape._params["r"]
                     )
                 elif shape_name == "box":
                     constraints.append(
-                        truss.members[i].shape._params["t"]
-                        - truss.members[i].shape._params["w"]
+                        recon_truss.members[i].shape._params["t"]
+                        - recon_truss.members[i].shape._params["w"]
                     )
                     constraints.append(
-                        truss.members[i].shape._params["t"]
-                        - truss.members[i].shape._params["h"]
+                        recon_truss.members[i].shape._params["t"]
+                        - recon_truss.members[i].shape._params["h"]
                     )
 
         return constraints
@@ -302,9 +325,8 @@ def make_inequality_constraints(
 def make_optimization_functions(
     truss: Truss,
     goals: Goals,
-    joint_coordinates: bool = True,
-    shape_parameters: bool = True,
-    shape_parameter_treatment: Literal["scaled", "full"] = "scaled",
+    joint_optimization: Literal[None, "full"] = "full",
+    member_optimization: Literal[None, "scaled", "full"] = "full",
 ) -> tuple[
     list[float],
     Callable[[list[float]], float],
@@ -313,7 +335,8 @@ def make_optimization_functions(
     tuple[list[float], list[float]],
 ]:
     """
-    Creates functions for use in optimization, including a starting vector, objective function, a constraint function, and a truss generator function.
+    Creates functions for use in optimization, including a starting vector, objective function, a constraint function,
+    and a truss generator function.
 
     Parameters
     ----------
@@ -321,9 +344,9 @@ def make_optimization_functions(
         The truss to use as a starting configuration
     goals: Goals
         The goals to use for optimization
-    joint_coordinates: bool, default=True
-        Whether to include joint location parameters.
-    shape_parameters: bool, default=True
+    joint_optimization: Literal[None, "full"] = "full"
+        If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
+    member_optimization: Literal[None, "scaled", "full"] = "full",
         Whether to include shape parameters.
 
     Returns
@@ -333,33 +356,32 @@ def make_optimization_functions(
         Callable[[list[float]], float],
         Callable[[list[float]], list[float]],
         Callable[[list[float]], Truss],
+        tuple[list[float], list[float]]
     ]
         A tuple containing the starting vector, objective function, constraint function, and truss generator function.
-        :param goals:
     """
 
-    x0 = make_x0(truss, joint_coordinates, shape_parameters, shape_parameter_treatment)
+    x0 = make_x0(truss, joint_optimization, member_optimization)
 
     truss_generator = make_truss_generator_function(
-        truss, joint_coordinates, shape_parameters, shape_parameter_treatment
+        truss, joint_optimization, member_optimization
     )
 
-    bounds = make_bounds(
-        truss, joint_coordinates, shape_parameters, shape_parameter_treatment
+    lower_bounds, upper_bounds = make_bounds(
+        truss, joint_optimization, member_optimization
     )
 
     inequality_constraints = make_inequality_constraints(
-        truss, goals, joint_coordinates, shape_parameters, shape_parameter_treatment
+        truss, goals, joint_optimization, member_optimization
     )
 
     def objective_function(x: list[float]) -> float:
-        truss = truss_generator(x)
-        return truss.mass
+        return truss_generator(x).mass
 
     return (
         x0,
         objective_function,
         inequality_constraints,
         truss_generator,
-        bounds,
+        (lower_bounds, upper_bounds),
     )
