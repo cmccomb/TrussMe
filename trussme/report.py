@@ -24,6 +24,7 @@ def _fig_to_svg(fig: matplotlib.pyplot.Figure) -> str:
 
     return svg
 
+
 def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
     """
     Generates a report on the truss
@@ -411,7 +412,10 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
     analysis += "\n## FORCES AND STRESSES\n"
 
     if with_figures:
-        analysis += _fig_to_svg(trussme.visualize.plot_truss(truss, starting_shape="force")) + "\n"
+        analysis += (
+            _fig_to_svg(trussme.visualize.plot_truss(truss, starting_shape="force"))
+            + "\n"
+        )
 
     data = []
     rows = []
@@ -450,7 +454,11 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
 
     if with_figures:
         analysis += (
-            _fig_to_svg(trussme.visualize.plot_truss(truss, starting_shape="k", deflected_shape="m"))
+            _fig_to_svg(
+                trussme.visualize.plot_truss(
+                    truss, starting_shape="k", deflected_shape="m"
+                )
+            )
             + "\n"
         )
 
