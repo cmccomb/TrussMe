@@ -1,4 +1,4 @@
-from typing import Union, Literal, Any
+from typing import Literal, Any, Optional, Union
 
 import matplotlib.pyplot
 import numpy
@@ -8,11 +8,11 @@ MatplotlibColor = Any
 
 
 def plot_truss(
-        truss,
-        starting_shape: Union[None, Literal["fos", "force"], MatplotlibColor] = "k",
-        deflected_shape: Union[None, Literal["fos", "force"], MatplotlibColor] = None,
-        exaggeration_factor: float = 10,
-        fos_threshold: float = 1.0,
+    truss,
+    starting_shape: Optional[Union[Literal["fos", "force"], MatplotlibColor]] = "k",
+    deflected_shape: Optional[Union[Literal["fos", "force"], MatplotlibColor]] = None,
+    exaggeration_factor: float = 10,
+    fos_threshold: float = 1.0,
 ) -> matplotlib.pyplot.Figure:
     """Plot the truss.
 
@@ -20,11 +20,11 @@ def plot_truss(
     ----------
     truss: Truss
         The truss to plot.
-    starting_shape: : Union[None, Literal["fos", "force"], MatplotlibColor], default="k"
+    starting_shape: None or "fos" or "force" or MatplotlibColor, default="k"
         How to show the starting shape. If None, the starting shape is not shown. If "fos", the members are colored
         green if the factor of safety is above the threshold and red if it is below. If "force", the members are colored
         according to the force in the member. If a color, the members are colored that color.
-    deflected_shape: : Union[None, Literal["fos", "force"], MatplotlibColor], default = None
+    deflected_shape:  None or "fos" or "force" or MatplotlibColor, default = None
         How to show the deflected shape. If None, the starting shape is not shown. If "fos", the members are colored
         green if the factor of safety is above the threshold and red if it is below. If "force", the members are colored
         according to the force in the member. If a color, the members are colored that color.
