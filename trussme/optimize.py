@@ -7,8 +7,8 @@ from trussme import Truss, Goals, read_json, Pipe, Box, Square, Bar
 
 def make_x0(
     truss: Truss,
-    joint_optimization: Literal[None, "full"] = "full",
-    member_optimization: Literal[None, "scaled", "full"] = "full",
+    joint_optimization: Optional[Literal["full"]] = "full",
+    member_optimization: Optional[Literal["scaled", "full"]] = "full",
 ) -> list[float]:
     """
     Returns a vector that encodes the current truss design
@@ -82,8 +82,8 @@ def make_x0(
 
 def make_bounds(
     truss: Truss,
-    joint_optimization: Literal[None, "full"] = "full",
-    member_optimization: Literal[None, "scaled", "full"] = "full",
+    joint_optimization: Optional[Literal["full"]] = "full",
+    member_optimization: Optional[Literal["scaled", "full"]] = "full",
 ) -> tuple[list[float], list[float]]:
     """
     Returns a vector that encodes the current truss design
@@ -168,8 +168,8 @@ def make_bounds(
 
 def make_truss_generator_function(
     truss: Truss,
-    joint_optimization: Literal[None, "full"] = "full",
-    member_optimization: Literal[None, "scaled", "full"] = "full",
+    joint_optimization: Optional[Literal["full"]] = "full",
+    member_optimization: Optional[Literal["scaled", "full"]] = "full",
 ) -> Callable[[list[float]], Truss]:
     """
     Returns a function that takes a list of floats and returns a truss.
@@ -263,8 +263,8 @@ def make_truss_generator_function(
 def make_inequality_constraints(
     truss: Truss,
     goals: Goals,
-    joint_optimization: Literal[None, "full"] = "full",
-    member_optimization: Literal[None, "scaled", "full"] = "full",
+    joint_optimization: Optional[Literal["full"]] = "full",
+    member_optimization: Optional[Literal["scaled", "full"]] = "full",
 ) -> Callable[[list[float]], list[float]]:
     """
     Returns a function that evaluates the inequality constraints.
@@ -325,8 +325,8 @@ def make_inequality_constraints(
 def make_optimization_functions(
     truss: Truss,
     goals: Goals,
-    joint_optimization: Literal[None, "full"] = "full",
-    member_optimization: Literal[None, "scaled", "full"] = "full",
+    joint_optimization: Optional[Literal["full"]] = "full",
+    member_optimization: Optional[Literal["scaled", "full"]] = "full",
 ) -> tuple[
     list[float],
     Callable[[list[float]], float],
