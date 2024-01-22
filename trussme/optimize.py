@@ -1,4 +1,4 @@
-from typing import Callable, Literal
+from typing import Callable, Literal, Optional
 
 import numpy
 
@@ -17,12 +17,15 @@ def make_x0(
     ----------
     truss: Truss
         The truss to configure.
-    joint_optimization: Literal[None, "full"], default = "full"
+    joint_optimization: None or "full", default = "full"
         If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
-    member_optimization: Literal[None, "scaled", "full"], default = "full"
+        This will add up to `3n` variables to the optimization vector, where `n` is the number of joints in the truss.
+    member_optimization: None or "scaled" or "full", default = "full"
         If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
-        optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
-        optimized.
+        optimally scaled based on initial shape, adding `m` variables to the optimization vector, where `m`, is the
+        number of members in the truss. If "full", then member cross-section parameters will be separately
+        optimized, adding up to `km` variables to the optimization vector, where `k` is the number of parameters
+        defining the cross-section of an individual member.
 
     Returns
     -------
@@ -86,18 +89,19 @@ def make_bounds(
     member_optimization: Optional[Literal["scaled", "full"]] = "full",
 ) -> tuple[list[float], list[float]]:
     """
-    Returns a vector that encodes the current truss design
+    Returns a tuple of vectors that represent lower and upper bounds for the variables of the optimization problem.
 
     Parameters
     ----------
     truss: Truss
         The truss to configure.
-    joint_optimization: Literal[None, "full"], default = "full"
-        If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
-    member_optimization: Literal[None, "scaled", "full"], default = "full"
-        If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
-        optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
-        optimized.
+    joint_optimization: None or "full", default = "full"
+        If None, no bounds are added. If "full", infinite bounds (lower = -inf, upper = inf) are added. This will add
+        `n` bounds, where `n` is the number of joints in the truss.
+    member_optimization: None or "scaled" or "full", default = "full"
+        If None, no bounds are added. If "scaled", then 'm' bounds are added, where `m`, is the number of members in the
+        truss. If "full", then up to `km` bounds are added, where `k` is the number of parameters defining the
+        cross-section of an individual member.
 
     Returns
     -------
@@ -178,9 +182,9 @@ def make_truss_generator_function(
     ----------
     truss: Truss
         The truss to configure.
-    joint_optimization: Literal[None, "full"], default = "full"
+    joint_optimization: None or "full", default = "full"
         If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
-    member_optimization: Literal[None, "scaled", "full"], default = "full"
+    member_optimization: None or "scaled" or "full", default = "full"
         If None, no optimization of member cross-section is performed. If "scaled", then member cross-section is
         optimally scaled based on initial shape. If "full", then member cross-section parameters will be separately
         optimized.
