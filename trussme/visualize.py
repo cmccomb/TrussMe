@@ -1,19 +1,24 @@
 from typing import Literal, Any, Optional, Union
 
+import matplotlib.colors
 import matplotlib.pyplot
 import numpy
+
+from matplotlib.figure import Figure
+
+from trussme.truss import Truss
 
 MatplotlibColor = Any
 """Type: New type to represent a matplotlib color, simply an alias of Any"""
 
 
 def plot_truss(
-    truss,
+    truss: Truss,
     starting_shape: Optional[Union[Literal["fos", "force"], MatplotlibColor]] = "k",
     deflected_shape: Optional[Union[Literal["fos", "force"], MatplotlibColor]] = None,
     exaggeration_factor: float = 10,
     fos_threshold: float = 1.0,
-) -> matplotlib.pyplot.Figure:
+) -> Figure:
     """Plot the truss.
 
     Parameters
@@ -39,7 +44,7 @@ def plot_truss(
         A matplotlib figure containing the truss
     """
 
-    fig = matplotlib.pyplot.figure()
+    fig: Figure = matplotlib.pyplot.figure()
     ax = fig.add_subplot(
         111,
     )
@@ -55,37 +60,39 @@ def plot_truss(
     )
 
     for member in truss.members:
+        start_color: MatplotlibColor
         if starting_shape == "fos":
-            color = (
+            start_color = (
                 "g"
                 if numpy.min([member.fos_buckling, member.fos_yielding]) > fos_threshold
                 else "r"
             )
         elif starting_shape == "force":
-            color = force_colormap(member.force / (2 * scaler) + 0.5)
+            start_color = force_colormap(member.force / (2 * scaler) + 0.5)
         elif starting_shape is None:
             break
         else:
-            color = starting_shape
+            start_color = starting_shape
         ax.plot(
             [member.begin_joint.coordinates[0], member.end_joint.coordinates[0]],
             [member.begin_joint.coordinates[1], member.end_joint.coordinates[1]],
-            color=color,
+            color=start_color,
         )
 
     for member in truss.members:
+        def_color: MatplotlibColor
         if deflected_shape == "fos":
-            color = (
+            def_color = (
                 "g"
                 if numpy.min([member.fos_buckling, member.fos_yielding]) > fos_threshold
                 else "r"
             )
         elif deflected_shape == "force":
-            color = force_colormap(member.force / (2 * scaler) + 0.5)
+            def_color = force_colormap(member.force / (2 * scaler) + 0.5)
         elif deflected_shape is None:
             break
         else:
-            color = deflected_shape
+            def_color = deflected_shape
         ax.plot(
             [
                 member.begin_joint.coordinates[0]
@@ -99,7 +106,7 @@ def plot_truss(
                 member.end_joint.coordinates[1]
                 + exaggeration_factor * member.end_joint.deflections[1],
             ],
-            color=color,
+            color=def_color,
         )
 
     return fig
