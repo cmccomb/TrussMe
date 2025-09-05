@@ -107,7 +107,9 @@ class Truss(object):
     @property
     def deflection(self) -> float:
         """float: Largest single joint deflection in the truss"""
-        return max([numpy.linalg.norm(joint.deflections) for joint in self.joints])
+        return float(
+            max([numpy.linalg.norm(joint.deflections) for joint in self.joints])
+        )
 
     @property
     def materials(self) -> list[Material]:
@@ -243,7 +245,9 @@ class Truss(object):
 
         return self.joints[-1].idx
 
-    def add_out_of_plane_support(self, constrained_axis: Literal["x", "y", "z"] = "z"):
+    def add_out_of_plane_support(
+        self, constrained_axis: Literal["x", "y", "z"] = "z"
+    ) -> None:
         for idx in range(self.number_of_joints):
             if constrained_axis == "x":
                 self.joints[idx].translation_restricted[0] = True
@@ -258,7 +262,7 @@ class Truss(object):
         end_joint_index: int,
         material: Material = MATERIAL_LIBRARY[0],
         shape: Shape = Pipe(t=0.002, r=0.02),
-    ):
+    ) -> int:
         """
         Add a member to the truss
 
@@ -277,7 +281,22 @@ class Truss(object):
         -------
         int
             The index of the new member
+
+        Raises
+        ------
+        IndexError
+            If ``begin_joint_index`` or ``end_joint_index`` are out of range.
+        ValueError
+            If ``begin_joint_index`` and ``end_joint_index`` refer to the same joint.
         """
+        if not 0 <= begin_joint_index < self.number_of_joints:
+            msg = f"begin_joint_index {begin_joint_index} is out of range"
+            raise IndexError(msg)
+        if not 0 <= end_joint_index < self.number_of_joints:
+            msg = f"end_joint_index {end_joint_index} is out of range"
+            raise IndexError(msg)
+        if begin_joint_index == end_joint_index:
+            raise ValueError("begin_joint_index and end_joint_index must differ")
 
         member = Member(
             self.joints[begin_joint_index],
@@ -294,7 +313,9 @@ class Truss(object):
         self.joints[begin_joint_index].members.append(self.members[-1])
         self.joints[end_joint_index].members.append(self.members[-1])
 
-    def move_joint(self, joint_index: int, coordinates: list[float]):
+        return member.idx
+
+    def move_joint(self, joint_index: int, coordinates: list[float]) -> None:
         """
         Move a joint to the given coordinates
 
@@ -311,7 +332,7 @@ class Truss(object):
         """
         self.joints[joint_index].coordinates = coordinates
 
-    def set_load(self, joint_index: int, load: list[float]):
+    def set_load(self, joint_index: int, load: list[float]) -> None:
         """Apply loads to a given joint
         Parameters
         ----------
@@ -347,7 +368,7 @@ class Truss(object):
             [[member.begin_joint.idx, member.end_joint.idx] for member in self.members]
         ).T
 
-    def analyze(self):
+    def analyze(self) -> None:
         """
         Analyze the truss
 
@@ -424,6 +445,8 @@ class Truss(object):
         for i in range(self.number_of_members):
             self.members[i].force = forces[i]
 
+        return None
+
     def to_json(self, file_name: Union[None, str] = None) -> Union[str, None]:
         """
         Saves the truss to a JSON file
@@ -479,6 +502,7 @@ class Truss(object):
         else:
             with open(file_name, "w") as f:
                 json.dump(combined, f, indent=4)
+            return None
 
     def to_trs(self, file_name: str) -> None:
         """

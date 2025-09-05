@@ -2,24 +2,24 @@ import json
 import io
 import re
 
-import matplotlib.pyplot
 import numpy
 import pandas
 import scipy
+from matplotlib.figure import Figure
 
 import trussme.visualize
 
 from trussme.truss import Truss, Goals
 
 
-def _fig_to_svg(fig: matplotlib.pyplot.Figure) -> str:
+def _fig_to_svg(fig: Figure) -> str:
     imgdata = io.StringIO()
     fig.savefig(imgdata, format="svg")
     imgdata.seek(0)  # rewind the data
 
     svg = imgdata.getvalue()
     svg = re.sub("<dc:date>(.*?)</dc:date>", "<dc:date></dc:date>", svg)
-    svg = re.sub("url\(#(.*?)\)", "url(#truss)", svg)
+    svg = re.sub(r"url\(#(.*?)\)", "url(#truss)", svg)
     svg = re.sub('<clipPath id="(.*?)">', '<clipPath id="truss">', svg)
 
     return svg
@@ -95,7 +95,7 @@ def report_to_md(
         f.write(report_to_str(truss, goals, with_figures=with_figures))
 
 
-def __generate_summary(truss, goals) -> str:
+def __generate_summary(truss: Truss, goals: Goals) -> str:
     """
     Generate a summary of the analysis.
 
@@ -121,8 +121,8 @@ def __generate_summary(truss, goals) -> str:
     )
     summary += "- The limit state is " + truss.limit_state + ".\n"
 
-    success_string = []
-    failure_string = []
+    success_string: list[str] = []
+    failure_string: list[str] = []
 
     if goals.minimum_fos_buckling < truss.fos_buckling:
         success_string.append("buckling FOS")
@@ -184,8 +184,8 @@ def __generate_summary(truss, goals) -> str:
                 summary += st + ","
             summary += "and " + str(failure_string[-1]) + " were not satisfied.\n"
 
-    data = []
-    rows = [
+    data: list[list[float | str]] = []
+    rows: list[str] = [
         "Minimum FOS for Buckling",
         "Minimum FOS for Yielding",
         "Maximum Mass",
@@ -232,7 +232,9 @@ def __generate_summary(truss, goals) -> str:
     return summary
 
 
-def __generate_instantiation_information(truss, with_figures: bool = True) -> str:
+def __generate_instantiation_information(
+    truss: Truss, with_figures: bool = True
+) -> str:
     """
     Generate a summary of the instantiation information.
 
@@ -255,11 +257,11 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
 
     # Print joint information
     instantiation += "## JOINTS\n"
-    data = []
-    rows = []
+    joint_data: list[list[str]] = []
+    joint_rows: list[str] = []
     for j in truss.joints:
-        rows.append("Joint_" + "{0:02d}".format(j.idx))
-        data.append(
+        joint_rows.append("Joint_" + "{0:02d}".format(j.idx))
+        joint_data.append(
             [
                 str(j.coordinates[0]),
                 str(j.coordinates[1]),
@@ -271,18 +273,18 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
         )
 
     instantiation += pandas.DataFrame(
-        data,
-        index=rows,
+        joint_data,
+        index=joint_rows,
         columns=["X", "Y", "Z", "X Support?", "Y Support?", "Z Support?"],
     ).to_markdown()
 
     # Print member information
     instantiation += "\n## MEMBERS\n"
-    data = []
-    rows = []
+    member_data: list[list[str | float]] = []
+    member_rows: list[str] = []
     for m in truss.members:
-        rows.append("Member_" + "{0:02d}".format(m.idx))
-        data.append(
+        member_rows.append("Member_" + "{0:02d}".format(m.idx))
+        member_data.append(
             [
                 str(m.begin_joint.idx),
                 str(m.end_joint.idx),
@@ -298,8 +300,8 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
         )
 
     instantiation += pandas.DataFrame(
-        data,
-        index=rows,
+        member_data,
+        index=member_rows,
         columns=[
             "Beginning Joint",
             "Ending Joint",
@@ -312,11 +314,11 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
 
     # Print material list
     instantiation += "\n## MATERIALS\n"
-    data = []
-    rows = []
+    material_data: list[list[str]] = []
+    material_rows: list[str] = []
     for mat in truss.materials:
-        rows.append(mat["name"])
-        data.append(
+        material_rows.append(mat["name"])
+        material_data.append(
             [
                 str(mat["density"]),
                 str(mat["elastic_modulus"] / pow(10, 9)),
@@ -325,8 +327,8 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
         )
 
     instantiation += pandas.DataFrame(
-        data,
-        index=rows,
+        material_data,
+        index=material_rows,
         columns=[
             "Density (kg/m3)",
             "Elastic Modulus (GPa)",
@@ -337,7 +339,9 @@ def __generate_instantiation_information(truss, with_figures: bool = True) -> st
     return instantiation
 
 
-def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
+def __generate_stress_analysis(
+    truss: Truss, goals: Goals, with_figures: bool = True
+) -> str:
     """
     Generate a summary of the stress analysis information.
 
@@ -359,11 +363,11 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
 
     # Print information about loads
     analysis += "## LOADING\n"
-    data = []
-    rows = []
+    load_data: list[list[str]] = []
+    load_rows: list[str] = []
     for j in truss.joints:
-        rows.append("Joint_" + "{0:02d}".format(j.idx))
-        data.append(
+        load_rows.append("Joint_" + "{0:02d}".format(j.idx))
+        load_data.append(
             [
                 str(j.loads[0] / pow(10, 3)),
                 format(
@@ -379,32 +383,38 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
         )
 
     analysis += pandas.DataFrame(
-        data, index=rows, columns=["X Load", "Y Load", "Z Load"]
+        load_data, index=load_rows, columns=["X Load", "Y Load", "Z Load"]
     ).to_markdown()
 
     # Print information about reactions
     analysis += "\n## REACTIONS\n"
-    data = []
-    rows = []
+    reaction_data: list[list[str]] = []
+    reaction_rows: list[str] = []
     for j in truss.joints:
-        rows.append("Joint_" + "{0:02d}".format(j.idx))
-        data.append(
+        reaction_rows.append("Joint_" + "{0:02d}".format(j.idx))
+        reaction_data.append(
             [
-                format(j.reactions[0] / pow(10, 3), ".2f")
-                if j.translation_restricted[0] != 0.0
-                else "N/A",
-                format(j.reactions[1] / pow(10, 3), ".2f")
-                if j.translation_restricted[1] != 0.0
-                else "N/A",
-                format(j.reactions[2] / pow(10, 3), ".2f")
-                if j.translation_restricted[2] != 0.0
-                else "N/A",
+                (
+                    format(j.reactions[0] / pow(10, 3), ".2f")
+                    if j.translation_restricted[0] != 0.0
+                    else "N/A"
+                ),
+                (
+                    format(j.reactions[1] / pow(10, 3), ".2f")
+                    if j.translation_restricted[1] != 0.0
+                    else "N/A"
+                ),
+                (
+                    format(j.reactions[2] / pow(10, 3), ".2f")
+                    if j.translation_restricted[2] != 0.0
+                    else "N/A"
+                ),
             ]
         )
 
     analysis += pandas.DataFrame(
-        data,
-        index=rows,
+        reaction_data,
+        index=reaction_rows,
         columns=["X Reaction (kN)", "Y Reaction (kN)", "Z Reaction (kN)"],
     ).to_markdown()
 
@@ -417,11 +427,11 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
             + "\n"
         )
 
-    data = []
-    rows = []
+    member_data: list[list[str | float]] = []
+    member_rows: list[str] = []
     for m in truss.members:
-        rows.append("Member_" + "{0:02d}".format(m.idx))
-        data.append(
+        member_rows.append("Member_" + "{0:02d}".format(m.idx))
+        member_data.append(
             [
                 m.area,
                 format(m.moment_of_inertia, ".2e"),
@@ -429,15 +439,17 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
                 m.fos_yielding,
                 "Yes" if m.fos_yielding > goals.minimum_fos_yielding else "No",
                 m.fos_buckling if m.fos_buckling > 0 else "N/A",
-                "Yes"
-                if m.fos_buckling > goals.minimum_fos_buckling or m.fos_buckling < 0
-                else "No",
+                (
+                    "Yes"
+                    if m.fos_buckling > goals.minimum_fos_buckling or m.fos_buckling < 0
+                    else "No"
+                ),
             ]
         )
 
     analysis += pandas.DataFrame(
-        data,
-        index=rows,
+        member_data,
+        index=member_rows,
         columns=[
             "Area (m^2)",
             "Moment of Inertia (m^4)",
@@ -462,30 +474,38 @@ def __generate_stress_analysis(truss, goals, with_figures: bool = True) -> str:
             + "\n"
         )
 
-    data = []
-    rows = []
+    deflection_data: list[list[str]] = []
+    deflection_rows: list[str] = []
     for j in truss.joints:
-        rows.append("Joint_" + "{0:02d}".format(j.idx))
-        data.append(
+        deflection_rows.append("Joint_" + "{0:02d}".format(j.idx))
+        deflection_data.append(
             [
-                format(j.deflections[0] * pow(10, 3), ".5f")
-                if j.translation_restricted[0] == 0.0
-                else "N/A",
-                format(j.deflections[1] * pow(10, 3), ".5f")
-                if j.translation_restricted[1] == 0.0
-                else "N/A",
-                format(j.deflections[2] * pow(10, 3), ".5f")
-                if j.translation_restricted[2] == 0.0
-                else "N/A",
-                "Yes"
-                if numpy.linalg.norm(j.deflections) < goals.maximum_deflection
-                else "No",
+                (
+                    format(j.deflections[0] * pow(10, 3), ".5f")
+                    if j.translation_restricted[0] == 0.0
+                    else "N/A"
+                ),
+                (
+                    format(j.deflections[1] * pow(10, 3), ".5f")
+                    if j.translation_restricted[1] == 0.0
+                    else "N/A"
+                ),
+                (
+                    format(j.deflections[2] * pow(10, 3), ".5f")
+                    if j.translation_restricted[2] == 0.0
+                    else "N/A"
+                ),
+                (
+                    "Yes"
+                    if numpy.linalg.norm(j.deflections) < goals.maximum_deflection
+                    else "No"
+                ),
             ]
         )
 
     analysis += pandas.DataFrame(
-        data,
-        index=rows,
+        deflection_data,
+        index=deflection_rows,
         columns=[
             "X Deflection(mm)",
             "Y Deflection (mm)",
