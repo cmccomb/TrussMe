@@ -1,5 +1,5 @@
 import abc
-from typing import TypedDict, Literal
+from typing import TypedDict, Literal, cast
 
 import numpy
 from numpy.typing import NDArray
@@ -11,28 +11,64 @@ Material = TypedDict(
         "density": float,
         "elastic_modulus": float,
         "yield_strength": float,
+        "source": str,
     },
 )
-"""TypedDict: New type to contain material properties"""
+"""TypedDict: New type to contain material properties.
+
+The ``source`` field stores a URL pointing to the origin of the
+mechanical property data for traceability.
+"""
 
 MATERIAL_LIBRARY: list[Material] = [
     {
         "name": "A36_Steel",
-        "density": 7800.0,
+        "density": 7850.0,
         "elastic_modulus": 200 * pow(10, 9),
         "yield_strength": 250 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/A36_steel",
     },
     {
         "name": "A992_Steel",
-        "density": 7800.0,
+        "density": 7850.0,
         "elastic_modulus": 200 * pow(10, 9),
         "yield_strength": 345 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/ASTM_A992",
     },
     {
         "name": "6061_T6_Aluminum",
         "density": 2700.0,
         "elastic_modulus": 68.9 * pow(10, 9),
         "yield_strength": 276 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/6061_aluminium_alloy",
+    },
+    {
+        "name": "7075_T6_Aluminum",
+        "density": 2810.0,
+        "elastic_modulus": 71.7 * pow(10, 9),
+        "yield_strength": 503 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/7075_aluminium_alloy",
+    },
+    {
+        "name": "2024_T3_Aluminum",
+        "density": 2780.0,
+        "elastic_modulus": 73.1 * pow(10, 9),
+        "yield_strength": 324 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/2024_aluminium_alloy",
+    },
+    {
+        "name": "304_Stainless_Steel",
+        "density": 8000.0,
+        "elastic_modulus": 193 * pow(10, 9),
+        "yield_strength": 215 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/SAE_304_stainless_steel",
+    },
+    {
+        "name": "Ti_6Al_4V_Titanium",
+        "density": 4430.0,
+        "elastic_modulus": 113.8 * pow(10, 9),
+        "yield_strength": 880 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/Ti-6Al-4V",
     },
 ]
 """list[Material]: List of built-in materials to choose from
@@ -467,17 +503,19 @@ class Member(object):
     @property
     def length(self) -> float:
         """float: The length of the member"""
-        return numpy.linalg.norm(
-            numpy.array(self.begin_joint.coordinates)
-            - numpy.array(self.end_joint.coordinates)
+        return float(
+            numpy.linalg.norm(
+                numpy.array(self.begin_joint.coordinates)
+                - numpy.array(self.end_joint.coordinates)
+            )
         )
 
     @property
-    def direction(self) -> NDArray[float]:
-        """NDArray[float]: The direction of the member as a unit vector"""
-        vector_length = numpy.array(self.end_joint.coordinates) - numpy.array(
-            self.begin_joint.coordinates
-        )
+    def direction(self) -> NDArray[numpy.float64]:
+        """NDArray[numpy.float64]: The direction of the member as a unit vector"""
+        vector_length: NDArray[numpy.float64] = numpy.array(
+            self.end_joint.coordinates
+        ) - numpy.array(self.begin_joint.coordinates)
         return vector_length / numpy.linalg.norm(vector_length)
 
     @property
@@ -486,15 +524,18 @@ class Member(object):
         return self.elastic_modulus * self.area / self.length
 
     @property
-    def stiffness_vector(self) -> NDArray[float]:
-        """NDArray[float]: The vector stiffness vector of the member"""
-        return self.stiffness * self.direction
+    def stiffness_vector(self) -> NDArray[numpy.float64]:
+        """NDArray[numpy.float64]: The vector stiffness vector of the member"""
+        return numpy.multiply(self.stiffness, self.direction)
 
     @property
-    def stiffness_matrix(self) -> NDArray[float]:
-        """NDArray[float]: The local stiffness matrix of the member"""
-        d2 = numpy.outer(self.direction, self.direction)
-        return self.stiffness * numpy.block([[d2, -d2], [-d2, d2]])
+    def stiffness_matrix(self) -> NDArray[numpy.float64]:
+        """NDArray[numpy.float64]: The local stiffness matrix of the member"""
+        d2: NDArray[numpy.float64] = cast(
+            NDArray[numpy.float64], numpy.outer(self.direction, self.direction)
+        )
+        block = numpy.block([[d2, -d2], [-d2, d2]]).astype(numpy.float64)
+        return cast(NDArray[numpy.float64], numpy.multiply(self.stiffness, block))
 
     @property
     def mass(self) -> float:
