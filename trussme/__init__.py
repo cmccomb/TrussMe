@@ -11,9 +11,9 @@ First, let's construct a small truss
 >>> pin = small_truss.add_pinned_joint([0.0, 0.0, 0.0])
 >>> free = small_truss.add_free_joint([2.5, 2.5, 0.0])
 >>> roller = small_truss.add_roller_joint([5.0, 0.0, 0.0])
->>> small_truss.add_member(pin, free)
->>> small_truss.add_member(pin, roller)
->>> small_truss.add_member(roller, free)
+>>> _ = small_truss.add_member(pin, free)
+>>> _ = small_truss.add_member(pin, roller)
+>>> _ = small_truss.add_member(roller, free)
 
 Since our truss is planar, its important to add out-of-plane support
 >>> small_truss.add_out_of_plane_support("z")
@@ -35,10 +35,28 @@ from trussme.components import (
     Material,
     Pipe,
     Box,
-    Pipe,
     Bar,
     Square,
 )
 from trussme.truss import Truss, read_trs, read_json, Goals
 from trussme.report import report_to_str, report_to_md, print_report
 from trussme.optimize import make_truss_generator_function, make_optimization_functions
+
+__all__ = [
+    "Truss",
+    "read_trs",
+    "read_json",
+    "Goals",
+    "report_to_str",
+    "report_to_md",
+    "print_report",
+    "make_truss_generator_function",
+    "make_optimization_functions",
+    "MATERIAL_LIBRARY",
+    "Shape",
+    "Material",
+    "Pipe",
+    "Box",
+    "Bar",
+    "Square",
+]
