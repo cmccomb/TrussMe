@@ -20,6 +20,7 @@ class TestCustomStuff(unittest.TestCase):
             "yield_strength": 200_000_000_000,
             "elastic_modulus": 200_000_000_000_000.0,
             "density": 1_000.0,
+            "source": "https://en.wikipedia.org/wiki/Unobtainium",
         }
 
         truss.add_member(0, 1, material=unobtanium)

@@ -1,5 +1,4 @@
 import doctest
-import filecmp
 import os
 import unittest
 
