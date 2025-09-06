@@ -531,6 +531,8 @@ class Truss(object):
                     + str(material["elastic_modulus"])
                     + "\t"
                     + str(material["yield_strength"])
+                    + "\t"
+                    + material["source"]
                     + "\n"
                 )
 
@@ -610,6 +612,7 @@ def read_trs(file_name: str) -> Truss:
                         "density": float(info[1]),
                         "elastic_modulus": float(info[2]),
                         "yield_strength": float(info[3]),
+                        "source": info[4] if len(info) > 4 else "",
                     }
                 )
 

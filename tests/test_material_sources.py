@@ -22,3 +22,22 @@ def test_every_material_has_source() -> None:
         parsed = urlparse(source)
         assert parsed.scheme in {"http", "https"}
         assert parsed.netloc
+
+
+def test_common_materials_present() -> None:
+    """Selected materials should ship with the library."""
+
+    # Arrange
+    expected = {
+        "A36_Steel",
+        "A992_Steel",
+        "6061_T6_Aluminum",
+        "7075_T6_Aluminum",
+        "304_Stainless_Steel",
+    }
+
+    # Act
+    names = {material["name"] for material in MATERIAL_LIBRARY}
+
+    # Assert
+    assert expected.issubset(names)

@@ -42,6 +42,34 @@ MATERIAL_LIBRARY: list[Material] = [
         "yield_strength": 276 * pow(10, 6),
         "source": "https://en.wikipedia.org/wiki/6061_aluminium_alloy",
     },
+    {
+        "name": "7075_T6_Aluminum",
+        "density": 2810.0,
+        "elastic_modulus": 71.7 * pow(10, 9),
+        "yield_strength": 503 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/7075_aluminium_alloy",
+    },
+    {
+        "name": "2024_T3_Aluminum",
+        "density": 2780.0,
+        "elastic_modulus": 73.1 * pow(10, 9),
+        "yield_strength": 324 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/2024_aluminium_alloy",
+    },
+    {
+        "name": "304_Stainless_Steel",
+        "density": 8000.0,
+        "elastic_modulus": 193 * pow(10, 9),
+        "yield_strength": 215 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/SAE_304_stainless_steel",
+    },
+    {
+        "name": "Ti_6Al_4V_Titanium",
+        "density": 4430.0,
+        "elastic_modulus": 113.8 * pow(10, 9),
+        "yield_strength": 880 * pow(10, 6),
+        "source": "https://en.wikipedia.org/wiki/Ti-6Al-4V",
+    },
 ]
 """list[Material]: List of built-in materials to choose from
 """
