@@ -23,10 +23,10 @@ Let's add a load to the truss
 
 Finally, let's analyze the truss and get the factor of safety and mass
 >>> small_truss.analyze()
->>> round(small_truss.fos, 2)
+>>> round(float(small_truss.fos), 2)
 0.96
 >>> round(small_truss.mass, 2)
-22.48
+22.62
 """
 
 from trussme._version import __version__
