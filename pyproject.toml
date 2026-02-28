@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trussme"
+dynamic = ["version"]
+description = "Truss construction and analysis"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+  { name = "Christopher McComb", email = "ccmcc2012@gmail.com" },
+]
+keywords = ["truss", "structural analysis", "optimization", "engineering"]
+classifiers = [
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = [
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "scipy",
+  "tabulate",
+]
+
+[project.urls]
+Homepage = "https://github.com/cmccomb/TrussMe"
+Source = "https://github.com/cmccomb/TrussMe"
+Issues = "https://github.com/cmccomb/TrussMe/issues"
+
+[project.optional-dependencies]
+dev = [
+  "build>=1",
+  "pytest>=8",
+  "pytest-cov>=6",
+  "twine>=5",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "trussme._version.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["trussme*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=trussme --cov-report=term-missing --cov-report=xml --cov-fail-under=85"
+markers = [
+  "slow: long-running optimization tests",
+]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["trussme"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
