@@ -1,6 +1,13 @@
 .idea/*
+*.egg-info/
+.venv*/
+.coverage*
+.pytest_cache/
+build/
+coverage.xml
+dist/
 tests/report*
 tests/asdf*
 tests/optim*
-tests/__pychache__/*
+tests/__pycache__/*
 trussme/__pycache__/*
