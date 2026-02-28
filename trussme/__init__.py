@@ -29,6 +29,7 @@ Finally, let's analyze the truss and get the factor of safety and mass
 22.48
 """
 
+from trussme._version import __version__
 from trussme.components import (
     MATERIAL_LIBRARY,
     Shape,
@@ -43,6 +44,7 @@ from trussme.report import report_to_str, report_to_md, print_report
 from trussme.optimize import make_truss_generator_function, make_optimization_functions
 
 __all__ = [
+    "__version__",
     "Truss",
     "read_trs",
     "read_json",
