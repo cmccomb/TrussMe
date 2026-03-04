@@ -5,6 +5,12 @@ import numpy
 from trussme import Truss, Goals, read_json, Pipe, Box, Square, Bar
 
 
+def _safe_ratio(numerator: float, denominator: float) -> float:
+    if denominator == 0.0:
+        return 0.0
+    return numerator / denominator
+
+
 def make_x0(
     truss: Truss,
     joint_optimization: Optional[Literal["full"]] = "full",
@@ -223,21 +229,27 @@ def make_truss_generator_function(
                 shape_name: str = configured_truss.members[i].shape.name()
                 p = configured_truss.members[i].shape._params
                 if shape_name == "pipe":
+                    thickness_ratio = _safe_ratio(p["t"], p["r"])
                     configured_truss.members[i].shape = Pipe(
-                        r=x[idx], t=x[idx] * p["t"] / p["r"]
+                        r=x[idx], t=x[idx] * thickness_ratio
                     )
                     idx += 1
                 elif shape_name == "box":
+                    height_ratio = _safe_ratio(p["h"], p["w"])
+                    thickness_ratio = _safe_ratio(p["t"], p["w"])
                     configured_truss.members[i].shape = Box(
-                        w=x[idx], h=x[idx] * p["h"] / p["w"], t=x[idx] * p["t"] / p["w"]
+                        w=x[idx],
+                        h=x[idx] * height_ratio,
+                        t=x[idx] * thickness_ratio,
                     )
                     idx += 1
                 elif shape_name == "bar":
                     configured_truss.members[i].shape = Bar(r=x[idx])
                     idx += 1
                 elif shape_name == "square":
+                    height_ratio = _safe_ratio(p["h"], p["w"])
                     configured_truss.members[i].shape = Square(
-                        w=x[idx], h=x[idx] * p["h"] / p["w"]
+                        w=x[idx], h=x[idx] * height_ratio
                     )
                     idx += 1
 
