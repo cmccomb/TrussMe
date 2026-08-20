@@ -52,7 +52,9 @@ def plot_truss(
     ax.axis("equal")
     ax.set_axis_off()
 
-    scaler: float = numpy.max(numpy.abs([member.force for member in truss.members]))
+    scaler = max((abs(member.force) for member in truss.members), default=0.0)
+    if scaler == 0.0:
+        scaler = 1.0
 
     force_colormap = matplotlib.colors.LinearSegmentedColormap.from_list(
         "force",

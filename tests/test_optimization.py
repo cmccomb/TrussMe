@@ -276,6 +276,46 @@ def test_make_truss_generator_function_scaled_updates_other_shapes(
         assert generated.members[0].shape._params[key] == pytest.approx(value)
 
 
+@pytest.mark.parametrize(
+    ("shape_factory", "expected"),
+    [
+        (
+            lambda: trussme.Pipe(r=0.0, t=0.0),
+            {"r": 0.04, "t": 0.0},
+        ),
+        (
+            lambda: trussme.Box(w=0.0, h=0.0, t=0.0),
+            {"w": 0.04, "h": 0.0, "t": 0.0},
+        ),
+        (
+            lambda: trussme.Square(w=0.0, h=0.0),
+            {"w": 0.04, "h": 0.0},
+        ),
+    ],
+)
+def test_make_truss_generator_function_scaled_handles_zero_reference_dimensions(
+    shape_factory,
+    expected,
+) -> None:
+    truss = build_triangle_truss(shape=shape_factory)
+    generator = trussme.make_truss_generator_function(
+        truss,
+        joint_optimization=None,
+        member_optimization="scaled",
+    )
+    x0 = optimize.make_x0(
+        truss,
+        joint_optimization=None,
+        member_optimization="scaled",
+    )
+    x0[0] = 0.04
+
+    generated = generator(x0)
+
+    for key, value in expected.items():
+        assert generated.members[0].shape._params[key] == pytest.approx(value)
+
+
 def test_make_truss_generator_function_full_updates_shapes() -> None:
     truss = build_optimization_truss()
     generator = trussme.make_truss_generator_function(

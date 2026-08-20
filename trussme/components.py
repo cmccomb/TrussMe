@@ -516,12 +516,18 @@ class Member(object):
         vector_length: NDArray[numpy.float64] = numpy.array(
             self.end_joint.coordinates
         ) - numpy.array(self.begin_joint.coordinates)
-        return vector_length / numpy.linalg.norm(vector_length)
+        magnitude = float(numpy.linalg.norm(vector_length))
+        if magnitude == 0.0:
+            return numpy.zeros_like(vector_length, dtype=numpy.float64)
+        return cast(NDArray[numpy.float64], vector_length / magnitude)
 
     @property
     def stiffness(self) -> float:
         """float: The axial stiffness of the member"""
-        return self.elastic_modulus * self.area / self.length
+        length = self.length
+        if length == 0.0:
+            raise ValueError("Member length must be greater than zero")
+        return self.elastic_modulus * self.area / length
 
     @property
     def stiffness_vector(self) -> NDArray[numpy.float64]:
@@ -554,19 +560,28 @@ class Member(object):
     @property
     def fos_yielding(self) -> float:
         """float: The factor of safety against yielding"""
-        return self.yield_strength / abs(self.force / self.area)
+        applied_force = abs(self.force)
+        if applied_force == 0.0:
+            return numpy.inf
+        return self.yield_strength * abs(self.area) / applied_force
 
     @property
     def fos_buckling(self) -> float:
         """float: The factor of safety against buckling"""
+        compressive_force = -self.force
+        if compressive_force <= 0.0:
+            return numpy.inf
+
+        length = self.length
+        if length == 0.0:
+            return numpy.inf
+
         fos = (
-            -(
-                (numpy.pi**2)
-                * self.elastic_modulus
-                * self.moment_of_inertia
-                / (self.length**2)
-            )
-            / self.force
+            (numpy.pi**2)
+            * self.elastic_modulus
+            * self.moment_of_inertia
+            / (length**2)
+            / compressive_force
         )
 
         return fos if fos > 0 else numpy.inf
