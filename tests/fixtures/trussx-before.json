@@ -1,0 +1,82 @@
+{
+  "materials": [
+    {
+      "name": "A36_Steel",
+      "density": 7850.0,
+      "elastic_modulus": 200000000000.0,
+      "yield_strength": 250000000.0,
+      "source": "https://en.wikipedia.org/wiki/A36_steel"
+    }
+  ],
+  "joints": [
+    {
+      "coordinates": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "loads": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "translation": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "coordinates": [
+        0.0,
+        2.0,
+        0.0
+      ],
+      "loads": [
+        0.0,
+        -300.0,
+        0.0
+      ],
+      "translation": [
+        true,
+        false,
+        true
+      ]
+    }
+  ],
+  "members": [
+    {
+      "begin_joint": 0,
+      "end_joint": 1,
+      "material": "A36_Steel",
+      "shape": {
+        "name": "square",
+        "parameters": {
+          "w": 0.006,
+          "h": 0.012
+        }
+      }
+    }
+  ],
+  "trussx": {
+    "gravity": [
+      0.0,
+      -9.80665,
+      0.0
+    ],
+    "buckling_axis": "Weak",
+    "member_buckling": [
+      {
+        "transverse_reference": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "effective_length_factors": [
+          1.0,
+          1.0
+        ]
+      }
+    ]
+  }
+}

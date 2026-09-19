@@ -1,4 +1,5 @@
 import abc
+from dataclasses import dataclass
 from typing import TypedDict, Literal, cast
 
 import numpy
@@ -111,7 +112,8 @@ class Shape(abc.ABC):
     @abc.abstractmethod
     def moi(self) -> float:
         """
-        The moment of inertia of the shape
+        Legacy scalar inertia (larger principal inertia for rectangles).
+        Use principal_inertias() for directional buckling checks.
 
         Returns
         -------
@@ -119,6 +121,31 @@ class Shape(abc.ABC):
             The moment of inertia of the shape
         """
         pass
+
+    def principal_inertias(self) -> tuple[float, float]:
+        """Inertias for the two transverse deflection directions.
+
+        Legacy subclasses with only ``moi`` are treated as isotropic. Override
+        this method for an asymmetric section. Rectangles return height first.
+        """
+        return (self.moi(), self.moi())
+
+    def validate(self) -> None:
+        """Reject nonphysical section properties before structural analysis."""
+        values = [self.area(), *self.principal_inertias()]
+        if not all(numpy.isfinite(v) and v > 0 for v in values):
+            raise ValueError(
+                "Section area and principal inertias must be finite and positive"
+            )
+        if self.name() in ("pipe", "bar", "square", "box", "custom") and not all(
+            numpy.isfinite(v) and v > 0 for v in self._params.values()
+        ):
+            raise ValueError("Section dimensions must be finite and positive")
+        p = self._params
+        if self.name() == "pipe" and p["t"] > p["r"]:
+            raise ValueError("Pipe thickness must not exceed its radius")
+        if self.name() == "box" and 2 * p["t"] > min(p["w"], p["h"]):
+            raise ValueError("Box thickness must not exceed half its smaller dimension")
 
     @abc.abstractmethod
     def area(self) -> float:
@@ -248,6 +275,10 @@ class Square(Shape):
     def area(self) -> float:
         return self._params["w"] * self._params["h"]
 
+    def principal_inertias(self) -> tuple[float, float]:
+        w, h = self._params["w"], self._params["h"]
+        return (w * h**3 / 12, h * w**3 / 12)
+
     def name(self) -> str:
         return "square"
 
@@ -299,6 +330,70 @@ class Box(Shape):
 
     def name(self) -> str:
         return "box"
+
+    def principal_inertias(self) -> tuple[float, float]:
+        w, h, t = self._params["w"], self._params["h"], self._params["t"]
+        return (
+            (w * h**3 - (w - 2 * t) * (h - 2 * t) ** 3) / 12,
+            (h * w**3 - (h - 2 * t) * (w - 2 * t) ** 3) / 12,
+        )
+
+
+class Custom(Shape):
+    """Section defined by area and two principal inertias in SI units."""
+
+    def __init__(self, area: float, i1: float, i2: float):
+        self._params = {"area": area, "i1": i1, "i2": i2}
+
+    def area(self) -> float:
+        return self._params["area"]
+
+    def moi(self) -> float:
+        return max(self.principal_inertias())
+
+    def principal_inertias(self) -> tuple[float, float]:
+        return (self._params["i1"], self._params["i2"])
+
+    def name(self) -> str:
+        return "custom"
+
+
+@dataclass(frozen=True)
+class BucklingSettings:
+    """Section orientation and caller-supplied effective length factors.
+
+    The projected reference is the first deflection direction; the second is
+    member direction crossed with the first. K factors do not add physical braces.
+    """
+
+    transverse_reference: tuple[float, float, float] | None = None
+    effective_length_factors: tuple[float, float] = (1.0, 1.0)
+
+    def __post_init__(self):
+        factors = tuple(self.effective_length_factors)
+        if len(factors) != 2 or not all(numpy.isfinite(k) and k > 0 for k in factors):
+            raise ValueError(
+                "Two finite positive effective length factors are required"
+            )
+        object.__setattr__(self, "effective_length_factors", factors)
+        if self.transverse_reference is not None:
+            ref = tuple(self.transverse_reference)
+            if len(ref) != 3 or not all(numpy.isfinite(v) for v in ref) or not any(ref):
+                raise ValueError(
+                    "Transverse reference must be a finite nonzero 3-vector"
+                )
+            object.__setattr__(self, "transverse_reference", ref)
+
+
+@dataclass(frozen=True)
+class BucklingMode:
+    """Euler member capacity check, not a geometric-stiffness eigenmode."""
+
+    direction: tuple[float, float, float]
+    moment_of_inertia: float
+    effective_length: float
+    critical_load: float
+    factor_of_safety: float
 
 
 class Joint(object):
@@ -460,6 +555,8 @@ class Member(object):
 
         # Variables to store information about truss state
         self._force: float = 0
+        self.buckling = BucklingSettings()
+        self.buckling_axis: Literal["weak", "strong"] = "weak"
 
         # Variable to store location in truss
         self.begin_joint: Joint = begin_joint
@@ -555,6 +652,8 @@ class Member(object):
 
     @force.setter
     def force(self, new_force: float):
+        if not numpy.isfinite(new_force):
+            raise ValueError("Member force must be finite")
         self._force = new_force
 
     @property
@@ -567,21 +666,59 @@ class Member(object):
 
     @property
     def fos_buckling(self) -> float:
-        """float: The factor of safety against buckling"""
-        compressive_force = -self.force
-        if compressive_force <= 0.0:
-            return numpy.inf
+        """Scalar safety; weak governs by default, strong is legacy compatibility."""
+        modes = self.buckling_modes
+        select = min if self.buckling_axis == "weak" else max
+        return select(m.factor_of_safety for m in modes)
 
+    @property
+    def buckling_modes(self) -> tuple[BucklingMode, BucklingMode]:
+        """Both transverse Euler capacities and global deflection directions."""
+        self.shape.validate()
         length = self.length
-        if length == 0.0:
-            return numpy.inf
-
-        fos = (
-            (numpy.pi**2)
-            * self.elastic_modulus
-            * self.moment_of_inertia
-            / (length**2)
-            / compressive_force
+        if not numpy.isfinite(length) or length <= 0:
+            raise ValueError("Member length must be greater than zero and finite")
+        if not numpy.isfinite(self.elastic_modulus) or self.elastic_modulus <= 0:
+            raise ValueError("Elastic modulus must be finite and positive")
+        axis = self.direction
+        reference = self.buckling.transverse_reference
+        ref = (
+            numpy.eye(3)[numpy.argmin(numpy.abs(axis))]
+            if reference is None
+            else numpy.array(reference, dtype=float)
         )
+        ref = ref / numpy.max(numpy.abs(ref))
+        first = ref - numpy.dot(ref, axis) * axis
+        norm = numpy.linalg.norm(first)
+        if norm <= 1e-12:
+            raise ValueError("Transverse reference must not be parallel to the member")
+        first /= norm
+        second = numpy.cross(axis, first)
+        modes = []
+        for direction, inertia, k in zip(
+            (first, second),
+            self.shape.principal_inertias(),
+            self.buckling.effective_length_factors,
+        ):
+            effective = k * length
+            critical = numpy.pi**2 * self.elastic_modulus * inertia / effective**2
+            if not numpy.isfinite(critical) or critical <= 0:
+                raise ValueError("Euler critical load must be finite and positive")
+            modes.append(
+                BucklingMode(
+                    tuple(float(v) for v in direction),
+                    inertia,
+                    effective,
+                    critical,
+                    critical / -self.force if self.force < 0 else numpy.inf,
+                )
+            )
+        return (modes[0], modes[1])
 
-        return fos if fos > 0 else numpy.inf
+    @property
+    def governing_buckling(self) -> BucklingMode:
+        """Lower capacity mode, independent of the legacy scalar convention.
+
+        Equal capacities have no unique governing direction; the first is returned.
+        """
+        return min(self.buckling_modes, key=lambda mode: mode.critical_load)

@@ -38,6 +38,9 @@ from trussme.components import (
     Box,
     Bar,
     Square,
+    Custom,
+    BucklingSettings,
+    BucklingMode,
 )
 from trussme.truss import Truss, read_trs, read_json, Goals
 from trussme.report import report_to_str, report_to_md, print_report
@@ -61,4 +64,7 @@ __all__ = [
     "Box",
     "Bar",
     "Square",
+    "Custom",
+    "BucklingSettings",
+    "BucklingMode",
 ]

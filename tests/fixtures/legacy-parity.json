@@ -1,0 +1,1640 @@
+{
+  "source": "https://github.com/cmccomb/TrussMe",
+  "commit": "52106383eb91cc8c29d6955bbeed440bdf6c2708",
+  "numpy_version": "2.5.3",
+  "scipy_version": "1.18.1",
+  "notes": "Self-weight enabled. TrussMe uses strong-axis inertia. Reactions corrected to K*u-f. Null safety denotes infinity.",
+  "cases": [
+    {
+      "name": "reference_11_joints",
+      "model": {
+        "materials": [
+          {
+            "name": "A36_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 250000000,
+            "source": "https://en.wikipedia.org/wiki/A36_steel"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              3.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              4.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              5.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              0.5,
+              1.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              1.5,
+              1.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -20000,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.5,
+              1.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -20000,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              3.5,
+              1.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -20000,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              4.5,
+              1.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 1,
+            "end_joint": 2,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 3,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 3,
+            "end_joint": 4,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 4,
+            "end_joint": 5,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 6,
+            "end_joint": 7,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 7,
+            "end_joint": 8,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 8,
+            "end_joint": 9,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 9,
+            "end_joint": 10,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 0,
+            "end_joint": 6,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 6,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 1,
+            "end_joint": 7,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 7,
+            "end_joint": 2,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 8,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 8,
+            "end_joint": 3,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 3,
+            "end_joint": 9,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 9,
+            "end_joint": 4,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 4,
+            "end_joint": 10,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 10,
+            "end_joint": 5,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 37.82348993687949,
+        "deflection": 0.006599125196759221,
+        "fos_yielding": 1.1883628355315625,
+        "fos_buckling": 1.6983115711754029,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.00042045930682448946,
+            -0.003658343910257166,
+            0.0
+          ],
+          [
+            -0.00021022965341224446,
+            -0.006200775174080751,
+            0.0
+          ],
+          [
+            0.00021022965341224514,
+            -0.00620077517408075,
+            0.0
+          ],
+          [
+            0.00042045930682448957,
+            -0.0036583439102571644,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0016832752810059474,
+            -0.0017244923225242946,
+            0.0
+          ],
+          [
+            0.0010518672939152183,
+            -0.005275352151494368,
+            0.0
+          ],
+          [
+            -8.61468191548822e-20,
+            -0.006599125196759221,
+            0.0
+          ],
+          [
+            -0.0010518672939152183,
+            -0.005275352151494366,
+            0.0
+          ],
+          [
+            -0.0016832752810059467,
+            -0.0017244923225242935,
+            0.0
+          ]
+        ],
+        "physical_reactions": [
+          [
+            35160.85829562589,
+            30185.460863794753,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -35160.85829562588,
+            30185.460863794728,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -20077.86041568973,
+          10038.93020784488,
+          20077.86041568974,
+          10038.930207844853,
+          -20077.860415689738,
+          -30151.12574366471,
+          -50228.98615935443,
+          -50228.98615935443,
+          -30151.125743664677,
+          -33726.60856402248,
+          33693.358196955676,
+          -33649.83290139602,
+          11245.62783083841,
+          -11202.102535278787,
+          -11202.102535278806,
+          11245.627830838435,
+          -33649.83290139602,
+          33693.358196955676,
+          -33726.60856402245
+        ],
+        "member_yielding": [
+          2.9729393063994713,
+          5.945878612798934,
+          2.97293930639947,
+          5.945878612798951,
+          2.9729393063994705,
+          1.9797025466204365,
+          1.1883628355315625,
+          1.1883628355315625,
+          1.9797025466204388,
+          1.76982693960756,
+          1.7715734973428465,
+          1.7738649874760504,
+          5.307863759684449,
+          5.32848723980373,
+          5.328487239803722,
+          5.3078637596844365,
+          1.7738649874760504,
+          1.7715734973428465,
+          1.7698269396075617
+        ],
+        "member_buckling": [
+          4.248683208106183,
+          null,
+          null,
+          null,
+          4.248683208106181,
+          2.829229964017671,
+          1.6983115711754029,
+          1.6983115711754029,
+          2.829229964017674,
+          2.0234342445884335,
+          null,
+          2.0280509244205316,
+          null,
+          6.092032679343283,
+          6.092032679343272,
+          null,
+          2.0280509244205316,
+          null,
+          2.0234342445884352
+        ]
+      }
+    },
+    {
+      "name": "triangle_pipe",
+      "model": {
+        "materials": [
+          {
+            "name": "A36_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 250000000,
+            "source": "https://en.wikipedia.org/wiki/A36_steel"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.5,
+              2.5,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -10000.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              5.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              true,
+              true
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 0,
+            "end_joint": 2,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 22.624490690184746,
+        "deflection": 0.0010425140359417583,
+        "fos_yielding": 8.38697536516946,
+        "fos_buckling": 0.9588786780568777,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0002634690809257328,
+            -0.001008672175948025,
+            0.0
+          ],
+          [
+            0.0005269381618514656,
+            0.0,
+            0.0
+          ]
+        ],
+        "physical_reactions": [
+          [
+            2.2737367544323206e-12,
+            5110.935230813451,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            5110.935230813451,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -7117.0186890134,
+          5032.492176832764,
+          -7117.0186890134
+        ],
+        "member_yielding": [
+          8.38697536516946,
+          11.8609743087117,
+          8.38697536516946
+        ],
+        "member_buckling": [
+          0.9588786780568777,
+          null,
+          0.9588786780568777
+        ]
+      }
+    },
+    {
+      "name": "triangle_bar",
+      "model": {
+        "materials": [
+          {
+            "name": "A36_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 250000000,
+            "source": "https://en.wikipedia.org/wiki/A36_steel"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.5,
+              2.5,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -10000.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              5.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              true,
+              true
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "bar",
+              "parameters": {
+                "r": 0.012
+              }
+            }
+          },
+          {
+            "begin_joint": 0,
+            "end_joint": 2,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "bar",
+              "parameters": {
+                "r": 0.012
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "bar",
+              "parameters": {
+                "r": 0.012
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 42.86745604456059,
+        "deflection": 0.0005533942544778289,
+        "fos_yielding": 15.79983793929544,
+        "fos_buckling": 0.3592814977432371,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.00013985641496437387,
+            -0.000535430092619368,
+            0.0
+          ],
+          [
+            0.00027971282992874774,
+            0.0,
+            0.0
+          ]
+        ],
+        "physical_reactions": [
+          [
+            2.2737367544323206e-13,
+            5210.193068909695,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            5210.193068909695,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -7158.132631724695,
+          5061.564124525238,
+          -7158.132631724695
+        ],
+        "member_yielding": [
+          15.79983793929544,
+          22.34434509704859,
+          15.79983793929544
+        ],
+        "member_buckling": [
+          0.3592814977432371,
+          null,
+          0.3592814977432371
+        ]
+      }
+    },
+    {
+      "name": "triangle_rectangle",
+      "model": {
+        "materials": [
+          {
+            "name": "A36_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 250000000,
+            "source": "https://en.wikipedia.org/wiki/A36_steel"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.5,
+              2.5,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -10000.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              5.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              true,
+              true
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "square",
+              "parameters": {
+                "w": 0.02,
+                "h": 0.04
+              }
+            }
+          },
+          {
+            "begin_joint": 0,
+            "end_joint": 2,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "square",
+              "parameters": {
+                "w": 0.02,
+                "h": 0.04
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "square",
+              "parameters": {
+                "w": 0.02,
+                "h": 0.04
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 75.80630585851519,
+        "deflection": 0.0003158617742316752,
+        "fos_yielding": 27.681537465416103,
+        "fos_buckling": 2.331356364779441,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            7.982608241932583e-05,
+            -0.00030560833919637196,
+            0.0
+          ],
+          [
+            0.00015965216483865166,
+            0.0,
+            0.0
+          ]
+        ],
+        "physical_reactions": [
+          [
+            -2.0463630789890885e-12,
+            5371.702954673703,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            5371.702954673703,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -7225.032216865475,
+          5108.869274836853,
+          -7225.032216865475
+        ],
+        "member_yielding": [
+          27.681537465416103,
+          39.14760571093039,
+          27.681537465416103
+        ],
+        "member_buckling": [
+          2.331356364779441,
+          null,
+          2.331356364779441
+        ]
+      }
+    },
+    {
+      "name": "triangle_box",
+      "model": {
+        "materials": [
+          {
+            "name": "A36_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 250000000,
+            "source": "https://en.wikipedia.org/wiki/A36_steel"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.5,
+              2.5,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -10000.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              5.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              true,
+              true
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "box",
+              "parameters": {
+                "w": 0.03,
+                "h": 0.05,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 0,
+            "end_joint": 2,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "box",
+              "parameters": {
+                "w": 0.03,
+                "h": 0.05,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 1,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "box",
+              "parameters": {
+                "w": 0.03,
+                "h": 0.05,
+                "t": 0.002
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 28.80639622623577,
+        "deflection": 0.0008202330875212446,
+        "fos_yielding": 10.659823006787024,
+        "fos_buckling": 2.2504669251693503,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.00020729318768248373,
+            -0.0007936068624987237,
+            0.0
+          ],
+          [
+            0.00041458637536496745,
+            0.0,
+            0.0
+          ]
+        ],
+        "physical_reactions": [
+          [
+            0.0,
+            5141.247122776008,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            5141.247122776008,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -7129.574285765478,
+          5041.370324438004,
+          -7129.574285765478
+        ],
+        "member_yielding": [
+          10.659823006787024,
+          15.075266268694959,
+          10.659823006787024
+        ],
+        "member_buckling": [
+          2.2504669251693503,
+          null,
+          2.2504669251693503
+        ]
+      }
+    },
+    {
+      "name": "mixed_materials_support_loads",
+      "model": {
+        "materials": [
+          {
+            "name": "6061_T6_Aluminum",
+            "density": 2700.0,
+            "elastic_modulus": 68900000000.0,
+            "yield_strength": 276000000,
+            "source": "https://en.wikipedia.org/wiki/6061_aluminium_alloy"
+          },
+          {
+            "name": "7075_T6_Aluminum",
+            "density": 2810.0,
+            "elastic_modulus": 71700000000.0,
+            "yield_strength": 503000000,
+            "source": "https://en.wikipedia.org/wiki/7075_aluminium_alloy"
+          },
+          {
+            "name": "2024_T3_Aluminum",
+            "density": 2780.0,
+            "elastic_modulus": 73100000000.0,
+            "yield_strength": 324000000,
+            "source": "https://en.wikipedia.org/wiki/2024_aluminium_alloy"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              300.0,
+              -400.0,
+              500.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.5,
+              2.5,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              -10000.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              5.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              false,
+              true,
+              true
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 1,
+            "material": "6061_T6_Aluminum",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 0,
+            "end_joint": 2,
+            "material": "7075_T6_Aluminum",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 1,
+            "material": "2024_T3_Aluminum",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 7.980522350713667,
+        "deflection": 0.0029023833318713114,
+        "fos_yielding": 9.298300439854167,
+        "fos_buckling": 0.33172791706721205,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0006699508185343702,
+            -0.0028240033473545213,
+            0.0
+          ],
+          [
+            0.0014636638890666153,
+            0.0,
+            0.0
+          ]
+        ],
+        "physical_reactions": [
+          [
+            -299.99999999999886,
+            5438.965529523045,
+            -500.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            5039.296659987583,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -7087.106716755325,
+          5011.341218410417,
+          -7087.1067167553265
+        ],
+        "member_yielding": [
+          9.298300439854167,
+          23.965002327166395,
+          10.915396168524452
+        ],
+        "member_buckling": [
+          0.33172791706721205,
+          null,
+          0.3519493575850971
+        ]
+      }
+    },
+    {
+      "name": "space_tripod",
+      "model": {
+        "materials": [
+          {
+            "name": "A36_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 250000000,
+            "source": "https://en.wikipedia.org/wiki/A36_steel"
+          },
+          {
+            "name": "A992_Steel",
+            "density": 7850.0,
+            "elastic_modulus": 200000000000,
+            "yield_strength": 345000000,
+            "source": "https://en.wikipedia.org/wiki/ASTM_A992"
+          },
+          {
+            "name": "6061_T6_Aluminum",
+            "density": 2700.0,
+            "elastic_modulus": 68900000000.0,
+            "yield_strength": 276000000,
+            "source": "https://en.wikipedia.org/wiki/6061_aluminium_alloy"
+          }
+        ],
+        "joints": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              2.0,
+              0.0,
+              0.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              2.0
+            ],
+            "loads": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "translation": [
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "coordinates": [
+              0.5,
+              2.0,
+              0.6
+            ],
+            "loads": [
+              1000.0,
+              -5000.0,
+              800.0
+            ],
+            "translation": [
+              false,
+              false,
+              false
+            ]
+          }
+        ],
+        "members": [
+          {
+            "begin_joint": 0,
+            "end_joint": 3,
+            "material": "A36_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 1,
+            "end_joint": 3,
+            "material": "A992_Steel",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          },
+          {
+            "begin_joint": 2,
+            "end_joint": 3,
+            "material": "6061_T6_Aluminum",
+            "shape": {
+              "name": "pipe",
+              "parameters": {
+                "r": 0.02,
+                "t": 0.002
+              }
+            }
+          }
+        ]
+      },
+      "expected": {
+        "mass": 10.449452800468617,
+        "deflection": 0.000593438276939496,
+        "fos_yielding": 22.842105383637037,
+        "fos_buckling": 1.6403366588373383,
+        "joint_displacements": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.00017681069935081463,
+            -0.00022471891708228183,
+            0.0005200080513197467
+          ]
+        ],
+        "physical_reactions": [
+          [
+            118.26416960469646,
+            492.7888218808204,
+            141.917003525636
+          ],
+          [
+            -1697.1069493411603,
+            2286.437133539227,
+            678.8427797364639
+          ],
+          [
+            578.8427797364642,
+            2323.2481708856667,
+            -1620.7597832620997
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "member_forces": [
+          -507.84788145526227,
+          -2908.8322898440506,
+          -2884.937548222047
+        ],
+        "member_yielding": [
+          117.53570822656728,
+          28.318084773990357,
+          22.842105383637037
+        ],
+        "member_buckling": [
+          36.43654676249074,
+          4.436613934526888,
+          1.6403366588373383
+        ]
+      }
+    }
+  ]
+}

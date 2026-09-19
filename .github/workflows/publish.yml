@@ -19,6 +19,15 @@ jobs:
         run: python -m pip install --upgrade pip
       - name: Install build tooling
         run: python -m pip install '.[dev]'
+      - name: Verify tag matches package version
+        run: |
+          python - <<'PY'
+          import os
+          from trussme import __version__
+          assert os.environ["GITHUB_REF_NAME"] == "v" + __version__
+          PY
+      - name: Run release tests
+        run: pytest
       - name: Build distributions
         run: python -m build
       - name: Check built distributions

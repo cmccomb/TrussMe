@@ -1,0 +1,34 @@
+[
+  {
+    "buckling_fos": 0.3488603100317583,
+    "critical_load_n": 106.59172753176507,
+    "direction": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "effective_length_factors": [
+      1.0,
+      1.0
+    ],
+    "feasible": false,
+    "mass_kg": 1.1304,
+    "stage": "before"
+  },
+  {
+    "buckling_fos": 1.3954412401270333,
+    "critical_load_n": 426.3669101270603,
+    "direction": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "effective_length_factors": [
+      1.0,
+      0.4
+    ],
+    "feasible": true,
+    "mass_kg": 1.1304,
+    "stage": "after"
+  }
+]

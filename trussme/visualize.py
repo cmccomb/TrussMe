@@ -18,6 +18,8 @@ def plot_truss(
     deflected_shape: Optional[Union[Literal["fos", "force"], MatplotlibColor]] = None,
     exaggeration_factor: float = 10,
     fos_threshold: float = 1.0,
+    projection: Literal["xy", "xz", "yz"] = "xy",
+    buckling_directions: bool = False,
 ) -> Figure:
     """Plot the truss.
 
@@ -38,12 +40,22 @@ def plot_truss(
     fos_threshold: float, default=1.0
         The threshold for the factor of safety. If the factor of safety is below this value, the member is colored red.
 
+    projection: "xy", "xz", or "yz", default="xy"
+        Global coordinate plane to display.
+    buckling_directions: bool, default=False
+        Mark the governing Euler capacity direction for compressed members.
+        A circle with a dot denotes a direction normal to the projection plane.
+        These marks are not eigenmode or post-buckling shapes.
+
     Returns
     -------
     Figure
         A matplotlib figure containing the truss
     """
 
+    if projection not in ("xy", "xz", "yz"):
+        raise ValueError("Projection must be xy, xz, or yz")
+    a, b = ("xyz".index(axis) for axis in projection)
     fig: Figure = matplotlib.pyplot.figure()
     ax = fig.add_subplot(
         111,
@@ -66,7 +78,10 @@ def plot_truss(
         if starting_shape == "fos":
             start_color = (
                 "g"
-                if numpy.min([member.fos_buckling, member.fos_yielding]) > fos_threshold
+                if numpy.min(
+                    [member.governing_buckling.factor_of_safety, member.fos_yielding]
+                )
+                > fos_threshold
                 else "r"
             )
         elif starting_shape == "force":
@@ -76,8 +91,8 @@ def plot_truss(
         else:
             start_color = starting_shape
         ax.plot(
-            [member.begin_joint.coordinates[0], member.end_joint.coordinates[0]],
-            [member.begin_joint.coordinates[1], member.end_joint.coordinates[1]],
+            [member.begin_joint.coordinates[a], member.end_joint.coordinates[a]],
+            [member.begin_joint.coordinates[b], member.end_joint.coordinates[b]],
             color=start_color,
         )
 
@@ -86,7 +101,10 @@ def plot_truss(
         if deflected_shape == "fos":
             def_color = (
                 "g"
-                if numpy.min([member.fos_buckling, member.fos_yielding]) > fos_threshold
+                if numpy.min(
+                    [member.governing_buckling.factor_of_safety, member.fos_yielding]
+                )
+                > fos_threshold
                 else "r"
             )
         elif deflected_shape == "force":
@@ -97,18 +115,39 @@ def plot_truss(
             def_color = deflected_shape
         ax.plot(
             [
-                member.begin_joint.coordinates[0]
-                + exaggeration_factor * member.begin_joint.deflections[0],
-                member.end_joint.coordinates[0]
-                + exaggeration_factor * member.end_joint.deflections[0],
+                member.begin_joint.coordinates[a]
+                + exaggeration_factor * member.begin_joint.deflections[a],
+                member.end_joint.coordinates[a]
+                + exaggeration_factor * member.end_joint.deflections[a],
             ],
             [
-                member.begin_joint.coordinates[1]
-                + exaggeration_factor * member.begin_joint.deflections[1],
-                member.end_joint.coordinates[1]
-                + exaggeration_factor * member.end_joint.deflections[1],
+                member.begin_joint.coordinates[b]
+                + exaggeration_factor * member.begin_joint.deflections[b],
+                member.end_joint.coordinates[b]
+                + exaggeration_factor * member.end_joint.deflections[b],
             ],
             color=def_color,
         )
+
+    if buckling_directions:
+        ax.set_title(f"{projection.upper()}: governing Euler capacity directions")
+        for member in truss.members:
+            if member.force >= 0:
+                continue
+            center = (
+                numpy.array(member.begin_joint.coordinates)
+                + numpy.array(member.end_joint.coordinates)
+            ) / 2
+            direction = numpy.array(member.governing_buckling.direction)[[a, b]]
+            if numpy.linalg.norm(direction) < 1e-12:
+                ax.plot(center[a], center[b], marker=r"$\odot$", color="darkorange")
+            else:
+                delta = direction * member.length * 0.08
+                ax.annotate(
+                    "",
+                    xy=center[[a, b]] + delta,
+                    xytext=center[[a, b]] - delta,
+                    arrowprops={"arrowstyle": "<->", "color": "darkorange"},
+                )
 
     return fig

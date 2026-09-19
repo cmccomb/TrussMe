@@ -4,7 +4,6 @@ import re
 
 import numpy
 import pandas
-import scipy
 from matplotlib.figure import Figure
 
 import trussme.visualize
@@ -43,6 +42,7 @@ def report_to_str(truss: Truss, goals: Goals, with_figures: bool = True) -> str:
     str
         A full report on the truss
     """
+    goals.validate()
     truss.analyze()
 
     report_string = __generate_summary(truss, goals) + "\n"
@@ -116,30 +116,39 @@ def __generate_summary(truss: Truss, goals: Goals) -> str:
         "- The truss has a mass of "
         + format(truss.mass, ".2f")
         + " kg, and a total factor of safety of "
-        + format(truss.fos, ".2f")
+        + format(min(truss.fos_yielding, truss.fos_buckling_governing), ".2f")
         + ".\n"
     )
-    summary += "- The limit state is " + truss.limit_state + ".\n"
+    summary += (
+        "- The limit state is "
+        + (
+            "buckling"
+            if truss.fos_buckling_governing < truss.fos_yielding
+            else "yielding"
+        )
+        + ".\n"
+    )
+    summary += f"- Gravity: {truss.gravity} m/s²; member self-weight is split equally between endpoints.\n"
 
     success_string: list[str] = []
     failure_string: list[str] = []
 
-    if goals.minimum_fos_buckling < truss.fos_buckling:
+    if goals.minimum_fos_buckling <= truss.fos_buckling_governing:
         success_string.append("buckling FOS")
     else:
         failure_string.append("buckling FOS")
 
-    if goals.minimum_fos_yielding < truss.fos_yielding:
+    if goals.minimum_fos_yielding <= truss.fos_yielding:
         success_string.append("yielding FOS")
     else:
         failure_string.append("yielding FOS")
 
-    if goals.maximum_mass > truss.mass:
+    if goals.maximum_mass >= truss.mass:
         success_string.append("mass")
     else:
         failure_string.append("mass")
 
-    if goals.maximum_deflection > truss.deflection:
+    if goals.maximum_deflection >= truss.deflection:
         success_string.append("deflection")
     else:
         failure_string.append("deflection")
@@ -194,29 +203,31 @@ def __generate_summary(truss: Truss, goals: Goals) -> str:
     data.append(
         [
             goals.minimum_fos_buckling,
-            truss.fos_buckling,
-            "Yes" if truss.fos_buckling > goals.minimum_fos_buckling else "No",
+            truss.fos_buckling_governing,
+            "Yes"
+            if truss.fos_buckling_governing >= goals.minimum_fos_buckling
+            else "No",
         ]
     )
     data.append(
         [
             goals.minimum_fos_yielding,
             truss.fos_yielding,
-            "Yes" if truss.fos_yielding > goals.minimum_fos_yielding else "No",
+            "Yes" if truss.fos_yielding >= goals.minimum_fos_yielding else "No",
         ]
     )
     data.append(
         [
             goals.maximum_mass,
             truss.mass,
-            "Yes" if truss.mass < goals.maximum_mass else "No",
+            "Yes" if truss.mass <= goals.maximum_mass else "No",
         ]
     )
     data.append(
         [
             goals.maximum_deflection,
             truss.deflection,
-            "Yes" if truss.deflection < goals.maximum_deflection else "No",
+            "Yes" if truss.deflection <= goals.maximum_deflection else "No",
         ]
     )
 
@@ -365,25 +376,14 @@ def __generate_stress_analysis(
     analysis += "## LOADING\n"
     load_data: list[list[str]] = []
     load_rows: list[str] = []
-    for j in truss.joints:
+    for j, loads in zip(truss.joints, truss.nodal_loads):
         load_rows.append("Joint_" + "{0:02d}".format(j.idx))
-        load_data.append(
-            [
-                str(j.loads[0] / pow(10, 3)),
-                format(
-                    (
-                        j.loads[1]
-                        - sum([m.mass / 2.0 * scipy.constants.g for m in j.members])
-                    )
-                    / pow(10, 3),
-                    ".2f",
-                ),
-                str(j.loads[2] / pow(10, 3)),
-            ]
-        )
+        load_data.append([format(value / 1000, ".2f") for value in loads])
 
     analysis += pandas.DataFrame(
-        load_data, index=load_rows, columns=["X Load", "Y Load", "Z Load"]
+        load_data,
+        index=load_rows,
+        columns=["X Load (kN)", "Y Load (kN)", "Z Load (kN)"],
     ).to_markdown()
 
     # Print information about reactions
@@ -437,11 +437,15 @@ def __generate_stress_analysis(
                 format(m.moment_of_inertia, ".2e"),
                 format(m.force / pow(10, 3), ".2f"),
                 m.fos_yielding,
-                "Yes" if m.fos_yielding > goals.minimum_fos_yielding else "No",
-                m.fos_buckling if m.fos_buckling > 0 else "N/A",
+                "Yes" if m.fos_yielding >= goals.minimum_fos_yielding else "No",
+                m.governing_buckling.factor_of_safety
+                if m.governing_buckling.factor_of_safety > 0
+                else "N/A",
                 (
                     "Yes"
-                    if m.fos_buckling > goals.minimum_fos_buckling or m.fos_buckling < 0
+                    if m.governing_buckling.factor_of_safety
+                    >= goals.minimum_fos_buckling
+                    or m.governing_buckling.factor_of_safety < 0
                     else "No"
                 ),
             ]
@@ -460,6 +464,45 @@ def __generate_stress_analysis(
             "OK buckling?",
         ],
     ).to_markdown()
+
+    analysis += "\n## DIRECTIONAL BUCKLING\n"
+    analysis += (
+        "Euler member checks use Pcr = π² E I / (K L)². Both transverse "
+        "directions are checked regardless of the legacy scalar setting. "
+        "K represents caller-supplied end conditions or bracing; it adds "
+        "no physical brace. These are capacity directions, not eigenmodes "
+        "or post-buckling shapes. Equal capacities have no unique direction.\n\n"
+    )
+    mode_data = []
+    for member in truss.members:
+        for index, mode in enumerate(member.buckling_modes):
+            mode_data.append(
+                [
+                    member.idx,
+                    index + 1,
+                    str(mode.direction),
+                    mode.moment_of_inertia,
+                    member.buckling.effective_length_factors[index],
+                    mode.effective_length,
+                    mode.critical_load,
+                    mode.factor_of_safety,
+                    "Yes" if mode == member.governing_buckling else "No",
+                ]
+            )
+    analysis += pandas.DataFrame(
+        mode_data,
+        columns=[
+            "Member",
+            "Mode",
+            "Global deflection direction",
+            "I (m^4)",
+            "K",
+            "KL (m)",
+            "Critical load (N)",
+            "FOS",
+            "Governs?",
+        ],
+    ).to_markdown(index=False)
 
     # Print information about members
     analysis += "\n## DEFLECTIONS\n"
@@ -497,7 +540,7 @@ def __generate_stress_analysis(
                 ),
                 (
                     "Yes"
-                    if numpy.linalg.norm(j.deflections) < goals.maximum_deflection
+                    if numpy.linalg.norm(j.deflections) <= goals.maximum_deflection
                     else "No"
                 ),
             ]

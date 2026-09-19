@@ -4,7 +4,6 @@ import json
 
 import numpy
 from numpy.typing import NDArray
-import scipy
 
 from trussme.components import (
     Joint,
@@ -15,6 +14,8 @@ from trussme.components import (
     Square,
     Shape,
     Box,
+    Custom,
+    BucklingSettings,
     MATERIAL_LIBRARY,
 )
 
@@ -52,6 +53,35 @@ class Goals:
     maximum_mass: float = numpy.inf
     maximum_deflection: float = numpy.inf
 
+    def validate(self) -> None:
+        for value in (self.minimum_fos_buckling, self.minimum_fos_yielding):
+            if not numpy.isfinite(value) or value < 0:
+                raise ValueError(
+                    "Minimum safety factors must be finite and nonnegative"
+                )
+        for value in (self.maximum_mass, self.maximum_deflection):
+            if numpy.isnan(value) or value < 0:
+                raise ValueError("Maximum mass and deflection must be nonnegative")
+
+    def evaluate(self, truss: "Truss") -> list[float]:
+        """Four dimensionless residuals, feasible at <= 0, on an analyzed truss.
+
+        Order: governing directional buckling, yielding, deflection, mass.
+        Infinite upper limits are disabled (-1). Both buckling modes are always
+        checked, including when the model uses the legacy strong scalar setting.
+        """
+        self.validate()
+
+        def upper(actual, limit):
+            return -1.0 if numpy.isinf(limit) else (actual - limit) / max(limit, 1.0)
+
+        return [
+            self.minimum_fos_buckling / truss.fos_buckling_governing - 1,
+            self.minimum_fos_yielding / truss.fos_yielding - 1,
+            upper(truss.deflection, self.maximum_deflection),
+            upper(truss.mass, self.maximum_mass),
+        ]
+
 
 class Truss(object):
     """The truss class
@@ -64,12 +94,119 @@ class Truss(object):
         A list of all joints in the truss
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        gravity=(0.0, -9.80665, 0.0),
+        buckling_axis: Literal["weak", "strong"] = "weak",
+    ):
         # Make a list to store members in
         self.members: list[Member] = []
 
         # Make a list to store joints in
         self.joints: list[Joint] = []
+        self.set_gravity(gravity)
+        self.set_buckling_axis(buckling_axis)
+
+    @property
+    def gravity(self) -> tuple[float, float, float]:
+        """Acceleration in m/s²; zero disables self-weight."""
+        return self._gravity
+
+    def set_gravity(self, gravity) -> None:
+        values = tuple(float(v) for v in gravity)
+        if len(values) != 3 or not all(numpy.isfinite(v) for v in values):
+            raise ValueError("Gravity must be a finite 3-vector")
+        self._gravity = values
+
+    @property
+    def buckling_axis(self) -> str:
+        return self._buckling_axis
+
+    def set_buckling_axis(self, axis: Literal["weak", "strong"]) -> None:
+        if axis not in ("weak", "strong"):
+            raise ValueError("Buckling axis must be 'weak' or 'strong'")
+        self._buckling_axis = axis
+        for member in self.members:
+            member.buckling_axis = axis
+
+    def set_member_buckling(
+        self, member_index: int, settings: BucklingSettings
+    ) -> None:
+        member = self.members[member_index]
+        previous = member.buckling
+        member.buckling = settings
+        try:
+            _ = member.buckling_modes
+        except (ValueError, TypeError, AttributeError):
+            member.buckling = previous
+            raise
+
+    @property
+    def fos_buckling_governing(self) -> float:
+        """Smallest safety across both modes of every member."""
+        return min(m.governing_buckling.factor_of_safety for m in self.members)
+
+    @property
+    def nodal_loads(self) -> NDArray[numpy.float64]:
+        """N-by-3 applied loads plus half each member's weight at each endpoint."""
+        loads = numpy.array([j.loads for j in self.joints], dtype=float).reshape(
+            (-1, 3)
+        )
+        for member in self.members:
+            weight = member.mass * numpy.array(self.gravity) / 2
+            loads[member.begin_joint.idx] += weight
+            loads[member.end_joint.idx] += weight
+        return loads
+
+    def _metadata(self) -> dict:
+        return {
+            "gravity": self.gravity,
+            "buckling_axis": self.buckling_axis.title(),
+            "member_buckling": [dataclasses.asdict(m.buckling) for m in self.members],
+        }
+
+    def _read_metadata(self, settings: dict) -> None:
+        # An explicit extension is never silently ignored or partially applied.
+        if set(settings) != {"gravity", "buckling_axis", "member_buckling"}:
+            raise ValueError("Unsupported or incomplete trussx metadata")
+        if settings["buckling_axis"] not in ("Weak", "Strong"):
+            raise ValueError("Unsupported buckling axis in metadata")
+        if len(settings["member_buckling"]) != self.number_of_members:
+            raise ValueError("Buckling settings must match the member count")
+        self.set_gravity(settings["gravity"])
+        self.set_buckling_axis(settings["buckling_axis"].lower())
+        for member, record in zip(self.members, settings["member_buckling"]):
+            if "effective_length_factors" not in record:
+                raise ValueError(
+                    "Member metadata must specify effective length factors"
+                )
+            member.buckling = BucklingSettings(**record)
+            # Default settings also support zero-size optimizer templates. Explicit
+            # orientation must be checked against actual member geometry now.
+            if member.buckling.transverse_reference is not None:
+                _ = member.buckling_modes
+
+    def validate(self) -> None:
+        """Validate mechanical inputs before analysis; model objects remain mutable."""
+        if not self.joints or not self.members:
+            raise ValueError("Analysis requires joints and members")
+        for joint in self.joints:
+            for values in (joint.coordinates, joint.loads):
+                if len(values) != 3 or not all(numpy.isfinite(v) for v in values):
+                    raise ValueError(
+                        "Joint coordinates and loads must be finite 3-vectors"
+                    )
+            if len(joint.translation_restricted) != 3:
+                raise ValueError("Joint restrictions must have three components")
+        for member in self.members:
+            member.shape.validate()
+            for key in ("density", "elastic_modulus", "yield_strength"):
+                if (
+                    not numpy.isfinite(member.material[key])
+                    or member.material[key] <= 0
+                ):
+                    raise ValueError("Material properties must be finite and positive")
+            _ = member.buckling_modes
 
     @property
     def number_of_members(self) -> int:
@@ -114,8 +251,13 @@ class Truss(object):
     @property
     def materials(self) -> list[Material]:
         """list[Material]: List of unique materials used in the truss"""
-        material_library: list[Material] = [member.material for member in self.members]
-        return list({v["name"]: v for v in material_library}.values())
+        library = {}
+        for member in self.members:
+            material = member.material
+            if material["name"] in library and library[material["name"]] != material:
+                raise ValueError("Conflicting material name: " + material["name"])
+            library[material["name"]] = material
+        return list(library.values())
 
     @property
     def limit_state(self) -> Literal["buckling", "yielding"]:
@@ -305,6 +447,7 @@ class Truss(object):
             shape,
         )
         member.idx = self.number_of_members
+        member.buckling_axis = self.buckling_axis
 
         # Make a member
         self.members.append(member)
@@ -349,18 +492,7 @@ class Truss(object):
 
     @property
     def __load_matrix(self) -> NDArray[float]:
-        loads = numpy.zeros([3, self.number_of_joints])
-        for i in range(self.number_of_joints):
-            loads[0, i] = self.joints[i].loads[0]
-            loads[1, i] = self.joints[i].loads[1] - sum(
-                [
-                    member.mass / 2.0 * scipy.constants.g
-                    for member in self.joints[i].members
-                ]
-            )
-            loads[2, i] = self.joints[i].loads[2]
-
-        return loads
+        return self.nodal_loads.T
 
     @property
     def __connection_matrix(self) -> NDArray[float]:
@@ -377,6 +509,7 @@ class Truss(object):
         None
 
         """
+        self.validate()
         loads = self.__load_matrix
         connections = self.__connection_matrix
         reactions = numpy.array(
@@ -411,6 +544,8 @@ class Truss(object):
 
         flat_loads = loads.T.flat[ff]
         flat_deflections = numpy.linalg.solve(ssff, flat_loads)
+        if not numpy.isfinite(flat_deflections).all():
+            raise ValueError("Analysis produced nonfinite displacements")
 
         ff = numpy.where(deflections.T == 1)
         for i in range(len(ff[0])):
@@ -421,7 +556,7 @@ class Truss(object):
             numpy.sum(dof * deflections.T.flat[:], axis=1)
             .reshape([self.number_of_joints, 3])
             .T
-        )
+        ) - loads
 
         # Store the results
         for i in range(self.number_of_joints):
@@ -495,13 +630,14 @@ class Truss(object):
             "materials": json.loads(materials),
             "joints": json.loads(joints),
             "members": json.loads(members),
+            "trussx": self._metadata(),
         }
 
         if file_name is None:
-            return json.dumps(combined)
+            return json.dumps(combined, allow_nan=False)
         else:
             with open(file_name, "w") as f:
-                json.dump(combined, f, indent=4)
+                json.dump(combined, f, indent=4, allow_nan=False)
             return None
 
     def to_trs(self, file_name: str) -> None:
@@ -519,6 +655,7 @@ class Truss(object):
         """
 
         with open(file_name, "w") as f:
+            f.write("# trussx " + json.dumps(self._metadata(), allow_nan=False) + "\n")
             # Do materials
             for material in self.materials:
                 f.write(
@@ -555,7 +692,7 @@ class Truss(object):
                     + str(int(j.translation_restricted[2]))
                     + "\n"
                 )
-                if numpy.sum(j.loads) != 0:
+                if any(value != 0 for value in j.loads):
                     load_string += "L" + "\t"
                     load_string += str(j.idx) + "\t"
                     load_string += str(j.loads[0]) + "\t"
@@ -601,9 +738,18 @@ def read_trs(file_name: str) -> Truss:
     """
     truss = Truss()
     material_library: list[Material] = []
+    metadata = None
 
     with open(file_name, "r") as f:
         for idx, line in enumerate(f):
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("# trussx "):
+                if metadata is not None:
+                    raise ValueError("Duplicate trussx metadata")
+                metadata = json.loads(line[len("# trussx ") :])
+                continue
             if line[0] == "S":
                 info = line.split()[1:]
                 material_library.append(
@@ -643,6 +789,10 @@ def read_trs(file_name: str) -> Truss:
                     shape = Square(**dict(zip(ks, vs)))
                 elif info[3] == "box":
                     shape = Box(**dict(zip(ks, vs)))
+                elif info[3] == "custom":
+                    shape = Custom(**dict(zip(ks, vs)))
+                else:
+                    raise ValueError("Unsupported shape: " + info[3])
                 truss.add_member(int(info[0]), int(info[1]), material, shape)
 
             elif line[0] == "L":
@@ -653,6 +803,8 @@ def read_trs(file_name: str) -> Truss:
             elif line[0] != "#" and not line.isspace():
                 raise ValueError("'" + line[0] + "' is not a valid line initializer.")
 
+    if metadata is not None:
+        truss._read_metadata(metadata)
     return truss
 
 
@@ -699,6 +851,8 @@ def read_json(file_name: str) -> Truss:
             shape = Square(**dict(shape_params))
         elif member["shape"]["name"] == "box":
             shape = Box(**dict(shape_params))
+        elif member["shape"]["name"] == "custom":
+            shape = Custom(**dict(shape_params))
         else:
             raise ValueError(
                 "Shape type '"
@@ -709,4 +863,6 @@ def read_json(file_name: str) -> Truss:
             member["begin_joint"], member["end_joint"], material=material, shape=shape
         )
 
+    if "trussx" in json_truss:
+        truss._read_metadata(json_truss["trussx"])
     return truss

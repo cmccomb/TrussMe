@@ -1,1 +1,2 @@
-recursive-include tests *.py *.trs
+include CHANGELOG.md RELEASING.md
+recursive-include tests *.py *.trs *.json

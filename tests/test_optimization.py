@@ -398,7 +398,7 @@ def test_make_inequality_constraints_full_pipe_adds_geometry_constraints() -> No
 
     values = constraints(x0)
 
-    assert len(values) == 22
+    assert len(values) == 23
 
 
 def test_make_inequality_constraints_full_box_adds_geometry_constraints() -> None:
@@ -418,7 +418,7 @@ def test_make_inequality_constraints_full_box_adds_geometry_constraints() -> Non
 
     values = constraints(x0)
 
-    assert len(values) == 9
+    assert len(values) == 10
 
 
 @pytest.mark.slow

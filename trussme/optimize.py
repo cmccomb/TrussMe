@@ -1,8 +1,29 @@
+from copy import deepcopy
 from typing import Callable, Literal, Optional
 
 import numpy
 
-from trussme import Truss, Goals, read_json, Pipe, Box, Square, Bar
+from trussme import Truss, Goals, Pipe, Box, Square, Bar
+
+
+def _joint_can_move(joint, planar_direction: str) -> bool:
+    return not any(value != 0 for value in joint.loads) and all(
+        not fixed or axis == planar_direction
+        for axis, fixed in zip("xyz", joint.translation_restricted)
+    )
+
+
+def _validate_modes(truss, joint_optimization, member_optimization):
+    if joint_optimization not in (None, "full") or member_optimization not in (
+        None,
+        "scaled",
+        "full",
+    ):
+        raise ValueError("Unsupported optimization mode")
+    if member_optimization and any(
+        m.shape.name() not in ("pipe", "bar", "square", "box") for m in truss.members
+    ):
+        raise ValueError("Custom sections require caller-defined sizing logic")
 
 
 def _safe_ratio(numerator: float, denominator: float) -> float:
@@ -39,18 +60,15 @@ def make_x0(
         A starting vector that encodes the current truss design
     """
 
+    _validate_modes(truss, joint_optimization, member_optimization)
     planar_direction: str = truss.is_planar()
     x0: list[float] = []
 
-    configured_truss = read_json(truss.to_json())
+    configured_truss = deepcopy(truss)
 
     if joint_optimization:
         for i in range(len(configured_truss.joints)):
-            if (
-                numpy.sum(configured_truss.joints[i].translation_restricted)
-                == (0 if planar_direction == "none" else 1)
-                and numpy.sum(configured_truss.joints[i].loads) == 0
-            ):
+            if _joint_can_move(configured_truss.joints[i], planar_direction):
                 if planar_direction != "x":
                     x0.append(configured_truss.joints[i].coordinates[0])
                 if planar_direction != "y":
@@ -115,19 +133,16 @@ def make_bounds(
         A starting vector that encodes the current truss design
     """
 
+    _validate_modes(truss, joint_optimization, member_optimization)
     planar_direction: str = truss.is_planar()
     lb: list[float] = []
     ub: list[float] = []
 
-    configured_truss = read_json(truss.to_json())
+    configured_truss = deepcopy(truss)
 
     if joint_optimization:
         for i in range(len(configured_truss.joints)):
-            if (
-                numpy.sum(configured_truss.joints[i].translation_restricted)
-                == (0 if planar_direction == "none" else 1)
-                and numpy.sum(configured_truss.joints[i].loads) == 0
-            ):
+            if _joint_can_move(configured_truss.joints[i], planar_direction):
                 if planar_direction != "x":
                     lb.append(-numpy.inf)
                     ub.append(numpy.inf)
@@ -201,19 +216,23 @@ def make_truss_generator_function(
         A function that takes a list of floats and returns a truss.
     """
 
+    _validate_modes(truss, joint_optimization, member_optimization)
     planar_direction: str = truss.is_planar()
 
+    snapshot = deepcopy(truss)
+    vector_length = len(make_x0(snapshot, joint_optimization, member_optimization))
+
     def truss_generator(x: list[float]) -> Truss:
-        configured_truss = read_json(truss.to_json())
+        if len(x) != vector_length or not numpy.isfinite(x).all():
+            raise ValueError(
+                "Design vector must have the expected length and finite values"
+            )
+        configured_truss = deepcopy(snapshot)
         idx = 0
 
         if joint_optimization:
             for i in range(len(configured_truss.joints)):
-                if (
-                    numpy.sum(configured_truss.joints[i].translation_restricted)
-                    == (0 if planar_direction == "none" else 1)
-                    and numpy.sum(configured_truss.joints[i].loads) == 0
-                ):
+                if _joint_can_move(configured_truss.joints[i], planar_direction):
                     if planar_direction != "x":
                         configured_truss.joints[i].coordinates[0] = x[idx]
                         idx += 1
@@ -290,7 +309,10 @@ def make_inequality_constraints(
     truss: Truss
         The truss to configure.
     goals: Goals
-        This informs constraints on yielding FOS, buckling FOS, and deflection.
+        This informs constraints on both buckling directions, yielding, deflection, and mass.
+        The first four residuals are dimensionless and feasible at <= 0. Full
+        sizing appends pipe t-r or box 2t-w, 2t-h residuals in metres.
+        Invalid or singular trials return finite positive design penalties.
     joint_optimization: Literal[None, "full"], default = "full"
         If None, no optimization of joint location. If "full", then full optimization of joint locations will be used.
     member_optimization: Literal[None, "scaled", "full"], default = "full"
@@ -307,33 +329,27 @@ def make_inequality_constraints(
         truss, joint_optimization, member_optimization
     )
 
+    goals = deepcopy(goals)
+    goals.validate()
+    truss.validate()
+
     def inequality_constraints(x: list[float]) -> list[float]:
         recon_truss = truss_generator(x)
-        recon_truss.analyze()
-        constraints = [
-            goals.minimum_fos_buckling - recon_truss.fos_buckling,
-            goals.minimum_fos_yielding - recon_truss.fos_yielding,
-            recon_truss.deflection - numpy.min([goals.maximum_deflection, 10000.0]),
-        ]
+        geometry = []
         if member_optimization == "full":
-            for i in range(len(recon_truss.members)):
-                shape_name: str = recon_truss.members[i].shape.name()
-                if shape_name == "pipe":
-                    constraints.append(
-                        recon_truss.members[i].shape._params["t"]
-                        - recon_truss.members[i].shape._params["r"]
-                    )
-                elif shape_name == "box":
-                    constraints.append(
-                        recon_truss.members[i].shape._params["t"]
-                        - recon_truss.members[i].shape._params["w"]
-                    )
-                    constraints.append(
-                        recon_truss.members[i].shape._params["t"]
-                        - recon_truss.members[i].shape._params["h"]
-                    )
-
-        return constraints
+            for member in recon_truss.members:
+                p = member.shape._params
+                if member.shape.name() == "pipe":
+                    geometry.append(p["t"] - p["r"])
+                elif member.shape.name() == "box":
+                    geometry.extend([2 * p["t"] - p["w"], 2 * p["t"] - p["h"]])
+        try:
+            recon_truss.analyze()
+        except (ValueError, numpy.linalg.LinAlgError):
+            # Finite infeasibility penalties let solvers reject zero/invalid
+            # sections or singular trial geometries without losing vector shape.
+            return [1e6] * 4 + geometry
+        return goals.evaluate(recon_truss) + geometry
 
     return inequality_constraints
 

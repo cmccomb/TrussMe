@@ -1,34 +1,20 @@
-# Releasing `trussme`
+# Releasing trussme
 
-## One-time PyPI Trusted Publishing Setup
+The `publish.yml` workflow uses the existing PyPI trusted publisher for
+`cmccomb/TrussMe`, with no GitHub environment. No local PyPI token is required.
 
-The workflow in `.github/workflows/publish.yml` is already configured to use
-GitHub OIDC. The remaining setup has to be completed in the GitHub and PyPI web
-UIs.
+1. Update `trussme/_version.py`, CHANGELOG, and migration notes.
+2. Install `python -m pip install -e '.[dev]'`.
+3. Run `pytest` (including the optimization smoke test and coverage gate).
+4. Build with `python -m build`; run `python -m twine check dist/*`.
+5. Install the wheel in a fresh environment outside the source checkout and run
+   the directional buckling, self-weight, reaction, and interchange smoke tests.
+6. Commit and push the exact release source. Require the main CI matrix and both
+   package and slow-test jobs to pass before tagging it.
+7. Create and push `v0.2.0` at that verified commit. The publishing workflow checks
+   the tag/version match, reruns the full suite, builds, checks, and uploads.
+8. Verify PyPI lists the new version and install `trussme==0.2.0` in a fresh
+   registry consumer. Publish GitHub release notes for the same tag.
 
-1. Create the `trussme` project on PyPI if it does not already exist.
-2. In PyPI, open `Project settings` and add a `Trusted Publisher`.
-3. Select `GitHub`.
-4. Enter:
-   - owner: `cmccomb`
-   - repository: `TrussMe`
-   - workflow name: `publish.yml`
-   - environment name: leave blank unless you later add a GitHub Environment to the job
-5. Save the trusted publisher entry.
-
-For a dry run, repeat the same setup in TestPyPI and publish a pre-release tag
-there first.
-
-## Release Flow
-
-1. Update `trussme/_version.py`.
-2. Run `python3 -m pip install -e '.[dev]'`.
-3. Run `pytest -m "not slow"`.
-4. Run `pytest -m "slow" --no-cov`.
-5. Run `python -m build`.
-6. Run `python -m twine check dist/*`.
-7. Commit the release changes.
-8. Create and push a tag like `v0.1.0`.
-
-Pushing the tag triggers `.github/workflows/publish.yml`, which builds and
-publishes the artifacts to PyPI.
+PyPI versions cannot be overwritten. A successful build or workflow dispatch does
+not prove publication; verify the workflow result and registry package separately.
